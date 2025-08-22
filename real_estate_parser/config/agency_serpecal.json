@@ -1,0 +1,46 @@
+{
+  "listing_marker": "*",
+  "preprocessing_needed": true,
+
+  "currency_aliases": {
+    "$": "USD",
+    "L": "HNL",
+    "L.": "HNL",
+    "Lps": "HNL",
+    "Lps.": "HNL",
+    "L. ": "HNL"
+  },
+
+  "transaction_keywords": {
+    "alquiler": "Rent",
+    "alquileres": "Rent",
+    "venta": "Sale",
+    "se vende": "Sale",
+    "renta": "Rent",
+    "valor": "Sale",
+    "precio": "Sale"
+  },
+
+  "type_keywords": {
+    "house": ["res", "residencia", "casa","townhouse"],
+    "apartment": ["apto", "apartamento","condominio"],
+    "commercial": ["local", "oficina", "bodega", "negocio"],
+    "land": ["terreno", "lote", "manzana"]
+  },
+
+"bedroom_keywords": ["hab", "habitaciones", "dormitorios", "dormitorio","hab.","habitaci√≥n"],
+"bathroom_keywords": ["baño", "baños", "banos","bafios"," ba√±o","ba√±os"],
+"area_aliases": {
+  "ac": ["mts", "m2", "metros", "mt2", "mts2", "m²"],
+  "at": ["vrs", "vr2", "vrs2", "v²", "vr²", "varas", "v2"]
+},
+
+  "start_exceptions": [
+  "Mts.", "Mts", "mt2", "m²", "mts", "mts2","Mts. ",
+  "Lps", "Lps.", "L.", "$","Lps. ",
+  "vr2", "vrs", "Vrs", "Vr²", "Vrs²",
+  "Res.", "res.", "area", "área",
+  "baños", "baño", "habitaciones", "hab.", "cubículos", "dormitorios",
+  "garaje", "lavandería", "cocina", "sala", "comedor"]
+
+}

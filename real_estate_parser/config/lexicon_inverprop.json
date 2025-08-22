@@ -1,0 +1,47 @@
+{
+  "currency_aliases": {
+    "AS$": "USD",
+    "US$": "USD",
+    "$": "USD",
+    "L": "HNL",
+    "L.": "HNL"
+  },
+  "bedroom_terms": [
+    "hab",
+    "habitaciones",
+    "habitacion"
+  ],
+  "bathroom_terms": [
+    "baños",
+    "baño",
+    "banos",
+    "bafios"
+  ],
+  "property_keywords": {
+    "Apartment": [
+      "apartamento",
+      "apto",
+      "apartamento amueblado",
+      "condominios",
+      "penthouse"
+    ],
+    "House": [
+      "casa",
+      "residencia",
+      "chalet"
+    ],
+    "Land": [
+      "terreno",
+      "lote",
+      "lotes",
+      "vrs2"
+    ],
+    "Commercial": [
+      "oficina",
+      "local",
+      "edificio",
+      "bodega",
+      "comercial"
+    ]
+  }
+}

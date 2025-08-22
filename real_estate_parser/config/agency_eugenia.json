@@ -1,0 +1,52 @@
+{
+  "agency": "Eugenia",
+  "listing_marker": "-",
+  "neighborhood_strategy": "first_comma",
+
+  "currency_aliases": {
+    "$": "USD",
+    "L": "HNL",
+    "L.": "HNL"
+  },
+  "transaction_headers": {
+    "ALQUILERES": "Rent",
+    "VENTAS": "Sale"
+  },
+  "bedroom_terms": [
+    "hab",
+    "habitaciones",
+    "habitacion"
+  ],
+  "bathroom_terms": [
+    "baños",
+    "baño",
+    "banos",
+    "bafios"
+  ],
+  "property_keywords": {
+    "Apartment": [
+      "apartamento",
+      "apto",
+      "condominios",
+      "penthouse"
+    ],
+    "House": [
+      "casa",
+      "residencia",
+      "chalet"
+    ],
+    "Land": [
+      "terreno",
+      "lote",
+      "lotes",
+      "vrs2"
+    ],
+    "Commercial": [
+      "oficina",
+      "local",
+      "edificio",
+      "bodega",
+      "comercial"
+    ]
+  }
+}

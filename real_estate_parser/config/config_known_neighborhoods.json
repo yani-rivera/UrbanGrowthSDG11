@@ -1,0 +1,1866 @@
+[
+  {
+    "Neighborhood": "Neighborhood",
+    "Code": "codcol"
+  },
+  {
+    "Neighborhood": " VILLA LOS JAZMINES",
+    "Code": "2830"
+  },
+  {
+    "Neighborhood": "3 CAMINOS",
+    "Code": "1705"
+  },
+  {
+    "Neighborhood": "AGUA DULCE",
+    "Code": "2310"
+  },
+  {
+    "Neighborhood": "ALAMEDA",
+    "Code": "1001"
+  },
+  {
+    "Neighborhood": "ALCAZAR",
+    "Code": "2158"
+  },
+  {
+    "Neighborhood": "ALCAZAR",
+    "Code": "2158"
+  },
+  {
+    "Neighborhood": "ALDEA AGUA BLANCA -CANTA GALLO",
+    "Code": "2912"
+  },
+  {
+    "Neighborhood": "ALTOS DE LA GRANJA",
+    "Code": "9991"
+  },
+  {
+    "Neighborhood": "ALTOS DE LA GRANJA",
+    "Code": "9991"
+  },
+  {
+    "Neighborhood": "ALTOS DE LA JOYA",
+    "Code": "1916"
+  },
+  {
+    "Neighborhood": "ALTOS DE LAS HADAS",
+    "Code": "2333"
+  },
+  {
+    "Neighborhood": "ALTOS DE MIRAFLORES",
+    "Code": "1104"
+  },
+  {
+    "Neighborhood": "ALTOS DE MIRAFLORES SUR",
+    "Code": "1933"
+  },
+  {
+    "Neighborhood": "ALTOS DE MIRAMONTES",
+    "Code": "1104"
+  },
+  {
+    "Neighborhood": "ALTOS DE MIRAMONTES",
+    "Code": "1104"
+  },
+  {
+    "Neighborhood": "ALTOS DE PALMIRA",
+    "Code": "433"
+  },
+  {
+    "Neighborhood": "ALTOS DE TONCONTIN",
+    "Code": "2801"
+  },
+  {
+    "Neighborhood": "ALTOS DE TONCONTIN",
+    "Code": "2801"
+  },
+  {
+    "Neighborhood": "ALTOS DEL TRAPICHE",
+    "Code": "1818"
+  },
+  {
+    "Neighborhood": "ALTOS MIRAMONTES",
+    "Code": "1104"
+  },
+  {
+    "Neighborhood": "AMERICA",
+    "Code": "2312"
+  },
+  {
+    "Neighborhood": "ANILLO PERIFÉRICO",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "APTO ALTOS TRAPICHE",
+    "Code": "1818"
+  },
+  {
+    "Neighborhood": "APTO LOMA LINDA",
+    "Code": "1109"
+  },
+  {
+    "Neighborhood": "BARRIO ABAJO",
+    "Code": "101"
+  },
+  {
+    "Neighborhood": "BARRIO GUADALUPE",
+    "Code": "507"
+  },
+  {
+    "Neighborhood": "BARRIO GUADALUPE",
+    "Code": "507"
+  },
+  {
+    "Neighborhood": "BARRIO JAZMIN",
+    "Code": "104"
+  },
+  {
+    "Neighborhood": "BARRIO JAZMIN",
+    "Code": "104"
+  },
+  {
+    "Neighborhood": "BARRIO LA PLAZUELA",
+    "Code": "110"
+  },
+  {
+    "Neighborhood": "BARRIO LA RONDA",
+    "Code": "111"
+  },
+  {
+    "Neighborhood": "BELLA ORIENTE",
+    "Code": "1803"
+  },
+  {
+    "Neighborhood": "BLV MORAZAN",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "BLV SUYAPA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "BO LA RONDA",
+    "Code": "111"
+  },
+  {
+    "Neighborhood": "BO SAN RAFAEL",
+    "Code": "415"
+  },
+  {
+    "Neighborhood": "BO. LA PLAZUEL",
+    "Code": "110"
+  },
+  {
+    "Neighborhood": "BO. PERPETUO SOCORRO",
+    "Code": "607"
+  },
+  {
+    "Neighborhood": "BO. SAN PABLO",
+    "Code": "304"
+  },
+  {
+    "Neighborhood": "BOULEVARD MORAZAN",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "BUENOS AIRES",
+    "Code": "201"
+  },
+  {
+    "Neighborhood": "CALPULES",
+    "Code": "2109"
+  },
+  {
+    "Neighborhood": "CAMINO AL HATILLO",
+    "Code": "944"
+  },
+  {
+    "Neighborhood": "CAMPOS ELISEOS",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "CAMPOS ELISEOS-valle de angeles",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "CASA AGUA DULCE",
+    "Code": "2310"
+  },
+  {
+    "Neighborhood": "CASA RESD HONDURAS",
+    "Code": "2019"
+  },
+  {
+    "Neighborhood": "CASAMATA",
+    "Code": "302"
+  },
+  {
+    "Neighborhood": "CASAMATA",
+    "Code": "302"
+  },
+  {
+    "Neighborhood": "CASAS VERDES",
+    "Code": "2355"
+  },
+  {
+    "Neighborhood": "CASTAÑO SUR",
+    "Code": "1023"
+  },
+  {
+    "Neighborhood": "CASTAÑOS",
+    "Code": "401"
+  },
+  {
+    "Neighborhood": "CASTAÑOS SUR",
+    "Code": "1023"
+  },
+  {
+    "Neighborhood": "CASTAÑOS SUR",
+    "Code": "1023"
+  },
+  {
+    "Neighborhood": "CASTAÑOS SUR,",
+    "Code": "1023"
+  },
+  {
+    "Neighborhood": "CASTAÑOS SUR,",
+    "Code": "1023"
+  },
+  {
+    "Neighborhood": "CERCA LOMAS DEL GUIJARRO",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "CERRO AZUL",
+    "Code": "2923"
+  },
+  {
+    "Neighborhood": "CERRO GRANDE",
+    "Code": "1401"
+  },
+  {
+    "Neighborhood": "CERRO GRANDE",
+    "Code": "1401"
+  },
+  {
+    "Neighborhood": "CERRO GRANDE Z 4",
+    "Code": "814"
+  },
+  {
+    "Neighborhood": "CERRO GRANDE-ZONA4",
+    "Code": "814"
+  },
+  {
+    "Neighborhood": "CIUDAD DEL ÁNGEL  ZONA NORTE",
+    "Code": "2525"
+  },
+  {
+    "Neighborhood": "CIUDAD LEMPIRA",
+    "Code": "1362"
+  },
+  {
+    "Neighborhood": "CIUDAD MORAZÁN-CHOLOMA",
+    "Code": "cortes"
+  },
+  {
+    "Neighborhood": "CIUDAD NUEVA",
+    "Code": "2420"
+  },
+  {
+    "Neighborhood": "COL 15 DE SEP",
+    "Code": "2321"
+  },
+  {
+    "Neighborhood": "COL 21 DE OCTUBRE",
+    "Code": "912"
+  },
+  {
+    "Neighborhood": "COL ALAMEDA",
+    "Code": "1001"
+  },
+  {
+    "Neighborhood": "COL ALTOS DE LA GRANJA",
+    "Code": "9991"
+  },
+  {
+    "Neighborhood": "COL ALTOS DE LAS COLINAS",
+    "Code": "1905"
+  },
+  {
+    "Neighborhood": "COL ALTOS DE SAN JOSÉ",
+    "Code": "2221"
+  },
+  {
+    "Neighborhood": "COL AMÉRICA",
+    "Code": "2312"
+  },
+  {
+    "Neighborhood": "COL AMERICA -RES. VIA PERUGIA",
+    "Code": "2312"
+  },
+  {
+    "Neighborhood": "COL CERRO GRANDE",
+    "Code": "1401"
+  },
+  {
+    "Neighborhood": "COL EL DORADO",
+    "Code": "1917"
+  },
+  {
+    "Neighborhood": "COL EL HOGAR",
+    "Code": "1902"
+  },
+  {
+    "Neighborhood": "COL EL PRADO",
+    "Code": "1102"
+  },
+  {
+    "Neighborhood": "COL EL TRIANGULO",
+    "Code": "1013"
+  },
+  {
+    "Neighborhood": "COL ELVEL",
+    "Code": "1107"
+  },
+  {
+    "Neighborhood": "COL KENNEDY",
+    "Code": "2001"
+  },
+  {
+    "Neighborhood": "COL LARA",
+    "Code": "408"
+  },
+  {
+    "Neighborhood": "COL LINTON",
+    "Code": "225"
+  },
+  {
+    "Neighborhood": "COL LOARQUE",
+    "Code": "9993"
+  },
+  {
+    "Neighborhood": "COL LOMAS DEL GUIJARRO",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "COL LOS ANGELES",
+    "Code": "2315"
+  },
+  {
+    "Neighborhood": "COL MODELO",
+    "Code": "2318"
+  },
+  {
+    "Neighborhood": "COL RUBÉN DARIO",
+    "Code": "1002"
+  },
+  {
+    "Neighborhood": "COL SAN CARLOS",
+    "Code": "407"
+  },
+  {
+    "Neighborhood": "COL SAN JOSÉ DE LA PENA",
+    "Code": "2111"
+  },
+  {
+    "Neighborhood": "COL SATELITE",
+    "Code": "2223"
+  },
+  {
+    "Neighborhood": "COL VILLA VIEJA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "COL. 15 DE SEPTIEMBRE",
+    "Code": "2321"
+  },
+  {
+    "Neighborhood": "COL. ALAMEDA",
+    "Code": "1001"
+  },
+  {
+    "Neighborhood": "COL. AM√©RICA",
+    "Code": "2312"
+  },
+  {
+    "Neighborhood": "COL. AMERICA",
+    "Code": "2312"
+  },
+  {
+    "Neighborhood": "COL. DARSY",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "COL. EL HATO",
+    "Code": "1801"
+  },
+  {
+    "Neighborhood": "COL. EL HOGAR",
+    "Code": "1902"
+  },
+  {
+    "Neighborhood": "COL. ELVEL",
+    "Code": "1107"
+  },
+  {
+    "Neighborhood": "COL. HUMUYA",
+    "Code": "1101"
+  },
+  {
+    "Neighborhood": "COL. INTERAMERICANA",
+    "Code": "1332"
+  },
+  {
+    "Neighborhood": "COL. LARA",
+    "Code": "408"
+  },
+  {
+    "Neighborhood": "COL. LOARQUE SUR",
+    "Code": "2104"
+  },
+  {
+    "Neighborhood": "COL. LOMA LINDA SUR",
+    "Code": "1110"
+  },
+  {
+    "Neighborhood": "COL. LOMAS DEL COUNTRY",
+    "Code": "1336"
+  },
+  {
+    "Neighborhood": "COL. LOMAS DEL GUIJARRO",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "COL. LOMAS DEL GUIJARRO ",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "COL. LOMAS DEL GUIJARRO SUR",
+    "Code": "1712"
+  },
+  {
+    "Neighborhood": "COL. LOS LLANOS",
+    "Code": "2119"
+  },
+  {
+    "Neighborhood": "COL. LOS ROBLES",
+    "Code": "2303"
+  },
+  {
+    "Neighborhood": "COL. LUIS LANDA",
+    "Code": "1805"
+  },
+  {
+    "Neighborhood": "COL. MARADIAGA",
+    "Code": "1215"
+  },
+  {
+    "Neighborhood": "COL. MINITAS",
+    "Code": "1003"
+  },
+  {
+    "Neighborhood": "COL. MIRAFLORES",
+    "Code": "1908"
+  },
+  {
+    "Neighborhood": "COL. MIRAFLORES SUR",
+    "Code": "1907"
+  },
+  {
+    "Neighborhood": "COL. NUEVO LOARQUE",
+    "Code": "2107"
+  },
+  {
+    "Neighborhood": "COL. PALERMO",
+    "Code": "501"
+  },
+  {
+    "Neighborhood": "COL. PALMIRA",
+    "Code": "433"
+  },
+  {
+    "Neighborhood": "COL. RUBEN DARIO",
+    "Code": "1002"
+  },
+  {
+    "Neighborhood": "COL. SAN ÁNGEL",
+    "Code": "2010"
+  },
+  {
+    "Neighborhood": "COL. SATÉLITE",
+    "Code": "2223"
+  },
+  {
+    "Neighborhood": "COL. TILOARQUE",
+    "Code": "1205"
+  },
+  {
+    "Neighborhood": "COL. TRES CAMINOS",
+    "Code": "1705"
+  },
+  {
+    "Neighborhood": "COLONIA 15 DE SEPTIEMBRE",
+    "Code": "2321"
+  },
+  {
+    "Neighborhood": "COLONIA AMERICA",
+    "Code": "2312"
+  },
+  {
+    "Neighborhood": "COLONIA ARTURO QUEZADA",
+    "Code": "1346"
+  },
+  {
+    "Neighborhood": "COLONIA EL PEDREGAL ",
+    "Code": "2205"
+  },
+  {
+    "Neighborhood": "COLONIA KENNEDY",
+    "Code": "2001"
+  },
+  {
+    "Neighborhood": "COLONIA LA JOYA",
+    "Code": "1912"
+  },
+  {
+    "Neighborhood": "COLONIA LARA",
+    "Code": "408"
+  },
+  {
+    "Neighborhood": "COLONIA LOMAS DEL MIRAFLORES SUR",
+    "Code": "1921"
+  },
+  {
+    "Neighborhood": "COLONIA MARADIAGA",
+    "Code": "1215"
+  },
+  {
+    "Neighborhood": "COLONIA MODELO",
+    "Code": "2318"
+  },
+  {
+    "Neighborhood": "COLONIA PALERMO",
+    "Code": "501"
+  },
+  {
+    "Neighborhood": "COLONIA PALMIRA",
+    "Code": "433"
+  },
+  {
+    "Neighborhood": "COLONIA PUEBLO NUEVO",
+    "Code": "1377"
+  },
+  {
+    "Neighborhood": "COLONIA TEPEYAC",
+    "Code": "1005"
+  },
+  {
+    "Neighborhood": "COLONIA VILLA ADELA",
+    "Code": "603"
+  },
+  {
+    "Neighborhood": "COMAYAGUELA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "CONDOMINIOS TONCONTIN",
+    "Code": "2339"
+  },
+  {
+    "Neighborhood": "CONDOMINIOS VIERA",
+    "Code": "316"
+  },
+  {
+    "Neighborhood": "CUMBRES DEL SUR",
+    "Code": "2356"
+  },
+  {
+    "Neighborhood": "CUMBRES DEL SUR",
+    "Code": "2356"
+  },
+  {
+    "Neighborhood": "DISTRITO CENTRAL",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "ECOVIVIENDA",
+    "Code": "1655"
+  },
+  {
+    "Neighborhood": "EL AGUACATAL",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "EL CENTRO",
+    "Code": "103"
+  },
+  {
+    "Neighborhood": "EL CHIMBO",
+    "Code": "9996"
+  },
+  {
+    "Neighborhood": "EL CHIMBO",
+    "Code": "9996"
+  },
+  {
+    "Neighborhood": "EL COCO",
+    "Code": "2211"
+  },
+  {
+    "Neighborhood": "EL COCO",
+    "Code": "2211"
+  },
+  {
+    "Neighborhood": "EL DORADO",
+    "Code": "1917"
+  },
+  {
+    "Neighborhood": "EL HATILLO",
+    "Code": "1509"
+  },
+  {
+    "Neighborhood": "EL HATILLO",
+    "Code": "1509"
+  },
+  {
+    "Neighborhood": "EL HOGAR",
+    "Code": "1902"
+  },
+  {
+    "Neighborhood": "EL MANANTIAL",
+    "Code": "718"
+  },
+  {
+    "Neighborhood": "EL MOLINO",
+    "Code": "1651"
+  },
+  {
+    "Neighborhood": "EL MOLINO",
+    "Code": "1651"
+  },
+  {
+    "Neighborhood": "EL MOLINON",
+    "Code": "1644"
+  },
+  {
+    "Neighborhood": "EL PARAISO ? Yuscaran",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "EL PARAISO ? Yuscaran",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "EL PEDREGAL",
+    "Code": "2205"
+  },
+  {
+    "Neighborhood": "EL PEDREGAL",
+    "Code": "2205"
+  },
+  {
+    "Neighborhood": "EL PORVENIR",
+    "Code": "731"
+  },
+  {
+    "Neighborhood": "EL PORVENIR",
+    "Code": "731"
+  },
+  {
+    "Neighborhood": "EL PRADO",
+    "Code": "1102"
+  },
+  {
+    "Neighborhood": "EL SAUCE",
+    "Code": "9998"
+  },
+  {
+    "Neighborhood": "EL SAUCE",
+    "Code": "9998"
+  },
+  {
+    "Neighborhood": "EL TABLON",
+    "Code": "9999"
+  },
+  {
+    "Neighborhood": "EL TRAPICHE",
+    "Code": "1726"
+  },
+  {
+    "Neighborhood": "EL TRAPICHE",
+    "Code": "1726"
+  },
+  {
+    "Neighborhood": "EL TRI√°NGULO",
+    "Code": "1013"
+  },
+  {
+    "Neighborhood": "EL TRIANGULO",
+    "Code": "1013"
+  },
+  {
+    "Neighborhood": "EL TRIANGULO",
+    "Code": "1013"
+  },
+  {
+    "Neighborhood": "EL TRIGO",
+    "Code": "940"
+  },
+  {
+    "Neighborhood": "EL TRIGO",
+    "Code": "940"
+  },
+  {
+    "Neighborhood": "FLORENCIA",
+    "Code": "1702"
+  },
+  {
+    "Neighborhood": "FLORENCIA NORTE",
+    "Code": "1702"
+  },
+  {
+    "Neighborhood": "FLORENCIA NORTE",
+    "Code": "1702"
+  },
+  {
+    "Neighborhood": "FLORENCIA OESTE",
+    "Code": "1704"
+  },
+  {
+    "Neighborhood": "FLORENCIA OESTE",
+    "Code": "1704"
+  },
+  {
+    "Neighborhood": "FLORENCIA SUR",
+    "Code": "1703"
+  },
+  {
+    "Neighborhood": "FLORENCIA SUR",
+    "Code": "1703"
+  },
+  {
+    "Neighborhood": "FLORENCIA SUR VILLA FLORENCIA",
+    "Code": "1703"
+  },
+  {
+    "Neighborhood": "GUANCASTE",
+    "Code": "106"
+  },
+  {
+    "Neighborhood": "GUANCASTE",
+    "Code": "106"
+  },
+  {
+    "Neighborhood": "HACIENDA-rural",
+    "Code": "rural"
+  },
+  {
+    "Neighborhood": "HADAS",
+    "Code": "2319"
+  },
+  {
+    "Neighborhood": "HATILLO",
+    "Code": "1509"
+  },
+  {
+    "Neighborhood": "HATILLO",
+    "Code": "1509"
+  },
+  {
+    "Neighborhood": "HATILLO-MIRALAGO",
+    "Code": "1514"
+  },
+  {
+    "Neighborhood": "HUMUYA",
+    "Code": "1101"
+  },
+  {
+    "Neighborhood": "JARDINES DEL LOARQUE",
+    "Code": "2105"
+  },
+  {
+    "Neighborhood": "JUTIAPA rural",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "JUTIAPA rural",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "KENNEDY",
+    "Code": "2001"
+  },
+  {
+    "Neighborhood": "KM 4-DANLI",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "LA CAMPAÑA",
+    "Code": "410"
+  },
+  {
+    "Neighborhood": "LA CASCADA",
+    "Code": "2307"
+  },
+  {
+    "Neighborhood": "LA CEIBA-atlantida",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LA CEIBA-atlantida",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LA COLINA-roatan",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LA CUMBRE",
+    "Code": "1007"
+  },
+  {
+    "Neighborhood": "LA CUMBRE",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LA ELVEL",
+    "Code": "1107"
+  },
+  {
+    "Neighborhood": "LA HACIENDA",
+    "Code": "1723"
+  },
+  {
+    "Neighborhood": "LA HUMUYA",
+    "Code": "1101"
+  },
+  {
+    "Neighborhood": "LA JOYA",
+    "Code": "1912"
+  },
+  {
+    "Neighborhood": "LA LOMA",
+    "Code": "1735"
+  },
+  {
+    "Neighborhood": "LA LOMA",
+    "Code": "1735"
+  },
+  {
+    "Neighborhood": "LA MODELO",
+    "Code": "2318"
+  },
+  {
+    "Neighborhood": "LA REFORMA",
+    "Code": "305"
+  },
+  {
+    "Neighborhood": "LA REFORMA",
+    "Code": "305"
+  },
+  {
+    "Neighborhood": "LA RONDA",
+    "Code": "111"
+  },
+  {
+    "Neighborhood": "LA RONDA",
+    "Code": "111"
+  },
+  {
+    "Neighborhood": "LA VEGA",
+    "Code": "9981"
+  },
+  {
+    "Neighborhood": "LA VEGUITA-lempira",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LARA",
+    "Code": "408"
+  },
+  {
+    "Neighborhood": "LARA",
+    "Code": "408"
+  },
+  {
+    "Neighborhood": "LARA NORTE",
+    "Code": "9992"
+  },
+  {
+    "Neighborhood": "LARA NORTE",
+    "Code": "9992"
+  },
+  {
+    "Neighborhood": "LAS CASCADAS",
+    "Code": "2307"
+  },
+  {
+    "Neighborhood": "LAS CASCADAS",
+    "Code": "2307"
+  },
+  {
+    "Neighborhood": "LAS COLINAS",
+    "Code": "1904"
+  },
+  {
+    "Neighborhood": "LAS COLINAS",
+    "Code": "1904"
+  },
+  {
+    "Neighborhood": "LAS CUMBRES",
+    "Code": "1007"
+  },
+  {
+    "Neighborhood": "LAS DELICIAS",
+    "Code": "9982"
+  },
+  {
+    "Neighborhood": "LAS DELICIAS",
+    "Code": "9982"
+  },
+  {
+    "Neighborhood": "LAS HADAS",
+    "Code": "2319"
+  },
+  {
+    "Neighborhood": "LAS HADAS",
+    "Code": "2319"
+  },
+  {
+    "Neighborhood": "LAS LOMAS",
+    "Code": "1225"
+  },
+  {
+    "Neighborhood": "LAS MARIAS",
+    "Code": "1031"
+  },
+  {
+    "Neighborhood": "LAS MARIAS-Lomas del guijarro",
+    "Code": "1031"
+  },
+  {
+    "Neighborhood": "LAS MINITAS",
+    "Code": "1003"
+  },
+  {
+    "Neighborhood": "LAS MINITAS",
+    "Code": "1003"
+  },
+  {
+    "Neighborhood": "LAS TAPIAS FRANCISCO MORAZAN*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LAS TAPIAS FRANCISCO MORAZAN*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LAS TRES ROSAS",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LAS TRES ROSAS*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LAS UVAS",
+    "Code": "2329"
+  },
+  {
+    "Neighborhood": "LAS UVAS",
+    "Code": "2329"
+  },
+  {
+    "Neighborhood": "LAS UVAS-VILLAS DEL REAL",
+    "Code": "2347"
+  },
+  {
+    "Neighborhood": "LINDA VISTA",
+    "Code": "1009"
+  },
+  {
+    "Neighborhood": "LINDA VISTA",
+    "Code": "1009"
+  },
+  {
+    "Neighborhood": "LIRIOS DE MIRAFLORES",
+    "Code": "1908"
+  },
+  {
+    "Neighborhood": "LIRIOS DE MIRAFLORES",
+    "Code": "1908"
+  },
+  {
+    "Neighborhood": "LLANOS DEL POTRERO",
+    "Code": "2322"
+  },
+  {
+    "Neighborhood": "LLANOS DEL POTRERO",
+    "Code": "2322"
+  },
+  {
+    "Neighborhood": "LOARQUE",
+    "Code": "9993"
+  },
+  {
+    "Neighborhood": "LOM",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LOM*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "LOMA ALTA",
+    "Code": "1026"
+  },
+  {
+    "Neighborhood": "LOMA ALTA",
+    "Code": "1026"
+  },
+  {
+    "Neighborhood": "LOMA LINDA",
+    "Code": "1109"
+  },
+  {
+    "Neighborhood": "LOMA LINDA NORTE",
+    "Code": "1109"
+  },
+  {
+    "Neighborhood": "LOMA LINDA NORTE",
+    "Code": "1109"
+  },
+  {
+    "Neighborhood": "LOMA LINDA SUR",
+    "Code": "1110"
+  },
+  {
+    "Neighborhood": "LOMA VERDE",
+    "Code": "1927"
+  },
+  {
+    "Neighborhood": "LOMAS DE JACALEAPA",
+    "Code": "2007"
+  },
+  {
+    "Neighborhood": "LOMAS DE LA FLORIDA",
+    "Code": "945"
+  },
+  {
+    "Neighborhood": "LOMAS DE MIRAFLORES",
+    "Code": "1921"
+  },
+  {
+    "Neighborhood": "LOMAS DE MIRAFLORES",
+    "Code": "1921"
+  },
+  {
+    "Neighborhood": "LOMAS DE SANTA LUC√≠A",
+    "Code": "rural"
+  },
+  {
+    "Neighborhood": "LOMAS DE TILOARUGE",
+    "Code": "1208"
+  },
+  {
+    "Neighborhood": "LOMAS DE TONCONTIN",
+    "Code": "2813"
+  },
+  {
+    "Neighborhood": "LOMAS DE TONCONTÍN",
+    "Code": "2813"
+  },
+  {
+    "Neighborhood": "LOMAS DEL COUNTRY",
+    "Code": "1336"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO ALFONSO XIII",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO SUR",
+    "Code": "1712"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO TORRE AQUA",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO TORRE SKY",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO-LAS CUMBRES",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO-LOS ANDES",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO-PENTHOUSE COLLINE",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL GUIJARRO-TIFFANNY",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS DEL MAYAB",
+    "Code": "1008"
+  },
+  {
+    "Neighborhood": "LOMAS DEL MAYAB",
+    "Code": "1008"
+  },
+  {
+    "Neighborhood": "LOMAS DEL MAYAB-TORRE SKY",
+    "Code": "1008"
+  },
+  {
+    "Neighborhood": "LOMAS DEL MOLINO",
+    "Code": "946"
+  },
+  {
+    "Neighborhood": "LOMAS DEL MOLINO",
+    "Code": "946"
+  },
+  {
+    "Neighborhood": "LOMAS DEL SANTA LUCIA",
+    "Code": "rural"
+  },
+  {
+    "Neighborhood": "LOMAS DORADO",
+    "Code": "2025"
+  },
+  {
+    "Neighborhood": "LOMAS GUIJARRO",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "LOMAS SANTA LUCIA",
+    "Code": "rural"
+  },
+  {
+    "Neighborhood": "LOS ALMENDROS",
+    "Code": "100"
+  },
+  {
+    "Neighborhood": "LOS ANGELES",
+    "Code": "2315"
+  },
+  {
+    "Neighborhood": "LOS ANGELES",
+    "Code": "2315"
+  },
+  {
+    "Neighborhood": "LOS ÁNGELES",
+    "Code": "2315"
+  },
+  {
+    "Neighborhood": "LOS CASTAÑOS",
+    "Code": "401"
+  },
+  {
+    "Neighborhood": "LOS CASTAÑOS SUR",
+    "Code": "1023"
+  },
+  {
+    "Neighborhood": "LOS HIDALGOS",
+    "Code": "2356"
+  },
+  {
+    "Neighborhood": "LOS HIDALGOS",
+    "Code": "2356"
+  },
+  {
+    "Neighborhood": "LOS PORTALES",
+    "Code": "2028"
+  },
+  {
+    "Neighborhood": "LOS PROCERES",
+    "Code": "1609"
+  },
+  {
+    "Neighborhood": "LOS PROCERES",
+    "Code": "1609"
+  },
+  {
+    "Neighborhood": "LOS ROBLES",
+    "Code": "2303"
+  },
+  {
+    "Neighborhood": "LOS TULIPANES",
+    "Code": "1939"
+  },
+  {
+    "Neighborhood": "MARADIAGA",
+    "Code": "1215"
+  },
+  {
+    "Neighborhood": "MINITAS",
+    "Code": "1003"
+  },
+  {
+    "Neighborhood": "MIRAFLORES",
+    "Code": "1908"
+  },
+  {
+    "Neighborhood": "MIRAFLORES",
+    "Code": "1908"
+  },
+  {
+    "Neighborhood": "MIRAFLORES SUR",
+    "Code": "1907"
+  },
+  {
+    "Neighborhood": "MIRAMONTES",
+    "Code": "1106"
+  },
+  {
+    "Neighborhood": "MIRAMONTES",
+    "Code": "1106"
+  },
+  {
+    "Neighborhood": "MODELO",
+    "Code": "2318"
+  },
+  {
+    "Neighborhood": "MODELO",
+    "Code": "2318"
+  },
+  {
+    "Neighborhood": "MODERNA-sps",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "MODERNA-sps",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "MONSEÑOR FIALLOS",
+    "Code": "703"
+  },
+  {
+    "Neighborhood": "MONSEÑOR FIALLOS",
+    "Code": "703"
+  },
+  {
+    "Neighborhood": "MONTE REAL-MATEO rural",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "MONTECARLO",
+    "Code": "1015"
+  },
+  {
+    "Neighborhood": "MONTECARLO",
+    "Code": "1015"
+  },
+  {
+    "Neighborhood": "NUEVA TATUMBLA *",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "NUEVA TATUMBLA *",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "OJOJONA *",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "OMOA cortes",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "OMOA cortes",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "PALERMO",
+    "Code": "501"
+  },
+  {
+    "Neighborhood": "PALERMO",
+    "Code": "501"
+  },
+  {
+    "Neighborhood": "PALMA REAL",
+    "Code": "2330"
+  },
+  {
+    "Neighborhood": "PALMA REAL  AEROPUERTO",
+    "Code": "2330"
+  },
+  {
+    "Neighborhood": "PALMERAS DE SAN IGNACIO",
+    "Code": "1802"
+  },
+  {
+    "Neighborhood": "PALMERAS DE SAN IGNACIO",
+    "Code": "1802"
+  },
+  {
+    "Neighborhood": "PALMIRA",
+    "Code": "433"
+  },
+  {
+    "Neighborhood": "PALMIRA",
+    "Code": "433"
+  },
+  {
+    "Neighborhood": "PAYAQUI",
+    "Code": "1012"
+  },
+  {
+    "Neighborhood": "PAYAQUI",
+    "Code": "1012"
+  },
+  {
+    "Neighborhood": "PINARES DE VILLA VIEJA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "PINARES DE VILLA VIEJA*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "PINARES DEL UYUCA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "PINARES DEL UYUCA *",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "PORTAL DEL BOSQUE",
+    "Code": "2349"
+  },
+  {
+    "Neighborhood": "PORTAL DEL BOSQUE",
+    "Code": "2349"
+  },
+  {
+    "Neighborhood": "QUINTA ISABEL",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "QUINTA ISABEL*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "REAL DE MINAS",
+    "Code": "1007"
+  },
+  {
+    "Neighborhood": "REAL DE MINAS",
+    "Code": "1007"
+  },
+  {
+    "Neighborhood": "RES ALTOS DE MIRAMONTES",
+    "Code": "1104"
+  },
+  {
+    "Neighborhood": "RES CENTRO AMÉRICA",
+    "Code": "1320"
+  },
+  {
+    "Neighborhood": "RES CIUDAD NUEVA",
+    "Code": "2420"
+  },
+  {
+    "Neighborhood": "RES LA VEGA",
+    "Code": "9985"
+  },
+  {
+    "Neighborhood": "RES LAS CASCADAS",
+    "Code": "2307"
+  },
+  {
+    "Neighborhood": "RES LAS COLINAS",
+    "Code": "1904"
+  },
+  {
+    "Neighborhood": "RES LAS HADAS",
+    "Code": "2319"
+  },
+  {
+    "Neighborhood": "RES LOMA VERDE",
+    "Code": "1927"
+  },
+  {
+    "Neighborhood": "RES PLAZA",
+    "Code": "2017"
+  },
+  {
+    "Neighborhood": "RES ROBLE OESTE",
+    "Code": "2346"
+  },
+  {
+    "Neighborhood": "RES SAN JUAN",
+    "Code": "1821"
+  },
+  {
+    "Neighborhood": "RES SUYAPITA",
+    "Code": "1819"
+  },
+  {
+    "Neighborhood": "RES VENECIA",
+    "Code": "2151"
+  },
+  {
+    "Neighborhood": "RES. AGUA DULCE",
+    "Code": "2328"
+  },
+  {
+    "Neighborhood": "RES. ALTOS DE MIRAMONTES",
+    "Code": "1104"
+  },
+  {
+    "Neighborhood": "RES. ALTOS DEL TRAPICHE",
+    "Code": "1818"
+  },
+  {
+    "Neighborhood": "RES. CASTANO SUR",
+    "Code": "1023"
+  },
+  {
+    "Neighborhood": "RES. CENTRO AMERICA",
+    "Code": "1320"
+  },
+  {
+    "Neighborhood": "RES. CENTRO AMÉRICA IV ETAPA",
+    "Code": "1320"
+  },
+  {
+    "Neighborhood": "RES. EL DORADO",
+    "Code": "1917"
+  },
+  {
+    "Neighborhood": "RES. FLORENCIA",
+    "Code": "1702"
+  },
+  {
+    "Neighborhood": "RES. LA CONCEPCI√©N",
+    "Code": "2821"
+  },
+  {
+    "Neighborhood": "RES. LARA",
+    "Code": "408"
+  },
+  {
+    "Neighborhood": "RES. LARA",
+    "Code": "408"
+  },
+  {
+    "Neighborhood": "RES. LAS CUMBRES",
+    "Code": "1007"
+  },
+  {
+    "Neighborhood": "RES. LAS HADAS",
+    "Code": "2319"
+  },
+  {
+    "Neighborhood": "RES. LAS UVAS",
+    "Code": "2329"
+  },
+  {
+    "Neighborhood": "RES. LOMA LINDA NORTE",
+    "Code": "1109"
+  },
+  {
+    "Neighborhood": "RES. LOMA LINDA SUR",
+    "Code": "1110"
+  },
+  {
+    "Neighborhood": "RES. LOMA VERDE",
+    "Code": "1927"
+  },
+  {
+    "Neighborhood": "RES. MAYA",
+    "Code": "1629"
+  },
+  {
+    "Neighborhood": "RES. MIRAMONTES",
+    "Code": "1106"
+  },
+  {
+    "Neighborhood": "RES. PALMA REAL",
+    "Code": "2330"
+  },
+  {
+    "Neighborhood": "RES. PORTAL DEL BOSQUE",
+    "Code": "2349"
+  },
+  {
+    "Neighborhood": "RES. SAN JUAN",
+    "Code": "1821"
+  },
+  {
+    "Neighborhood": "RES. SANTA CLARA",
+    "Code": "9995"
+  },
+  {
+    "Neighborhood": "RES. SANTA LUCÍA",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "RES. TRES CAMINOS",
+    "Code": "1705"
+  },
+  {
+    "Neighborhood": "RES. VENECIA",
+    "Code": "2151"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL CENTRO AMÉRICA",
+    "Code": "1320"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL CENTRO AMÉRICA IV ETAPA",
+    "Code": "1320"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL CONCEPCIÓN",
+    "Code": "2821"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL EL DORADO",
+    "Code": "1917"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL HONDURAS",
+    "Code": "2019"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL LAS CASCADAS",
+    "Code": "2307"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL LAS UVAS",
+    "Code": "2329"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL LOMAS DEL NAVOO,",
+    "Code": "2021"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL MAYA",
+    "Code": "1629"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL PLAZA",
+    "Code": "2017"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL SANTA LUCIA",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL VENECIA",
+    "Code": "2151"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL VENECIA ",
+    "Code": "2151"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL VILLA ELENA",
+    "Code": "5501"
+  },
+  {
+    "Neighborhood": "RESIDENCIAL VILLA ELENA ",
+    "Code": "5501"
+  },
+  {
+    "Neighborhood": "ROATAN",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "ROATAN-roatan",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "ROBLE OESTE",
+    "Code": "2346"
+  },
+  {
+    "Neighborhood": "RUB√©N DAR√≠O",
+    "Code": "1002"
+  },
+  {
+    "Neighborhood": "RUBEN DARIO",
+    "Code": "1002"
+  },
+  {
+    "Neighborhood": "RUBEN DARIO",
+    "Code": "1002"
+  },
+  {
+    "Neighborhood": "RUBÉN DARÍO",
+    "Code": "1002"
+  },
+  {
+    "Neighborhood": "SAN IGNACIO",
+    "Code": "1802"
+  },
+  {
+    "Neighborhood": "SAN IGNACIO",
+    "Code": "1802"
+  },
+  {
+    "Neighborhood": "SAN IGNACIO-QUINTA BELLA",
+    "Code": "1802"
+  },
+  {
+    "Neighborhood": "SAN JOSE DE LA PEÑA",
+    "Code": "2111"
+  },
+  {
+    "Neighborhood": "SAN JOSE DE LA VEGA",
+    "Code": "2114"
+  },
+  {
+    "Neighborhood": "SAN JOSE VEGA",
+    "Code": "2114"
+  },
+  {
+    "Neighborhood": "SAN JUAN",
+    "Code": "1821"
+  },
+  {
+    "Neighborhood": "SAN MATIAS",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "SAN MATIAS*rural",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "SAN PEDRO SULA",
+    "Code": "cortes"
+  },
+  {
+    "Neighborhood": "SAN PEDRO SULA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "SANTA BARBARA",
+    "Code": "2418"
+  },
+  {
+    "Neighborhood": "SANTA BARBARA",
+    "Code": "2418"
+  },
+  {
+    "Neighborhood": "SANTA LUCIA",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "SANTA LUCIA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "SIGUATEPEQUE",
+    "Code": "rural"
+  },
+  {
+    "Neighborhood": "SIGUATEPEQUE",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "STA. BÁRBARA",
+    "Code": "2418"
+  },
+  {
+    "Neighborhood": "TATUMBLA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "TATUMBLA rural",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "TELA",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "TEPEYAC",
+    "Code": "1005"
+  },
+  {
+    "Neighborhood": "TIFFANY LAS LOMAS",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "TILOARQUE  ALTOS DE PRIMAVERA",
+    "Code": "621"
+  },
+  {
+    "Neighborhood": "TORRE SKY",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "TORRE TIFFANY",
+    "Code": "1006"
+  },
+  {
+    "Neighborhood": "TRAPICHE",
+    "Code": "1726"
+  },
+  {
+    "Neighborhood": "TRES CAMINOS",
+    "Code": "1705"
+  },
+  {
+    "Neighborhood": "TRES CAMINOS",
+    "Code": "1705"
+  },
+  {
+    "Neighborhood": "UNIVERSIDAD NORTE",
+    "Code": "1701"
+  },
+  {
+    "Neighborhood": "VALLE ANGELES",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "VALLE DE ANGELES",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "VALLE DE ANGELES",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "VALLE DE ÁNGELES",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "VALLE DORADO",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "VALLE DORADO-COMAYAGUA",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "VALLE VERDE",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "VALLE VERDE-DANLI",
+    "Code": "RURAL"
+  },
+  {
+    "Neighborhood": "VENECIA",
+    "Code": "2151"
+  },
+  {
+    "Neighborhood": "VENECIA",
+    "Code": "2151"
+  },
+  {
+    "Neighborhood": "VIERA",
+    "Code": "301"
+  },
+  {
+    "Neighborhood": "VIERA",
+    "Code": "301"
+  },
+  {
+    "Neighborhood": "VILLA ELENA",
+    "Code": "5501"
+  },
+  {
+    "Neighborhood": "VILLA ELENA",
+    "Code": "5501"
+  },
+  {
+    "Neighborhood": "VILLA FLORENCIA",
+    "Code": "1738"
+  },
+  {
+    "Neighborhood": "VILLA LOS JAZMINES",
+    "Code": "2830"
+  },
+  {
+    "Neighborhood": "VILLA OLÍMPICA",
+    "Code": "1711"
+  },
+  {
+    "Neighborhood": "VILLA OLÍMPICA",
+    "Code": "1711"
+  },
+  {
+    "Neighborhood": "VILLA ROSALIA rural",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "VILLA TOSCANA",
+    "Code": "2364"
+  },
+  {
+    "Neighborhood": "VILLA UNIVERSITARIA",
+    "Code": "1625"
+  },
+  {
+    "Neighborhood": "VILLAS DE AMERICA",
+    "Code": "2312"
+  },
+  {
+    "Neighborhood": "VILLAS DE AMERICA",
+    "Code": "2312"
+  },
+  {
+    "Neighborhood": "VILLAS DE TILOARQUE",
+    "Code": "1234"
+  },
+  {
+    "Neighborhood": "VILLAS DEL CAMPO-KM8 DANLI*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "VILLAS DEL CAMPO*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "VILLAS DEL REAL - MEDITERRANIO",
+    "Code": "2347"
+  },
+  {
+    "Neighborhood": "VILLAS ROSALIA*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "VILLAS SAN SEBASTIAN",
+    "Code": "2716"
+  },
+  {
+    "Neighborhood": "VILLAS SAN SEBASTIAN",
+    "Code": "2716"
+  },
+  {
+    "Neighborhood": "ZAMBRANO*",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "ZARAHEL",
+    "Code": NaN
+  },
+  {
+    "Neighborhood": "ZARAHEL*",
+    "Code": NaN
+  }
+]
