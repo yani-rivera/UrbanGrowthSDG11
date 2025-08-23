@@ -1,0 +1,45 @@
+
+{
+  "agency": "SERPECAL",
+  "neighborhood_delimiter": ",",
+  "listing_marker": "COL.",
+  "transaction_keywords": {
+    "rent": ["ALQUILER", "RENTA"],
+    "sale": ["VENTA"]
+  },
+    "transaction_headers": {
+    "ALQUILERES": "Rent",
+    "VENTAS": "Sale"
+  },
+  "type_keywords": {
+  "House": ["casa", "residencia", "chalet","Res","townhouse"],
+  "Apartment": ["apartamento", "apto", "condominio"],
+  "Commercial": ["local", "oficina", "bodega"]
+},
+  "currency_aliases": {
+    "$": "USD",
+    "Lps": "HNL",
+    "Lps.": "HNL",
+    "L.": "HNL"
+  },
+  "neighborhood_strategy": "uppercase_prefix",
+  "bathroom_terms": ["baño", "baños", "bafios"],
+  "bedroom_terms": ["dormitorio", "dormitorios", "habitacion", "habitaciones", "alcoba", "alcobas"],
+  "property_keywords": {
+  "Apartment": ["apartamento", "apto", "condominio"],
+  "House": ["casa", "residencia", "chalet","Res","townhouse"],
+  "Land": ["terreno", "lote"],
+  "Commercial": ["local", "bodega", "oficina"]
+},
+"currency_aliases": {
+  "$": "USD",
+  "USD": "USD",
+  "US$": "USD",
+  "L": "HNL",
+  "L.": "HNL",
+  "Lps": "HNL",
+  "Lps.": "HNL",
+  "Lempira": "HNL",
+  "Lempiras": "HNL"
+}
+}
