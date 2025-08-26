@@ -9,63 +9,70 @@ def ocr_sanitize(text: str) -> str:
 
     s = str(text)
 
-    # Unicode normalize (fixes many accent/spacing artifacts)
-    # NFKC also resolves ligatures and compatibility forms
+# Unicode normalize (fixes many accent/spacing artifacts)
     s = unicodedata.normalize("NFKC", s)
 
-    # Common OCR garbage & mis-encoded sequences seen in your scans
-    # (extend this table as you encounter new patterns)
+# Common OCR garbage & mis-encoded sequences
     FIXES = [
-        # Broken currency spacing / stray dots
-        (r'\$\.', '$ '),                  # "$.700,000" -> "$ 700,000"
-        (r'(Lps?|L)\.(\d)', r'\1. \2'),   # "Lps.3000"  -> "Lps. 3000"
-        (r'US\$(\d)', r'US$ \1'),
+# Currency formatting
+    (r'\$\.', '$ '),
+    (r'(Lps?|L)\.(\d)', r'\1. \2'),
+    (r'US\$(\d)', r'US$ \1'),
 
-        # Smart quotes / bullets / weird punctuation
-        ('\u2018', "'"), ('\u2019', "'"),
-        ('\u201C', '"'), ('\u201D', '"'),
-        ('\u2022', '*'),                  # bullet to "*"
-        ('\u00AD', ''),                   # soft hyphen
+# Smart quotes and bullets
+    ('\u2018', "'"), ('\u2019', "'"),
+    ('\u201C', '"'), ('\u201D', '"'),
+    ('\u2022', '*'),
+    ('\u00AD', ''),
 
-        # Mis-decoded accent triplets often seen after OCR/export
-        ('bafios', 'baños'),
-        ('banos', 'baños'),
-        ('baf̃os', 'baños'),
-        ('bano', 'baño'),
-        ('anos', 'años'),
-        ('jard\\u221an', 'jardín'),       # "jard√≠n" etc → "jardín"
-        ('jard\xbf\xaan', 'jardín'),
+# Common OCR misreads in Spanish
+    ('bafios', 'baños'),
+    ('banos', 'baños'),
+    ('baf̃os', 'baños'),
+    ('bano', 'baño'),
+    ('anos', 'años'),
+    ('jard\\u221an', 'jardín'),
+    ('jard\xbf\xaan', 'jardín'),
 
-        # General accent repairs (broad strokes)
-        ('Monse\\xF1or', 'Monseñor'),
-        ('Monsenor', 'Monseñor'),
-        ('An\\xEDllo', 'Anillo'),
+    ('Monse\\xF1or', 'Monseñor'),
+    ('Monsenor', 'Monseñor'),
+    ('An\\xEDllo', 'Anillo'),
 
-        # Frequently mangled tokens
-        ('Residencial', 'Res.'),
-        ('Colonia', 'Col.'),
-        ('Col ', 'Col. '),
-        ('Urb ', 'Urb. '),
-    ]
+# Abbreviations normalization
+    ('Residencial', 'Res.'),
+    ('Colonia', 'Col.'),
+    ('Col ', 'Col. '),
+    ('Urb ', 'Urb. '),
+
+# Eugenia-specific corrections
+    ('√Å', 'Á'),
+    ('√°', 'á'),
+    ('√±', 'ñ'),
+    ('√É', 'É'),
+    ('√©', 'é'),
+    ('√®', 'í'),
+    ('√≥', 'ó'),
+    ('√∫', 'ú'),
+    ('√Ú' ,'Ü')
+]
 
     for a, b in FIXES:
-        s = re.sub(a, b, s, flags=re.IGNORECASE) if len(a) > 1 and a.startswith(r'\b') is False else s.replace(a, b)
+        s = re.sub(a, b, s, flags=re.IGNORECASE) if len(a) > 1 and not a.startswith(r'\\b') else s.replace(a, b)
 
-    # Normalize area units (m2→m², mts2→m²; vr2/vrs2→vrs²)
+# Normalize area units
     s = re.sub(r'\b(mts?2|mt2|m2)\b', 'm²', s, flags=re.IGNORECASE)
     s = re.sub(r'\b(vr2|vrs2|v2)\b', 'vrs²', s, flags=re.IGNORECASE)
 
-    # Ensure a space after currency markers for price regex
+# Ensure a space after currency markers
     s = re.sub(r'(\$)(\d)', r'\1 \2', s)
     s = re.sub(r'(Lps?\.?|US\$)(\s*)(\d)', r'\1 \3', s, flags=re.IGNORECASE)
 
-    # Hyphenation line‑break fix (if any multi-line text slips through)
+# Fix hyphenated line breaks
     s = re.sub(r'-\s*\n\s*', '', s)
 
-    # Collapse weird spacing
+# Final cleanup
     s = re.sub(r'\s+', ' ', s).strip()
 
-    
     return s
 
 # --- Your existing basic normalizer; now calls ocr_sanitize first ---
@@ -92,6 +99,11 @@ def preprocess_generic(text: str) -> str:
 def preprocess_serpecal(text: str) -> str:
     s = _basic_normalize(text)
     # SERPECAL quirks: Vr²/Vrs2 capitalization
+    s = s.replace('Vr²','vrs²').replace('Vr2','vrs²').replace('Vrs2','vrs²').replace('Vrs','vrs')
+    return s.lower()
+def preprocess_eugenia(text: str) -> str:
+    s = _basic_normalize(text)
+    # eugenia quirks: Vr²/Vrs2 capitalization
     s = s.replace('Vr²','vrs²').replace('Vr2','vrs²').replace('Vrs2','vrs²').replace('Vrs','vrs')
     return s.lower()
 
