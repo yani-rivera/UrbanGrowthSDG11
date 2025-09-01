@@ -8,7 +8,17 @@
     "L.": "HNL",
     "Lps": "HNL",
     "Lps.": "HNL",
-    "L. ": "HNL"
+    "L. ": "HNL",
+    "LPS.": "HNL"
+  },
+ "preprocess": [1, 2],
+ "emit_marker": true,
+ "header_marker": "#",
+ "symbols": ["*", "•", ">", "-"],
+
+  "neighborhood_rule": {
+    "strategy": "first_comma",      
+    "max_token_span": 20
   },
 
   "transaction_keywords": {
@@ -22,25 +32,58 @@
   },
 
   "type_keywords": {
-    "house": ["res", "residencia", "casa","townhouse"],
-    "apartment": ["apto", "apartamento","condominio"],
+    "house": ["res", "residencia", "casa", "townhouse"],
+    "apartment": ["apto", "apartamento", "condominio"],
     "commercial": ["local", "oficina", "bodega", "negocio"],
-    "land": ["terreno", "lote", "manzana"]
+    "land": ["terreno", "lote", "lotes", "manzana", "manzanas", "vrs", "vrs²", "vr²"]
   },
 
-"bedroom_keywords": ["hab", "habitaciones", "dormitorios", "dormitorio","hab.","habitaci√≥n"],
-"bathroom_keywords": ["baño", "baños", "banos","bafios"," ba√±o","ba√±os"],
-"area_aliases": {
-  "ac": ["mts", "m2", "metros", "mt2", "mts2", "m²"],
-  "at": ["vrs", "vr2", "vrs2", "v²", "vr²", "varas", "v2"]
-},
+  "bedroom_keywords": ["hab", "habitaciones", "dormitorios", "dormitorio", "hab.", "habitaci√≥n"],
+
+  "bathroom_keywords": ["baño", "baños", "banos", "bafios", "ba√±o", "ba√±os"],
+
+  "area_aliases": {
+    "ac": ["mts", "m2", "metros", "mt2", "mts2", "m²", "metros2"],
+    "at": ["vrs", "vr2", "vrs2", "v²", "vr²", "varas", "v2"]
+  },
 
   "start_exceptions": [
-  "Mts.", "Mts", "mt2", "m²", "mts", "mts2","Mts. ",
-  "Lps", "Lps.", "L.", "$","Lps. ",
-  "vr2", "vrs", "Vrs", "Vr²", "Vrs²",
-  "Res.", "res.", "area", "área",
-  "baños", "baño", "habitaciones", "hab.", "cubículos", "dormitorios",
-  "garaje", "lavandería", "cocina", "sala", "comedor"]
+    "Mts.", "Mts", "mt2", "m²", "mts", "mts2", "Mts. ",
+    "Lps", "Lps.", "L.", "$", "Lps. ",
+    "vr2", "vrs", "Vrs", "Vr²", "Vrs²",
+    "Res.", "res.", "area", "área",
+    "baños", "baño", "habitaciones", "hab.", "cubículos", "dormitorios",
+    "garaje", "lavandería", "cocina", "sala", "comedor"
+  ],
 
+  "agencies": {
+    "SERPECAL": {
+      "neighborhood_rule": {
+        "strategy_order": ["prefix_token", "delimiter", "fallback"],
+        "delimiter": ",",
+        "prefix_tokens": ["col.", "res.", "barrio", "urb.", "blvd.", "anillo periferico"],
+        "max_token_span": 40
+      }
+    },
+    "DEFAULT": {
+      "neighborhood_rule": {
+        "strategy_order": ["prefix_token", "fallback"],
+        "prefix_tokens": ["col.", "res.", "barrio", "urb.", "blvd."]
+      }
+    }
+  },
+
+  "neighborhood_aliases": {
+    "COL. PALMIRA": ["PALMIRA", "COL PALMIRA", "COLONIA PALMIRA"],
+    "COL. LOS ANGELES": ["LOS ANGELES", "COL LOS ANGELES"],
+    "RES. MONSEÑOR FIALLOS": ["MONSEÑOR FIALLOS"]
+  },
+
+  "section_headers": [
+    { "pattern": "ALQUILER DE APARTAMENTOS", "transaction": "Rent", "type": "Apartment", "category": "ALQUILER DE APARTAMENTOS" },
+    { "pattern": "ALQUILER DE CASAS",        "transaction": "Rent", "type": "House",     "category": "ALQUILER DE CASAS" },
+    { "pattern": "VENTA DE APARTAMENTOS",    "transaction": "Sale", "type": "Apartment", "category": "VENTA DE APARTAMENTOS" },
+    { "pattern": "VENTA DE CASAS",           "transaction": "Sale", "type": "House",     "category": "VENTA DE CASAS" },
+    { "pattern": "VENTA DE TERRENOS",        "transaction": "Sale", "type": "Land",      "category": "VENTA DE TERRENOS" }
+  ]
 }

@@ -238,41 +238,16 @@ def extract_bathrooms(text: str, config: dict | None = None) -> Optional[float]:
 
     # 1) Slash shorthand beds/baths (3/2 or 3-2)
     # Slash shorthand beds/baths (3/2 or 3-2)
-    # Slash shorthand beds/baths (3/2 or 3-2)
-    # Slash shorthand beds/baths (3/2 or 3-2)
     if bool(cfg.get("allow_slash_bed_bath", True)):
-        m = re.search(r"\b(\d+(?:[.,]\d+)?)\s*[/\-]\s*(\d+(?:[.,]\d+)?)\b", text)
-        if m:
-        # ---- anti-price guards (tiny, context-only) ----
-            aliases = list((cfg or {}).get("currency_aliases", {}).keys())
-            if aliases:
-                # any alias anywhere before the slash => very likely a price range
-                alias_rx = re.compile("|".join(re.escape(a) for a in sorted(aliases, key=len, reverse=True)), re.I)
-                if alias_rx.search(text[:m.start()]):          # currency before match
-                    m = None
-                    if m:
-                    # if bathrooms token is followed by ',' or '.' => it's a thousands continuation
-                        next_char = text[m.end(2):m.end(2)+1]
-                        if next_char in {",", "."}:
-                            m = None
-        if m:
-            # if the immediate tail looks like thousands ('000' soon after), drop it
-            tail = text[m.end(2):m.end(2)+6]
-            raw2 = text[m.start(2):m.end(2)]
-            if ("000" in tail) and ("," in raw2 or "." in raw2):
-                m = None
-        # -----------------------------------------------
-
-        if m:
-            v = _to_float(m.group(2))
-            if v is not None:
-                if v > 10:                 # unrealistic bathrooms
-                    v = None
+            m = re.search(r"\b(\d+(?:[.,]\d+)?)\s*[/\-]\s*(\d+(?:[.,]\d+)?)\b", text)
+            if m:
+                v = _to_float(m.group(2))
                 if v is not None:
-                    baths = v  # don't return yet; half-bath may add 0.5 later
-
-
-                       
+            # safeguard: ignore unrealistic bathroom counts (likely price range)
+                    if v > 10:  
+                        v = None
+                    if v is not None:
+                        baths = v  # don't return yet; half-bath may add 0.5 later
 
 
     # Helper to build config keyword alternation
@@ -362,6 +337,8 @@ def extract_bathrooms(text: str, config: dict | None = None) -> Optional[float]:
     ])
     if half_present and not half_already_accounted:
         baths = (baths if baths is not None else 0.0) + 0.5
+   
+
 
     return baths
 

@@ -1,168 +1,227 @@
-# modules/agency_preprocess.py
+# agency_preprocess.py — two-phase preprocessing (split → join/sanitize)
+# Public API preserved. New: preprocess_split() and preprocess_join().
+from __future__ import annotations
 import re
-import unicodedata
+from typing import Iterable, List, Dict, Optional
 
-# --- OCR sanitation ---
-def ocr_sanitize(text: str) -> str:
-    if not text:
-        return ""
+# --------------------------------------------------------------------------------------
+# Module config (overridden by configure_preprocess)
+_CFG: Dict[str, object] = {
+    "header_marker": "#",            # lines starting with this are section headers
+    "listing_marker": "*",           # "*", "-", "NUMBERED", "UPPERCASE"
+    "auto_masquerade_numdot": False,  # handled by scripts (prefile), kept for reference
+    "sanitize": False,                # phase-2 only
+    "glue_price_tails": True,         # phase-2: glue a price-only next line
+    "glue_area_tails": False,         # optional phase-2 rule (rare)
+    "start_exceptions": [],           # strings that must NOT start a listing
+}
 
-    s = str(text)
-
-# Unicode normalize (fixes many accent/spacing artifacts)
-    s = unicodedata.normalize("NFKC", s)
-
-# Common OCR garbage & mis-encoded sequences
-    FIXES = [
-# Currency formatting
-    (r'\$\.', '$ '),
-    (r'(Lps?|L)\.(\d)', r'\1. \2'),
-    (r'US\$(\d)', r'US$ \1'),
-
-# Smart quotes and bullets
-    ('\u2018', "'"), ('\u2019', "'"),
-    ('\u201C', '"'), ('\u201D', '"'),
-    ('\u2022', '*'),
-    ('\u00AD', ''),
-
-# Common OCR misreads in Spanish
-    ('bafios', 'baños'),
-    ('banos', 'baños'),
-    ('baf̃os', 'baños'),
-    ('bano', 'baño'),
-    ('anos', 'años'),
-    ('jard\\u221an', 'jardín'),
-    ('jard\xbf\xaan', 'jardín'),
-
-    ('Monse\\xF1or', 'Monseñor'),
-    ('Monsenor', 'Monseñor'),
-    ('An\\xEDllo', 'Anillo'),
-
-# Abbreviations normalization
-    ('Residencial', 'Res.'),
-    ('Colonia', 'Col.'),
-    ('Col ', 'Col. '),
-    ('Urb ', 'Urb. '),
-
-# Eugenia-specific corrections
-    ('√Å', 'Á'),
-    ('√°', 'á'),
-    ('√±', 'ñ'),
-    ('√É', 'É'),
-    ('√©', 'é'),
-    ('√®', 'í'),
-    ('√≥', 'ó'),
-    ('√∫', 'ú'),
-    ('√Ú' ,'Ü')
+__all__ = [
+    "configure_preprocess",
+    "preprocess_split",
+    "preprocess_join",
+    "preprocess_listings",  # compatibility wrapper (phase1+phase2)
 ]
 
-    for a, b in FIXES:
-        s = re.sub(a, b, s, flags=re.IGNORECASE) if len(a) > 1 and not a.startswith(r'\\b') else s.replace(a, b)
+# --------------------------------------------------------------------------------------
+# Helpers
+_UP_WORD = re.compile(r"[A-ZÁÉÍÓÚÑ]", re.UNICODE)
+_HAS_LOWER = re.compile(r"[a-záéíóúñ]", re.UNICODE)
+_NUM_START = re.compile(r"^\s*\d{1,3}[\.)]?\s+")
 
-# Normalize area units
-    s = re.sub(r'\b(mts?2|mt2|m2)\b', 'm²', s, flags=re.IGNORECASE)
-    s = re.sub(r'\b(vr2|vrs2|v2)\b', 'vrs²', s, flags=re.IGNORECASE)
-
-# Ensure a space after currency markers
-    s = re.sub(r'(\$)(\d)', r'\1 \2', s)
-    s = re.sub(r'(Lps?\.?|US\$)(\s*)(\d)', r'\1 \3', s, flags=re.IGNORECASE)
-
-# Fix hyphenated line breaks
-    s = re.sub(r'-\s*\n\s*', '', s)
-
-# Final cleanup
-    s = re.sub(r'\s+', ' ', s).strip()
-
-    return s
-
-# --- Your existing basic normalizer; now calls ocr_sanitize first ---
-def _basic_normalize(s: str) -> str:
-    s = ocr_sanitize(s)
-
-    # remove leading bullets/markers
-    s = re.sub(r'^[\*\>]+\s*', '', s)
-
-    # Unicode NFC (after edits)
-    s = unicodedata.normalize("NFC", s)
-
-    # Standardize tokens that help extractors
-    s = re.sub(r'(Lps\.?|L\.|\$)(\d)', r'\1 \2', s, flags=re.IGNORECASE)  # backup space enforcement
-    s = re.sub(r'\bcolonia\b', 'col.', s, flags=re.IGNORECASE)
-    s = re.sub(r'\bcol\b', 'col.', s, flags=re.IGNORECASE)
-    s = re.sub(r'\bresidencial\b', 'res.', s, flags=re.IGNORECASE)
-
-    return s.strip()
-
-def preprocess_generic(text: str) -> str:
-    return _basic_normalize(text).lower()
-
-def preprocess_serpecal(text: str) -> str:
-    s = _basic_normalize(text)
-    # SERPECAL quirks: Vr²/Vrs2 capitalization
-    s = s.replace('Vr²','vrs²').replace('Vr2','vrs²').replace('Vrs2','vrs²').replace('Vrs','vrs')
-    return s.lower()
-def preprocess_eugenia(text: str) -> str:
-    s = _basic_normalize(text)
-    # eugenia quirks: Vr²/Vrs2 capitalization
-    s = s.replace('Vr²','vrs²').replace('Vr2','vrs²').replace('Vrs2','vrs²').replace('Vrs','vrs')
-    return s.lower()
-
-def preprocess_perpi(text: str) -> str:
-    return _basic_normalize(text).lower()
-
-# def preprocess(text: str, agency: str) -> str:
-#     ag = (agency or "").strip().upper()
-#     if ag == "SERPECAL":
-#         return preprocess_serpecal(text)
-#     if ag == "PERPI":
-#         return preprocess_perpi(text)
-#     return preprocess_generic(text)
-
-MULTI_PRICE = re.compile(
-    r'(\$\s?\d[\d.,]*)(?:\s*(?:/|y|e|,)\s*)(\$\s?\d[\d.,]*)',
-    re.IGNORECASE
+_PRICE_ONLY = re.compile(
+    r"^(?:US\$|\$|LPS?\.?|L\.|USD|HNL)\s*"  # currency
+    r"\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?$",  # number
+    re.IGNORECASE,
 )
+_AREA_TAIL = re.compile(r"(m2|m²|mt2|mts2|mts|vrs2|vrs²|vrs|vr2|vr)\s*$", re.IGNORECASE)
 
-def detect_multi_offer(text: str) -> dict:
-    """
-    Non-invasive detector: finds multiple prices and/or bedrooms in one line.
-    Does NOT split; returns metadata you can store in parsed row.
-    """
-    prices = PRICES_ANY.findall(text)              # ['$ 450', '$ 500']
-    beds   = [int(b) for b in BEDS_ANY.findall(text)]  # [2, 3]
-    return {
-        "is_multi": (len(prices) >= 2) or (len(beds) >= 2) or bool(MULTI_PRICE.search(text)),
-        "prices_found": [p.strip() for p in prices],
-        "bedrooms_found": beds
-    }
 
-#####
+def configure_preprocess(config: Dict[str, object]) -> None:
+    """Shallow-merge agency config into module defaults."""
+    if not isinstance(config, dict):
+        return
+    for k in list(_CFG.keys()):
+        if k in config:
+            _CFG[k] = config[k]
+
+
+# --------------------------------------------------------------------------------------
+# Phase 1: split to blocks
+# We return a list of blocks: {"kind":"header","text":...} or {"kind":"listing","lines":[...]}
+
+Block = Dict[str, object]
+
+
+def _is_header(ln: str) -> bool:
+    return ln.lstrip().startswith(str(_CFG.get("header_marker", "#")))
+
+
+def _is_uppercase_title(ln: str) -> bool:
+    t = (ln or "").strip()
+    if not t:
+        return False
+    # must contain at least one uppercase letter and no lowercase letters in the leading chunk
+    has_up = bool(_UP_WORD.search(t))
+    has_low = bool(_HAS_LOWER.search(t.split(",")[0].split(":")[0]))
+    return has_up and not has_low
+
 
 # modules/agency_preprocess.py
+import re
 
-def normalize_ocr_text(s: str) -> str:
-    if not s:
-        return ""
-    s = unicodedata.normalize("NFKC", s)
-    s = re.sub(r'\$\.(\d)', r'$\1', s)           # "$.700,000" -> "$700,000"
-    s = re.sub(r'(Lps?|L)\.(\d)', r'\1. \2', s)  # "Lps.3000" -> "Lps. 3000"
-    s = re.sub(r'\s+', ' ', s).strip()
-    return s
-
-
-def preprocess(text: str, agency: str) -> str:
+def preprocess_split(raw_lines, *, mode=None, marker=None):
     """
-    Generic OCR cleanup; you can branch on agency inside if needed.
-    Keep this as the single function `record_parser` calls.
+    Returns a list of blocks:
+      {"kind": "header",  "text": "# ALQUILER DE CASAS"}
+      {"kind": "listing", "lines": ["FLORENCIA NORTE, ...", "precio ..."], "marker": "*"}
     """
-    s = normalize_ocr_text(text)
-    ag = (agency or "").upper()
-    if ag == "SERPECAL":
-        # Any extra SERPECAL-specific tweaks live here
-        s = s.replace("Vr2", "vrs²").replace("Vrs2", "vrs²")
-    return s
+    out = []
+    buf = []            # current listing content (marker removed)
+    cur_marker = None   # "*" or "-" etc.
 
-# --- Back‑compat shim (so old imports don't break) ---
-def serpecal_preprocess(text: str) -> str:
-    """Old callers used this name; delegate to the generic one."""
-    return preprocess(text, "SERPECAL")
+    def flush_listing():
+        nonlocal buf, cur_marker
+        if buf:
+            out.append({"kind": "listing", "lines": buf, "marker": cur_marker or "*"})
+            buf, cur_marker = [], None
+
+    header_rx = re.compile(r"^\s*#\s*")
+
+    if not mode:
+        mode = "LITERAL"
+    mode = str(mode).upper()
+
+    # NUMBERED → after masquerade we read literal '*' anyway
+    if mode == "NUMBERED":
+        return preprocess_split(raw_lines, mode="LITERAL", marker="*")
+
+    if mode == "UPPERCASE":
+        # keep your UPPERCASE logic; the important part is the same state discipline:
+        # - start a new listing only when the uppercase predicate is true
+        # - append lines once, and flush on next start/header
+        ...
+        return out
+
+    # LITERAL mode (explicit markers like "*", "-")
+    lit = str(marker or "*").strip()
+    lit_rx = re.compile(rf"^\s*{re.escape(lit)}\s+")
+    for ln in raw_lines:
+        # 1) headers: flush current and emit header
+        if header_rx.match(ln):
+            flush_listing()
+            out.append({"kind": "header", "text": ln.strip()})
+            continue
+
+        # 2) listing start: line begins with the literal marker
+        if lit_rx.match(ln):
+            flush_listing()
+            stripped = lit_rx.sub("", ln, count=1).rstrip("\n")
+            cur_marker = lit
+            buf = [stripped]              # ← add ONCE
+            continue
+
+        # 3) continuation: only if we are inside a listing
+        if buf:
+            buf.append(ln.rstrip("\n"))
+        else:
+            # outside any listing; ignore or buffer per your policy
+            # (most newspaper OCR has no prelude; ignoring is safest)
+            pass
+
+    flush_listing()
+    return out
+
+
+def _starts_with_any(ln: str, items: object) -> bool:
+    if not items:
+        return False
+    s = ln.strip().lower()
+    for it in items:  # type: ignore[assignment]
+        if s.startswith(str(it).lower()):
+            return True
+    return False
+
+
+# --------------------------------------------------------------------------------------
+# Phase 2: join/sanitize blocks into one-line listings
+
+try:
+    from modules.ocr_sanitize import ocr_sanitize  # if you have a central sanitizer
+except Exception:  # fallback minimal
+    def ocr_sanitize(x: str) -> str:  # type: ignore[override]
+        return x
+
+
+def preprocess_join(blocks: List[Block], *, sanitize: Optional[bool] = None,
+                     glue_price_tails: Optional[bool] = None,
+                     glue_area_tails: Optional[bool] = None,
+                     keep_marker: Optional[bool] = None) -> List[str]:
+    """
+    Phase-2: join/sanitize blocks into one-line rows.
+    If keep_marker/emit_marker is True, re-prefix listing rows with their original marker
+    so reviewers see the same delimiter ('*', '-', etc.). Headers are passed through.
+    """
+    do_san = bool(_CFG.get("sanitize") if sanitize is None else sanitize)
+    glue_p = bool(_CFG.get("glue_price_tails") if glue_price_tails is None else glue_price_tails)
+    glue_a = bool(_CFG.get("glue_area_tails") if glue_area_tails is None else glue_area_tails)
+    keep   = bool(_CFG.get("emit_marker") if keep_marker is None else keep_marker)
+
+    out: List[str] = []
+
+    def join_lines(lines: List[str]) -> str:
+        if not lines:
+            return ""
+        buf: List[str] = []
+        for i, ln in enumerate(lines):
+            if i > 0 and glue_p and _PRICE_ONLY.match(ln.strip()) and buf:
+                # price-only line glued to previous
+                buf[-1] = f"{buf[-1]} {ln.strip()}"
+                continue
+            if i > 0 and glue_a and _AREA_TAIL.search(buf[-1]) and ln.strip():
+                buf[-1] = f"{buf[-1]} {ln.strip()}"
+                continue
+            buf.append(ln.strip())
+        j = " ".join(p for p in buf if p)
+        return ocr_sanitize(j) if do_san else j
+
+    for b in blocks:
+        if b.get("kind") == "header":
+            out.append(str(b.get("text", "")))
+            continue
+
+        joined = join_lines(list(map(str, b.get("lines", []))))
+
+        # modules/agency_preprocess.py → preprocess_join(...)
+        if keep:  # keep == emit_marker
+             m = str(b.get("marker") or "*").strip()
+             if m and not re.match(r"^\s*([*\-•])\s+\S", joined):
+                joined = f"{m} {joined}".lstrip()
+        
+        out.append(joined)
+
+    return out
+
+
+
+# --------------------------------------------------------------------------------------
+# Compatibility wrapper: phase1 + phase2 in one call (what scripts already use)
+
+def preprocess_listings(raw_lines: Iterable[str], marker: Optional[str] = None,
+                        agency: Optional[str] = None) -> List[str]:
+    # map marker into a phase-1 mode
+    m = str(marker or _CFG.get("listing_marker", "*")).upper()
+    mode: Optional[str]
+    lit: Optional[str] = None
+    if m in {"NUMBERED", "#NUM", "#NUMDOT"}:
+        mode = "NUMBERED"
+    elif m == "UPPERCASE":
+        mode = "UPPERCASE"
+    else:
+        mode = "LITERAL"; lit = marker or str(_CFG.get("listing_marker", "*"))
+
+    blocks = preprocess_split(raw_lines, mode=mode, marker=lit)
+    rows = preprocess_join(blocks)
+    return rows
+
+

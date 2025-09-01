@@ -18,12 +18,16 @@ from scripts.helpers import (
     count_star_bullets,
     split_raw_and_parse_line,
 )
+
+# imports (near the top)
+from modules.phase1_listing_marker_normalize import run_phase1_normalize_listing_marker
+
 #####---------------------------------------------------
 
 
 
 
-# in scripts/parse_serpecal_listings_v1.py
+# in scripts/parse_eugenia_listings_v1.py
 
 
 def make_prefile(input_path, agency, tmp_root="output"):
@@ -50,6 +54,17 @@ def main(file, config_path, output_dir):
 
      #======
 
+    # ----- Phase 1: normalize leading listing markers (only if configured)
+    # Phase-1 only if there's anything to change
+    if cfg.get("listing_marker_tochange"):
+        file = run_phase1_normalize_listing_marker(
+            raw_file=file,
+            cfg=cfg,
+            agency=agency,     # required in production
+            # year=None,       # optional; inferred from path if omitted
+            test_mode=False,   # ensure we don't silently fall back
+        )
+
     if cfg.get("listing_marker") == "NUMBERED" and cfg.get("auto_masquerade_numdot"):
         file = make_prefile_numbered(file, agency)
 
@@ -59,6 +74,8 @@ def main(file, config_path, output_dir):
     listings = preprocess_listings(load_lines(file),
                 marker=cfg.get("listing_marker"),
                 agency=agency)
+    
+    #print ("DEBUG LISTITNG MARKER==>",file)
 
     #=========== Detect tyoe and transaction
 
@@ -174,7 +191,7 @@ def main(file, config_path, output_dir):
      
  #================ FOR END========
  # Ensure agency comes from args
-    agency="serpecal"
+    agency="eugenia"
 
     # Derive date from prefile if not already set
     #if "date" not in locals() or not date:
@@ -186,18 +203,18 @@ def main(file, config_path, output_dir):
     year = date[:4] if date and date != "unknown" else "unknown"
 
     # Build directory: output/Agency/Year
-    outdir = os.path.join(args.output_dir, "Serpecal", year)
+    outdir = os.path.join(args.output_dir, "eugenia", year)
     print("outdoe==>",outdir)
 #=========
     if rows:
         os.makedirs(args.output_dir, exist_ok=True)
-        dateprint='20151028'
+        dateprint=date
 
-        outpath = outdir+"//"+agency+"_"+dateprint+".csv"
+        outpath = outdir+"/"+agency+"_"+dateprint+".csv"
         with open(outpath, "w", newline="", encoding="utf-8-sig") as f:
             print("[SANITY] type(rows):", type(rows), "len(rows):", len(rows))
             if rows:
-                print("[SANITY] first row keys:", list(rows[0].keys()))
+                #print("[SANITY] first row keys:", list(rows[0].keys()))
                 print("[SANITY] sample last row title:", rows[-1].get("title"))
 
             writer = csv.DictWriter(f, fieldnames=output_fields)
@@ -223,7 +240,7 @@ if __name__ == "__main__":
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
-    print("[entry] starting parse_serpecal_listings_v1.py")
+    print("[entry] starting parse_eugenia_listings_v2.py")
     main(args.file, args.config, args.output_dir)
 
   

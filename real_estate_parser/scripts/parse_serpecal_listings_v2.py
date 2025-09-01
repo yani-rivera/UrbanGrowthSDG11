@@ -193,7 +193,7 @@ def main(file, config_path, output_dir):
         os.makedirs(args.output_dir, exist_ok=True)
         dateprint='20151028'
 
-        outpath = outdir+"//"+agency+"_"+dateprint+".csv"
+        outpath = outdir+"/"+agency+"_"+dateprint+".csv"
         with open(outpath, "w", newline="", encoding="utf-8-sig") as f:
             print("[SANITY] type(rows):", type(rows), "len(rows):", len(rows))
             if rows:

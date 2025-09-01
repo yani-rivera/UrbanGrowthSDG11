@@ -23,7 +23,7 @@ from scripts.helpers import (
 
 
 
-# in scripts/parse_serpecal_listings_v1.py
+# in scripts/parse_casabianca_listings_v1.py
 
 
 def make_prefile(input_path, agency, tmp_root="output"):
@@ -174,7 +174,7 @@ def main(file, config_path, output_dir):
      
  #================ FOR END========
  # Ensure agency comes from args
-    agency="serpecal"
+    agency="casabianca"
 
     # Derive date from prefile if not already set
     #if "date" not in locals() or not date:
@@ -186,18 +186,18 @@ def main(file, config_path, output_dir):
     year = date[:4] if date and date != "unknown" else "unknown"
 
     # Build directory: output/Agency/Year
-    outdir = os.path.join(args.output_dir, "Serpecal", year)
-    print("outdoe==>",outdir)
+    outdir = os.path.join(args.output_dir, "Casabianca", year)
+  
 #=========
     if rows:
         os.makedirs(args.output_dir, exist_ok=True)
-        dateprint='20151028'
+        dateprint=date
 
-        outpath = outdir+"//"+agency+"_"+dateprint+".csv"
+        outpath = outdir+"/"+agency+"_"+dateprint+".csv"
         with open(outpath, "w", newline="", encoding="utf-8-sig") as f:
             print("[SANITY] type(rows):", type(rows), "len(rows):", len(rows))
             if rows:
-                print("[SANITY] first row keys:", list(rows[0].keys()))
+                #print("[SANITY] first row keys:", list(rows[0].keys()))
                 print("[SANITY] sample last row title:", rows[-1].get("title"))
 
             writer = csv.DictWriter(f, fieldnames=output_fields)
@@ -211,7 +211,6 @@ def main(file, config_path, output_dir):
         print(f"✅ Exported {len(rows)} listings to {outpath}")
     else:
         print(f"⚠️ No listings parsed. Check header detection and marker in {args.file}.")
-   
        
         
 if __name__ == "__main__":
@@ -223,7 +222,7 @@ if __name__ == "__main__":
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
-    print("[entry] starting parse_serpecal_listings_v1.py")
+    print("[entry] starting parse_casabianca_listings_v1.py")
     main(args.file, args.config, args.output_dir)
 
   
