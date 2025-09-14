@@ -16,7 +16,7 @@ from scripts.helpers import (
     make_prefile_numbered,
     count_numbered_bullets,
     count_star_bullets,
-    split_raw_and_parse_line,
+    split_raw_and_parse_line,write_prefile
 )
 #####---------------------------------------------------
 
@@ -26,17 +26,7 @@ from scripts.helpers import (
 # in scripts/parse_serpecal_listings_v1.py
 
 
-def make_prefile(input_path, agency, tmp_root="output"):
-    """Replace inline `NN.` with '*' when masquerade is requested."""
-    base = os.path.basename(input_path)
-    pre_dir = os.path.join(tmp_root, agency, "pre", agency.lower())
-    os.makedirs(pre_dir, exist_ok=True)
-    pre_path = os.path.join(pre_dir, f"pre_{base}")
-    with open(input_path, "r", encoding="utf-8", errors="ignore") as fi, \
-         open(pre_path, "w", encoding="utf-8") as fo:
-        for ln in fi:
-            fo.write(re.sub(r"(?<!\d)(\d{1,3})\.(?=\s*\S)", "* ", ln))
-    return pre_path
+
 
 def load_lines(path):
     with open(path, "r", encoding="utf-8", errors="ignore") as fh:
@@ -59,6 +49,16 @@ def main(file, config_path, output_dir):
     listings = preprocess_listings(load_lines(file),
                 marker=cfg.get("listing_marker"),
                 agency=agency)
+    
+    ### Keep a copy of preprocessed lines for notes
+
+    out_path = write_prefile(
+    registry_path="config/agencies_registry.json",
+    agency="Serpecal",
+    date_str=date,   # or "2025-09-04"
+    rows=listings
+        )
+    print("prefile saved at:", out_path)
 
     #=========== Detect tyoe and transaction
 
@@ -74,6 +74,11 @@ def main(file, config_path, output_dir):
                 continue
 
         raw_line, text_for_parse = split_raw_and_parse_line(ln)
+
+ #######
+
+    
+
 #=================
 ###### START PHASE 3==PARSING
 #==================
@@ -174,7 +179,7 @@ def main(file, config_path, output_dir):
      
  #================ FOR END========
  # Ensure agency comes from args
-    agency="serpecal"
+    agency="Serpecal"
 
     # Derive date from prefile if not already set
     #if "date" not in locals() or not date:
@@ -186,12 +191,14 @@ def main(file, config_path, output_dir):
     year = date[:4] if date and date != "unknown" else "unknown"
 
     # Build directory: output/Agency/Year
-    outdir = os.path.join(args.output_dir, "Serpecal", year)
+    outdir = os.path.join(args.output_dir, "serpecal", year)
     print("outdoe==>",outdir)
 #=========
     if rows:
         os.makedirs(args.output_dir, exist_ok=True)
-        dateprint='20151028'
+
+        
+        dateprint=date
 
         outpath = outdir+"/"+agency+"_"+dateprint+".csv"
         with open(outpath, "w", newline="", encoding="utf-8-sig") as f:

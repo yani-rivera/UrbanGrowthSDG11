@@ -1,0 +1,60 @@
+{
+  "uppercase": true,
+  "strip_accents": true,
+  "max_len_default": 20,
+  "max_len_cap": 30,
+  "min_len": 3,
+
+  "prefix_type_map": {
+    "COL.": "COLONIA", "COL": "COLONIA", "COLONIA": "COLONIA",
+    "BARRIO": "BARRIO", "BO.": "BARRIO", "BO": "BARRIO",
+    "URB.": "URBANIZACION", "URBANIZACION": "URBANIZACION", "URBANIZACIÓN": "URBANIZACION",
+    "ALDEA": "ALDEA",
+    "AVENIDA": "AVENIDA", "AV.": "AVENIDA",
+    "RES.": "RESIDENCIAL", "RESID.": "RESIDENCIAL", "RESIDENCIAL": "RESIDENCIAL"
+  },
+
+  "type_to_prefix": {
+    "COLONIA": "COL.",
+    "BARRIO": "BARRIO",
+    "URBANIZACION": "URB.",
+    "ALDEA": "ALDEA",
+    "AVENIDA": "AVENIDA",
+    "RESIDENCIAL": "RES."
+  },
+
+  "replace_map": {
+    "B° ": "BARRIO ",
+    "ALTOS MIRAFLORES": "ALTOS DE MIRAFLORES",
+    "ALTOS MIRAMONTES": "ALTOS DE MIRAMONTES",
+    "ALTOS TONCONTIN": "ALTOS DE TONCONTIN",
+    "LOMAS GUIJARRO": "LOMAS DEL GUIJARRO",
+    "VALLE ANGELES": "VALLE DE ANGELES"
+  },
+
+  "strip_patterns": {
+    "leading_price": "^(?:\\$|US\\$|USD|HNL|LPS?\\.?|L\\.)\\s*[\\d.,/\\- ]+",
+    "trailing_price": "[, ]*(?:\\$|US\\$|USD|HNL|LPS?\\.?|L\\.)?\\s*[\\d.,/\\- ]+$",
+    "trailing_generic_paren": "\\s*\\((?:NUEVA|AREA SOCIAL|ÁREA SOCIAL|SEG|24H(?:RAS)?|JARD[IÍ]N|GARAJE|INCLUID[OA])\\)\\s*$"
+  },
+
+  "match_thresholds": {
+    "prefix_contains": 0.90,
+    "token_jaccard": 0.70
+  },
+
+  "aliases": {
+    "RES. CENTROAMÉRICA": ["RES. CENTROAMERICA"],
+    "VALLE DE ÁNGELES": ["VALLE DE ANGELES"],
+    "BARRIO MORAZÁN": ["BARRIO MORAZAN", "BO MORAZAN"],
+    "ALTOS DE MIRAMONTES": ["ALTOS MIRAMONTES"],
+    "LOMAS DEL GUIJARRO": ["LOMAS GUIJARRO"],
+    "RES. TRAPICHE": ["TRAPICHE"],
+    "EL CHIMBO": ["CHIMBO"],
+    "COL. PALMIRA": ["PALMIRA"],
+    "ALTOS DE TONCONTÍN": ["ALTOS DE TONCONTIN"]
+  },
+
+  "building_tokens": ["torre", "edificio", "tower", "condominio"],
+  "text_fields": ["title", "raw", "notes"]
+}

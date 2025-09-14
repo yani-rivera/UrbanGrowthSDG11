@@ -1,6 +1,10 @@
-{
-  "listing_marker": "*",
+{ "agency": "Serpecal",
+ "nemonic":"SPCL",
+  "listing_marker": "UPPERCASE",
   "preprocessing_needed": true,
+  "sanitize": false,
+  "glue_price_tails": true,
+  "glue_area_tails": true,
 
   "currency_aliases": {
     "$": "USD",
@@ -19,6 +23,20 @@
   "neighborhood_rule": {
     "strategy": "first_comma",      
     "max_token_span": 20
+  },
+
+    "neighborhood_flow": {
+    "flow_type": "simple"},
+
+  "agencies": {
+    "SERPECAL": {
+      "neighborhood_rule": {
+        "strategy_order": ["delimiter"],
+        "prefix_tokens": ["col.", "res.", "barrio", "urb.", "blvd.", "anillo periferico"],
+        "max_token_span": 30
+      }
+    }
+    
   },
 
   "transaction_keywords": {
@@ -56,22 +74,7 @@
     "garaje", "lavandería", "cocina", "sala", "comedor"
   ],
 
-  "agencies": {
-    "SERPECAL": {
-      "neighborhood_rule": {
-        "strategy_order": ["prefix_token", "delimiter", "fallback"],
-        "delimiter": ",",
-        "prefix_tokens": ["col.", "res.", "barrio", "urb.", "blvd.", "anillo periferico"],
-        "max_token_span": 40
-      }
-    },
-    "DEFAULT": {
-      "neighborhood_rule": {
-        "strategy_order": ["prefix_token", "fallback"],
-        "prefix_tokens": ["col.", "res.", "barrio", "urb.", "blvd."]
-      }
-    }
-  },
+
 
   "neighborhood_aliases": {
     "COL. PALMIRA": ["PALMIRA", "COL PALMIRA", "COLONIA PALMIRA"],

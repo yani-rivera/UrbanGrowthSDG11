@@ -26,17 +26,7 @@ from scripts.helpers import (
 # in scripts/parse_makos_listings_v1.py
 
 
-def make_prefile(input_path, agency, tmp_root="output"):
-    """Replace inline `NN.` with '*' when masquerade is requested."""
-    base = os.path.basename(input_path)
-    pre_dir = os.path.join(tmp_root, agency, "pre", agency.lower())
-    os.makedirs(pre_dir, exist_ok=True)
-    pre_path = os.path.join(pre_dir, f"pre_{base}")
-    with open(input_path, "r", encoding="utf-8", errors="ignore") as fi, \
-         open(pre_path, "w", encoding="utf-8") as fo:
-        for ln in fi:
-            fo.write(re.sub(r"(?<!\d)(\d{1,3})\.(?=\s*\S)", "* ", ln))
-    return pre_path
+
 
 def load_lines(path):
     with open(path, "r", encoding="utf-8", errors="ignore") as fh:
@@ -47,11 +37,17 @@ def main(file, config_path, output_dir):
     cfg = json.load(open(config_path, encoding="utf-8"))
     agency = infer_agency(config_path)
     date   = infer_date(file)
+    year = date[:4]
 
      #======
 
     if cfg.get("listing_marker") == "NUMBERED" and cfg.get("auto_masquerade_numdot"):
-        file = make_prefile_numbered(file, agency)
+            file = make_prefile_numbered(
+            input_path=file,
+            agency=agency, 
+            year=year      # optional; inferred from path if omitted
+              # ensure we don't silently fall back
+             )
 
     # =====LOAD FILE AND PREPROCESS
 

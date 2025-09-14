@@ -16,6 +16,47 @@ from typing import Dict, List, Optional, Tuple
 # Helpers
 # -----------------------------
 
+# --- ES/locale autofix helpers ---
+_ES_THOUSANDS_ONLY = re.compile(r"\b\d{1,3}(?:\.\d{3})+\b")          # 675.000 | 1.200.000
+_ES_THOUSANDS_DEC  = re.compile(r"\b\d{1,3}(?:\.\d{3})+,\d{2}\b")    # 1.200,50
+
+def _autofix_price_locale(text: str, amount: Optional[float], locale: str = "auto") -> Optional[float]:
+    """
+    Return corrected amount or original if no action needed.
+    - 'auto'/'es': fix Spanish-style tokens found in `text`
+    - 'en'/'off' : no change
+    """
+    if amount is None or not text:
+        return amount
+
+    loc = (locale or "off").lower()
+    if loc in {"en", "off"}:
+        return amount
+
+    # Prefer explicit ES decimal: 1.200,50 -> 1200.50
+    m = _ES_THOUSANDS_DEC.search(text)
+    if m and loc in {"auto", "es"}:
+        try:
+            return float(m.group(0).replace(".", "").replace(",", "."))
+        except Exception:
+            pass
+
+    # Dotted thousands only: 675.000 -> current parser often reads 675000 (US)
+    m = _ES_THOUSANDS_ONLY.search(text)
+    if m and loc in {"auto", "es"}:
+        raw = m.group(0)
+        try:
+            us_read = float(raw.replace(".", ""))   # 675000.0
+            es_read = us_read / 1000.0              # 675.0
+            # Only override if current equals the US misread (prevents false positives)
+            if abs((amount or 0) - us_read) < 0.5:
+                return es_read
+        except Exception:
+            pass
+
+    return amount
+
+
 def _fix_leading_dot_after_currency(s: str, currency_prefixes: list[str]) -> str:
     """
     Turn '$.550.00' -> '$550.00', 'L. .750' -> 'L.750'.
@@ -173,20 +214,41 @@ def _to_float_num(raw: str, mag: Optional[str]) -> Optional[float]:
         return None
     s = raw.strip()
     s = _strip_nbsp(s)
-    # Decide thousand/decimal
+
+    # Mixed separators: both comma and dot present
     if "," in s and "." in s:
+        # Decide by last separator: if last is '.', assume US (comma thousands, dot decimal)
+        # else assume ES (dot thousands, comma decimal)
         if s.rfind(".") > s.rfind(","):
-            s = s.replace(",", "")
+            s = s.replace(",", "")                 # "1,200.50" -> "1200.50"
         else:
-            s = s.replace(".", "").replace(",", ".")
+            s = s.replace(".", "").replace(",", ".")  # "1.200,50" -> "1200.50"
+
+    # Only comma present
     elif "," in s:
-        parts = s.split(",")
-        if len(parts) == 2 and 1 <= len(parts[1]) <= 2:
-            s = s.replace(",", ".")
+        # If comma has 1–2 decimals, treat as decimal; else treat as thousands
+        if re.fullmatch(r"\d+,\d{1,2}", s):
+            s = s.replace(",", ".")                # "600,50" -> "600.50"
         else:
-            s = s.replace(",", "")
-    else:
-        s = s.replace(".", "")
+            s = s.replace(",", "")                 # "1,200,000" -> "1200000"
+
+    # Only dot present
+    elif "." in s:
+        # Decimal zeros case: "600.000" -> "600"
+        if re.fullmatch(r"\d+\.000", s):
+            s = s.split(".")[0]
+        # Pure decimal with 1–2 digits: keep decimal
+        elif re.fullmatch(r"\d+\.\d{1,2}", s):
+            pass                                   # keep as-is, e.g. "600.00"
+        # Thousand-grouping style: 1.200.000 / 675.000 / 60.000
+        elif re.fullmatch(r"\d{1,3}(?:\.\d{3})+", s):
+            s = s.replace(".", "")
+        else:
+            # Fallback: keep dot (rare cases like "123.4" already covered above)
+            pass
+
+    # Neither comma nor dot → digits only (already fine)
+
     try:
         val = float(s)
     except ValueError:
@@ -194,6 +256,7 @@ def _to_float_num(raw: str, mag: Optional[str]) -> Optional[float]:
         val = float(digits) if digits else None
     if val is None:
         return None
+
     if mag:
         m = mag.lower()
         if m == "k":
@@ -385,4 +448,10 @@ def extract_price(text: str, config: dict) -> Tuple[Optional[float], Optional[st
     )
     if result is None:
         return (None, None)
-    return result
+    amount, currency = result
+    locale_flag = (config or {}).get("price_autofix_locale", "auto")   # "off" | "auto" | "es" | "en"
+    amount = _autofix_price_locale(text, amount, locale=locale_flag)
+
+    return (_round_val(amount), currency)
+    
+  

@@ -16,27 +16,13 @@ from scripts.helpers import (
     make_prefile_numbered,
     count_numbered_bullets,
     count_star_bullets,
-    split_raw_and_parse_line,
+    split_raw_and_parse_line,make_prefile_star,write_prefile
 )
+
+
 #####---------------------------------------------------
 
-
-
-
 # in scripts/parse_vinsa_listings_v1.py
-
-
-def make_prefile(input_path, agency, tmp_root="output"):
-    """Replace inline `NN.` with '*' when masquerade is requested."""
-    base = os.path.basename(input_path)
-    pre_dir = os.path.join(tmp_root, agency, "pre", agency.lower())
-    os.makedirs(pre_dir, exist_ok=True)
-    pre_path = os.path.join(pre_dir, f"pre_{base}")
-    with open(input_path, "r", encoding="utf-8", errors="ignore") as fi, \
-         open(pre_path, "w", encoding="utf-8") as fo:
-        for ln in fi:
-            fo.write(re.sub(r"(?<!\d)(\d{1,3})\.(?=\s*\S)", "* ", ln))
-    return pre_path
 
 def load_lines(path):
     with open(path, "r", encoding="utf-8", errors="ignore") as fh:
@@ -47,8 +33,21 @@ def main(file, config_path, output_dir):
     cfg = json.load(open(config_path, encoding="utf-8"))
     agency = infer_agency(config_path)
     date   = infer_date(file)
+    year = date[:4]
 
      #======
+
+    # ----- Phase 1: normalize leading listing markers (only if configured)
+    # Phase-1 only if there's anything to change
+    if cfg.get("listing_marker_tochange"):
+        deli=cfg.get("listing_marker_tochange")
+        file = make_prefile_star(
+            input_path=file,
+            agency=agency, 
+            delimiter=deli,   # required in production
+            year=year      # optional; inferred from path if omitted
+              # ensure we don't silently fall back
+        )
 
     if cfg.get("listing_marker") == "NUMBERED" and cfg.get("auto_masquerade_numdot"):
         file = make_prefile_numbered(file, agency)
@@ -59,6 +58,18 @@ def main(file, config_path, output_dir):
     listings = preprocess_listings(load_lines(file),
                 marker=cfg.get("listing_marker"),
                 agency=agency)
+    
+    #============
+    
+    out_path = write_prefile(
+    registry_path="config/agencies_registry.json",
+    agency="vinsa",
+    date_str=date,   # or "2025-09-04"
+    rows=listings
+        )
+    print("prefile saved at:", out_path)
+
+    #print ("DEBUG LISTITNG MARKER==>",file)
 
     #=========== Detect tyoe and transaction
 
@@ -186,7 +197,7 @@ def main(file, config_path, output_dir):
     year = date[:4] if date and date != "unknown" else "unknown"
 
     # Build directory: output/Agency/Year
-    outdir = os.path.join(args.output_dir, "Vinsa", year)
+    outdir = os.path.join(args.output_dir, "VINSA", year)
     print("outdoe==>",outdir)
 #=========
     if rows:
@@ -223,7 +234,7 @@ if __name__ == "__main__":
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
-    print("[entry] starting parse_vinsa_listings_v1.py")
+    print("[entry] starting parse_VINSA_listings_v2.py")
     main(args.file, args.config, args.output_dir)
 
   

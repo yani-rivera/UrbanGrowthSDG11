@@ -1,5 +1,6 @@
 {
   "agency": "Eugenia",
+  "nemonic":"EUGE",
   "listing_marker": "*",
   "listing_marker_tochange": "-",
   "preprocessing_needed": true,
@@ -15,7 +16,7 @@
     "strategy": "before_colon", 
     "strategy_order": ["delimiter"],
     "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av."],    
-    "max_token_span": 20
+    "max_token_span": 30
   },
 
     "neighborhood_flow": {

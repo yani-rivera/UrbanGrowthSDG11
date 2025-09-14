@@ -1,8 +1,12 @@
 # agency_preprocess.py — two-phase preprocessing (split → join/sanitize)
 # Public API preserved. New: preprocess_split() and preprocess_join().
+
 from __future__ import annotations
 import re
+import sys,os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from typing import Iterable, List, Dict, Optional
+from modules.forcebullet import bulletize
 
 # --------------------------------------------------------------------------------------
 # Module config (overridden by configure_preprocess)
@@ -68,7 +72,7 @@ def _is_uppercase_title(ln: str) -> bool:
 
 
 # modules/agency_preprocess.py
-import re
+
 
 def preprocess_split(raw_lines, *, mode=None, marker=None):
     """
@@ -222,6 +226,7 @@ def preprocess_listings(raw_lines: Iterable[str], marker: Optional[str] = None,
 
     blocks = preprocess_split(raw_lines, mode=mode, marker=lit)
     rows = preprocess_join(blocks)
+    rows=bulletize(rows)
     return rows
 
 

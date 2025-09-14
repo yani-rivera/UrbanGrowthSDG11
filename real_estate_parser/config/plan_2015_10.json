@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "year": 2015,
+  "month": 10,
+  "date_token": "20151028",
+  "agencies_expected": [
+    "vinsa"
+  ],
+  "policy": {
+    "skip_if_missing": true,
+    "halt_on_error": false
+  }
+}

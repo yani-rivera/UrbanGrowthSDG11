@@ -1,16 +1,28 @@
-{
+{"agency": "VINSA",
+  "nemonic":"VINSA",
   "preprocessing_needed": true,
-  "delimiter": ":",
-  "listing_marker": "*",
+  "listing_marker": "CUE:COLON",
   "auto_masquerade_numdot": false,
-  "sanitize": false,
+  "sanitize": true,
   "glue_price_tails": true,
   "glue_area_tails": true,
   "preprocess": [2],
-  "emit_marker": false,
+  "emit_marker": false, 
+   "neighborhood_rule": {
+    "strategy": "before_colon", 
+    "strategy_order": ["delimiter"],
+    "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av."],    
+    "max_token_span": 20
+  },
+
+    "neighborhood_flow": {"flow_type": "simple"},
+  
 
   "currency_aliases": {
     "$": "USD",
+    "$.": "USD",
+    "$. ": "USD",
+    "$ ": "USD",
     "L": "HNL",
     "L.": "HNL",
     "Lps": "HNL",
@@ -33,22 +45,14 @@
     "COL. LOS ANGELES": ["LOS ANGELES", "COL LOS ANGELES"],
     "RES. MONSEÑOR FIALLOS": ["MONSEÑOR FIALLOS"]
   },
-  "neighborhood_rule": {
-    "strategy": "before_colon", 
-    "strategy_order": ["delimiter"],
-    "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av."],
-    "max_token_span": 3
-  },
-  "neighborhood_flow": {
-    "flow_type": "simple"},
 
-  "agencies": {
-    "VINSA": {
-      "neighborhood_rule": {
-        "max_token_span": 4
-      }
-    }
+    "area_aliases": {
+    "ac": ["m²", "m2", "mt2", "mts2", "mts²", "metros", "metros2", "metros²"],
+    "at": ["vrs²", "vrs2", "vr2", "vr²", "vrs", "vara", "varas", "v²", "vr"],
+    "mz": ["manzana", "manzanas", "mz"]
   },
+
+  
   "range_separators": ["/", "-", " a ", " hasta ", "–", "—"],
 
   "parsing_overrides": {

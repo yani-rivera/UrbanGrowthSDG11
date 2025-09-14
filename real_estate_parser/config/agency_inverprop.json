@@ -1,14 +1,16 @@
 {
   "agency": "Inverprop",
+  "nemonic":"INVP",
   "preprocessing_needed": true,
   "header_marker": "#",
-  "listing_marker": "*",      
+  "listing_marker": "*",
+  "listing_marker_tochange": "*",      
   "auto_masquerade_numdot": false,
   "sanitize": false,
   "glue_price_tails": true,
   "glue_area_tails": false,
   "preprocess": [2],
-  "emit_marker": false,
+  "emit_marker": true,
 
 
   "neighborhood_rule": {

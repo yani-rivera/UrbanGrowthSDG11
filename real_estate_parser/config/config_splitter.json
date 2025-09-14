@@ -1,0 +1,118 @@
+{
+  "bedroom_keywords": [
+    "beds",
+    "bed",
+    "hab",
+    "habitaciones",
+    "cuartos",
+    "dormitorios",
+    "dorms",
+    "recámaras",
+    "alcobas"
+  ],
+  "usd_aliases": [
+    "usd",
+    "us$",
+    "$",
+    "uss",
+    "udd",
+    "u$d"
+  ],
+  "hnl_aliases": [
+    "lps.",
+    "lps",
+    "lempiras",
+    "lempira"
+  ],
+  "neighborhood_prefixes": [
+    "res.",
+    "res",
+    "residencial",
+    "colonia",
+    "condominio",
+    "torre",
+    "edificio",
+    "villas",
+    "complejo"
+  ],
+  "listing_types": [
+    "casa",
+    "casas",
+    "apartamento",
+    "apartamentos",
+    "apartaestudio",
+    "terreno",
+    "lote",
+    "local",
+    "oficina",
+    "bodega",
+    "condo",
+    "duplex"
+  ],
+  "separators": [
+    ";",
+    "|",
+    "•",
+    " - ",
+    " y "
+  ],
+  "ignore_before_colon": [
+    "col.",
+    "col",
+    "colón"
+  ],
+  "location_prepositions": [
+    "en",
+    "en la",
+    "en el",
+    "en residencial"
+  ],
+  "range_keywords": [
+    "desde",
+    "de"
+  ],
+  "range_connectors": [
+    "hasta",
+    "a",
+    "–",
+    "-",
+    "al",
+    "to"
+  ],
+  "alignment_markers": [
+    "respectivamente",
+    "respectively",
+    "en ese orden"
+  ],
+  "availability_units": [
+    "apartamentos",
+    "apartamento",
+    "residencias",
+    "residencia",
+    "villas",
+    "villa",
+    "unidades",
+    "unidad"
+  ],
+  "availability_markers": [
+    "disponibilidad",
+    "disponibles",
+    "cupos"
+  ],
+  "per_unit_markers": [
+    "por apartamento",
+    "c/u",
+    "cada",
+    "cada uno",
+    "cada unidad"
+  ],
+  "pair_connectors": [
+    " y ",
+    " e "
+  ],
+  "split_multi_offers": true,
+  "min_offers_to_split": 2,
+  "split_multi_offers_when_mixed_currency": false,
+  "dont_split_mixed_currency_max_offers": 2,
+  "max_children_warn": 25
+}

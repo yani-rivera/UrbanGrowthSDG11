@@ -1,5 +1,6 @@
 {
   "agency": "Makos",
+  "nemonic":"MAKOS",
   "header_marker": "#",
   "listing_marker": "NUMBERED",      
   "auto_masquerade_numdot": true,

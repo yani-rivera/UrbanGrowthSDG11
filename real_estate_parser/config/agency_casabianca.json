@@ -1,5 +1,6 @@
 {
   "agency": "Casabianca",
+  "nemonic":"CSBC",
   "header_marker": "#",
   "listing_marker": "NUMBERED",      
   "auto_masquerade_numdot": true,
@@ -12,7 +13,7 @@
 
   "neighborhood_rule": {
     "strategy": "first_comma",      
-    "max_token_span": 20,
+    "max_token_span": 30,
      "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av."]
   },
 
@@ -33,7 +34,7 @@
    ],
 
 
-  "currency_aliases": { "L.": "HNL", "$": "USD", "US$": "USD" ,"$": "USD","Lps,":"HNL","Lps, ":"HNL","US$ ": "USD"},
+  "currency_aliases": { "L.": "HNL", "$": "USD", "US$": "USD" ,"$": "USD","Lps,":"HNL","Lps, ":"HNL","US$ ": "USD","U$":"USD"},
   
   "area_aliases": {
     "ac": ["m²","m2","mt2","mts2","metros cuadrados"],

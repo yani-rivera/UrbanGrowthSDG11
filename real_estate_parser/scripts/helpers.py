@@ -3,6 +3,7 @@ DEFAULT_PIPELINE_VERSION = "v1.0"
 # scripts/helpers.py
 
 
+from decimal import Decimal, InvalidOperation
 import os, re, json, csv
 
 # --- CSV schema (units included) ---
@@ -19,6 +20,56 @@ _UNIT_PRICE = re.compile(
     r'(US\$|\$|L\.?)\s?\d+(?:[\.,]\d+)?\s?(?:x\s*)?(?:vrs²|vrs2|vr2|m²|m2|mt2)\b',
     re.I
 )
+
+from pathlib import Path
+from datetime import datetime
+import json
+
+# -----------------------------------------------------------------------------
+# Prefile helpers
+# -----------------------------------------------------------------------------
+
+#====== to write prefile
+
+def _dt(date_str: str) -> datetime:
+    """Parse date in YYYY-MM-DD, YYYYMMDD, or YYYY/MM/DD."""
+    for fmt in ("%Y-%m-%d", "%Y%m%d", "%Y/%m/%d"):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            pass
+    raise ValueError(f"Bad date: {date_str}")
+
+def _render_pre_out(registry_path: Path, agency: str, date_str: str) -> Path:
+    """Return the pre_out file path for agency/date based on registry template."""
+    reg = json.loads(Path(registry_path).read_text(encoding="utf-8"))
+    tmpl = reg["defaults"]["paths"]["pre_out"]
+    dt = _dt(date_str)
+    ctx = {
+        "Agency": agency.capitalize(),
+        "agency": agency.lower(),
+        "year": dt.strftime("%Y"),
+        "yyyymm": dt.strftime("%Y%m"),
+        "date": dt.strftime("%Y%m%d"),
+    }
+    return Path(tmpl.format(**ctx))
+
+def write_prefile(registry_path: str | Path, agency: str, date_str: str, rows: list[str]) -> Path:
+    """
+    Write prefile (one row per line) to the correct path defined in agencies_registry.json.
+    Returns the written path.
+    """
+    out_path = _render_pre_out(Path(registry_path), agency, date_str)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8", newline="\n") as f:
+        for r in rows:
+            f.write((r or "").rstrip("\n") + "\n")
+    return out_path
+
+#==========End prefile write
+
+
+
 
 def _normalize_num_token(num_str: str) -> float | None:
     """
@@ -176,15 +227,19 @@ _BULLET_RE = re.compile(
 )
 
 
-def make_prefile_numbered(input_path: str, agency: str, tmp_root: str = "output") -> str:
+def make_prefile_numbered(input_path: str, agency: str,year: str, tmp_root: str = "output") -> str:
     """
     Create a temp 'prefile' where numbered bullets are rewritten as '* '.
     Returns the new path: output/<Agency>/pre/<agency>/pre_<basename>.txt
     """
     base = os.path.basename(input_path)
-    pre_dir  = os.path.join(tmp_root, agency, "pre", agency.lower())
+    base="pre_"+base
+    pre_dir  = os.path.join(tmp_root, agency, "pre", year)
     os.makedirs(pre_dir, exist_ok=True)
-    pre_path = os.path.join(pre_dir, f"pre_{base}")
+    pre_path = os.path.join(pre_dir, base)
+
+    os.makedirs(pre_dir, exist_ok=True)
+
 
     replaced = 0
     with open(input_path, "r", encoding="utf-8", errors="ignore") as fi, \
@@ -197,6 +252,54 @@ def make_prefile_numbered(input_path: str, agency: str, tmp_root: str = "output"
 
     print(f"[masq] → {pre_path}  bullets_replaced={replaced}")
     return pre_path
+
+import os, re
+
+def make_prefile_star(input_path: str, agency: str, delimiter: str, year: str, tmp_root: str = "output") -> str:
+    """
+    Normalize listing delimiters: replace the given delimiter (single char) at the start of a line
+    with the canonical '* ' (star + space).
+
+    Output path: output/<Agency>/pre/<year>/<file>
+    Example: input='data/raw/Inverprop/2015/inverprop_20151028.txt'
+             output='output/Inverprop/pre/2015/inverprop_20151028.txt'
+
+    Args:
+        input_path: path to raw TXT file
+        agency: agency code (e.g., "Inverprop")
+        delimiter: the actual listing delimiter character to replace (e.g., '*', '-', '#')
+        year: 4-digit year string (e.g., "2015")
+        tmp_root: root output directory (default "output")
+
+    Returns:
+        Path to the new preprocessed file
+    """
+    if len(delimiter) != 1:
+        raise ValueError("delimiter must be a single character")
+
+    base = os.path.basename(input_path)
+    base="pre_"+base
+    pre_dir = os.path.join(tmp_root, agency, "pre", year)
+    os.makedirs(pre_dir, exist_ok=True)
+    pre_path = os.path.join(pre_dir, base)  # same filename, not prefixed with "pre_"
+
+    # Regex: line start (^) + optional whitespace + delimiter + optional whitespace
+    bullet_re = re.compile(rf"(?m)^(?P<lead>\s*){re.escape(delimiter)}\s*")
+
+    replaced = 0
+    with open(input_path, "r", encoding="utf-8", errors="ignore") as fi, \
+         open(pre_path, "w", encoding="utf-8", errors="ignore") as fo:
+        for ln in fi:
+            new, n = bullet_re.subn(r"\g<lead>* ", ln, count=1)
+            if n > 0:
+                replaced += n
+            fo.write(new)
+
+    print(f"[make_prefile_star] {input_path} → {pre_path} delimiter='{delimiter}' bullets_replaced={replaced}")
+    return pre_path
+
+
+
 
 # Small QC counters you can print during debug
 def count_numbered_bullets(path: str) -> int:

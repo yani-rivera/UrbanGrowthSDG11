@@ -25,7 +25,7 @@ from modules.parser_utils import (
 
 # Neighborhood extractor
 
-from scripts.neighborhood_utils import  (clean_neighborhood_before_currency,apply_strategy)
+from modules.neighborhood_utils import  (apply_strategy)
 
 
  
@@ -112,17 +112,17 @@ def _num_from_locale(s: str) -> Optional[float]:
 
 
 
-def clean_neighborhood_before_currency(text: str, cfg: dict) -> str:
-    """
-    Return neighborhood = everything before the first currency alias. Makos or other
-    """
-    cur_keys = sorted(cfg.get("currency_aliases", {}).keys(), key=len, reverse=True)
-    cur_alt  = "|".join(re.escape(k) for k in cur_keys)
+# def clean_neighborhood_before_currency(text: str, cfg: dict) -> str:
+#     """
+#     Return neighborhood = everything before the first currency alias. Makos or other
+#     """
+#     cur_keys = sorted(cfg.get("currency_aliases", {}).keys(), key=len, reverse=True)
+#     cur_alt  = "|".join(re.escape(k) for k in cur_keys)
 
-    m = re.search(rf"\b(?:{cur_alt})\b", text, flags=re.IGNORECASE)
-    if m:
-        return text[:m.start()].strip()
-    return text.strip()
+#     m = re.search(rf"\b(?:{cur_alt})\b", text, flags=re.IGNORECASE)
+#     if m:
+#         return text[:m.start()].strip()
+#     return text.strip()
 
 
 
@@ -341,6 +341,7 @@ def extract_neighborhood(text: str, cfg: dict) -> str:
     and passes the rule (with abbrev_exceptions etc.) down to it.
     """
     text = text or ""
+    
     rule = (cfg or {}).get("neighborhood_rule", {}) or {}
     ##print("DEBUG.=====RULE from extract_neighborhood:", rule)
     strategy = rule.get("strategy", "first_line")
@@ -447,7 +448,7 @@ def parse_record(text, config, *, agency="", date="", listing_no=0,
 
     # 4) neighborhood / type / transaction (inherit defaults)
     
-    parsed["neighborhood"] = extract_neighborhood(text_norm, config) or ""
+    #parsed["neighborhood"] = extract_neighborhood(text_norm, config) or ""
     ####print("before call extract neighbor :", text_norm[:40],parsed)
     try:
         parsed["neighborhood"] = extract_neighborhood(text_norm, config) or ""
@@ -455,13 +456,7 @@ def parse_record(text, config, *, agency="", date="", listing_no=0,
     except TypeError:
     # --- optional currency-aware cleanup of neighborhood ---
         parsed["neighborhood"]= ""
-    if config.get("neighborhood_split_on_currency", False):
-        neigh, pre_price = clean_neighborhood_before_currency(text_norm, config)
-        if neigh:
-            parsed["neighborhood"] = neigh
-        if pre_price:
-            parsed["pre_price_text"] = pre_price
-        print("neighborhood :", parsed["neighborhood"])
+    
 
 # --- property type ---
 

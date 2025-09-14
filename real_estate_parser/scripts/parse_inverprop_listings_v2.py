@@ -16,7 +16,7 @@ from scripts.helpers import (
     make_prefile_numbered,
     count_numbered_bullets,
     count_star_bullets,
-    split_raw_and_parse_line,
+    split_raw_and_parse_line,make_prefile_star
 )
 #####---------------------------------------------------
 
@@ -26,17 +26,7 @@ from scripts.helpers import (
 # in scripts/parse_inverprop_listings_v1.py
 
 
-def make_prefile(input_path, agency, tmp_root="output"):
-    """Replace inline `NN.` with '*' when masquerade is requested."""
-    base = os.path.basename(input_path)
-    pre_dir = os.path.join(tmp_root, agency, "pre", agency.lower())
-    os.makedirs(pre_dir, exist_ok=True)
-    pre_path = os.path.join(pre_dir, f"pre_{base}")
-    with open(input_path, "r", encoding="utf-8", errors="ignore") as fi, \
-         open(pre_path, "w", encoding="utf-8") as fo:
-        for ln in fi:
-            fo.write(re.sub(r"(?<!\d)(\d{1,3})\.(?=\s*\S)", "* ", ln))
-    return pre_path
+
 
 def load_lines(path):
     with open(path, "r", encoding="utf-8", errors="ignore") as fh:
@@ -47,6 +37,19 @@ def main(file, config_path, output_dir):
     cfg = json.load(open(config_path, encoding="utf-8"))
     agency = infer_agency(config_path)
     date   = infer_date(file)
+    year = date[:4]
+
+   
+    # Phase-1 only if there's anything to change
+    if cfg.get("listing_marker_tochange"):
+        deli=cfg.get("listing_marker_tochange")
+        file = make_prefile_star(
+            input_path=file,
+            agency=agency, 
+            delimiter=deli,   # required in production
+            year=year      # optional; inferred from path if omitted
+              # ensure we don't silently fall back
+        )
 
      #======
 

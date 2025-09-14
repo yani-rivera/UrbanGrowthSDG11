@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "defaults": {
+    "paths": {
+      "input": "output/{Agency}/{year}/{agency}_{date}.txt",
+      "pre_out": "output/{Agency}/pre/{year}/pre_{agency}_{date}.txt",
+      "parsed_out": "output/{Agency}/{year}/{agency}_{date}.csv",
+      "l1_out": "output/L1clean/{AGENCY}_{yyyymm}_exploded.csv"
+    }
+  },
+  "agencies": {
+    "vinsa": {
+      "enabled": true,
+      "requires_preprocess": true,
+      "preprocess_script": "scripts/preprocess_vinsa.py",
+      "preprocess_args": { "--in": "{input}", "--out": "{pre_out}" },
+      "parse_script": "scripts/parse_vinsa_listings_v2.py",
+      "parse_args": { "--config": "config/agency_vinsa.json", "--output": "output" },
+      "filename_pattern": "vinsa_{date}_phase2.txt"
+    },
+    "inverprop": {
+      "enabled": true,
+      "requires_preprocess": false,
+      "parse_script": "scripts/parse_inverprop_listings_v2.py",
+      "parse_args": { "--config": "config/agency_inverprop.json", "--output": "output" },
+      "filename_pattern": "inverprop_{date}.txt"
+    },
+    "serpecal": {
+      "enabled": true,
+      "requires_preprocess": true,
+      "preprocess_script": "scripts/preprocess_serpecal.py",
+      "preprocess_args": { "--in": "{input}", "--out": "{pre_out}" },
+      "parse_script": "scripts/parse_serpecal_listings_v2.py",
+      "parse_args": { "--config": "config/agency_serpecal.json", "--output": "output" },
+      "filename_pattern": "serpecal_{date}_phase2.txt"
+    },
+    "casabianca": {
+      "enabled": true,
+      "requires_preprocess": true,
+      "preprocess_script": "scripts/preprocess_casabianca.py",
+      "preprocess_args": { "--in": "{input}", "--out": "{pre_out}" },
+      "parse_script": "scripts/parse_casabianca_listings_v1.py",
+      "parse_args": { "--config": "config/agency_casabianca.json", "--output-dir": "output/{Agency}/{year}" },
+      "filename_pattern": "casabianca_{date}.txt"
+    },
+    "makos": {
+      "enabled": true,
+      "requires_preprocess": false,
+      "parse_script": "scripts/parse_makos_listings_v1.py",
+      "parse_args": { "--config": "config/agency_makos.json", "--output-dir": "output/{Agency}/{year}" },
+      "filename_pattern": "makos_{date}.txt"
+    },
+    "eugenia": {
+      "enabled": true,
+      "requires_preprocess": false,
+      "parse_script": "scripts/parse_eugenia_listings_v2.py",
+      "parse_args": { "--config": "config/agency_eugenia.json", "--output": "output" },
+      "filename_pattern": "eugenia_{date}.txt"
+    },
+    "satelite": {
+      "enabled": true,
+      "requires_preprocess": true,
+      "preprocess_script": "scripts/preprocess_satelite.py",
+      "preprocess_args": { "--in": "{input}", "--out": "{pre_out}" },
+      "parse_script": "scripts/parse_satelite_listings_v2.py",
+      "parse_args": { "--config": "config/agency_satelite.json", "--output": "output" },
+      "filename_pattern": "satelite_{date}.txt"
+    },
+    "jireh": {
+      "enabled": true,
+      "requires_preprocess": false,
+      "parse_script": "scripts/parse_jireh_listings_v2.py",
+      "parse_args": { "--config": "config/agency_jireh.json", "--output": "output" },
+      "filename_pattern": "jireh_{date}.txt"
+    },
+    "fenix": {
+      "enabled": true,
+      "requires_preprocess": false,
+      "parse_script": "scripts/parse_fenix_listings_v2.py",
+      "parse_args": { "--config": "config/agency_fenix.json", "--output": "output" },
+      "filename_pattern": "fenix_{date}.txt"
+    }
+  }
+}
