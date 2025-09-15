@@ -27,6 +27,27 @@ def normalize_price(text):
 
     return max(cleaned) if cleaned else None
 
+
+def extract_price(text):
+    # More flexible price matcher for OCR-like $.700, $2,600.00, $325/$425
+    price_patterns = [
+        r'\$\.\d{1,3}(?:,\d{3})*(?:\.\d+)?',       # $.700.00, $.2,600.00
+        r'\$\s?\d{1,3}(?:,\d{3})*(?:\.\d+)?',      # $2,600.00
+        r'\$\d+/\$\d+',                            # $325/$425
+        r'L\.\s?\d{1,3}(?:,\d{3})*(?:\.\d+)?',     # L. 1,700,000
+        r'Lps?\.\s?\d{1,3}(?:,\d{3})*(?:\.\d+)?'   # Lps. 8500
+    ]
+
+    found = []
+    for pattern in price_patterns:
+        matches = re.findall(pattern, text)
+        found.extend(matches)
+
+    return found  # Now returns the matched raw strings
+
+
+
+
 def extract_bedrooms(text):
     match = re.search(r'(\d+)\s*(hab\.|habitaciones|cuartos|dorm)', text, re.IGNORECASE)
     return match.group(1) if match else ""
@@ -52,3 +73,10 @@ def detect_transaction(header, transaction_keywords):
 
 def clean_listing_line(line):
     return line.strip().lstrip("*-").strip()
+
+def extract_property_type(text, config):
+    text_lower = text.lower()
+    for prop_type, keywords in config.get("type_keywords", {}).items():
+        if any(keyword in text_lower for keyword in keywords):
+            return prop_type
+    return "other"

@@ -1,0 +1,150 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unified Real Estate Listing Output Schema",
+  "version": "1.0.0",
+  "description": "Defines the canonical CSV header order, JSONL structure, and writer policies for Phase 3 (Spooler). Also declares merge-time computed fields.",
+  "output": {
+    "base_dir": "output",
+    "path_template": "{agency}/{year}",
+    "files": {
+      "csv": "listings.{agency}.{year}.csv",
+      "jsonl": "listings.{agency}.{year}.jsonl",
+      "full_jsonl": "listings.{agency}.{year}.full.jsonl",
+      "manifest": "manifest.{agency}.{year}.json"
+    }
+  },
+  "writer_policy": {
+    "missing_keys": "blank_cell",
+    "extra_keys": "warn_and_full_jsonl_only",
+    "duplicate_listing_id": "last_write_wins",
+    "encoding": "utf-8",
+    "csv": {
+      "delimiter": ",",
+      "quotechar": "\"",
+      "lineterminator": "\n",
+      "header_from": "schema.fields"
+    }
+  },
+  "fields": [
+    { "name": "listing_id", "type": "string", "required": true, "description": "Stable unique ID across runs (agency+source id normalized)." },
+    { "name": "agency_code", "type": "string", "required": true },
+    { "name": "agency_name", "type": "string" },
+
+    { "name": "source_url", "type": "string", "format": "uri" },
+    { "name": "source_listing_id", "type": "string", "description": "ID as shown by the agency site, if any." },
+    { "name": "listing_status", "type": "string", "enum": ["active", "pending", "sold", "rented", "off_market", "unknown"], "default": "active" },
+    { "name": "operation_type", "type": "string", "enum": ["sale", "rent", "temp_rent", "lease", "unknown"], "default": "sale" },
+    { "name": "property_type", "type": "string", "enum": [
+      "apartment", "house", "duplex", "penthouse", "studio", "loft",
+      "land", "lot", "commercial", "office", "retail", "warehouse",
+      "industrial", "farm", "mixed_use", "other", "unknown"
+    ], "default": "unknown" },
+
+    { "name": "country", "type": "string" },
+    { "name": "state", "type": "string" },
+    { "name": "city", "type": "string" },
+    { "name": "neighborhood", "type": "string", "description": "Normalized neighborhood for joins." },
+    { "name": "neighborhood_raw", "type": "string", "description": "As extracted before normalization." },
+    { "name": "address", "type": "string" },
+    { "name": "address_number", "type": "string" },
+    { "name": "postal_code", "type": "string" },
+    { "name": "latitude", "type": "number" },
+    { "name": "longitude", "type": "number" },
+
+    { "name": "title", "type": "string" },
+    { "name": "description", "type": "string" },
+
+    { "name": "bedrooms", "type": "integer" },
+    { "name": "bathrooms", "type": "number", "description": "Supports half-baths as 0.5." },
+    { "name": "parking_spaces", "type": "integer" },
+    { "name": "floor", "type": "integer" },
+    { "name": "floors_total", "type": "integer" },
+    { "name": "year_built", "type": "integer" },
+
+    { "name": "area_value", "type": "number", "description": "Primary area numeric value (built or total depending on source)." },
+    { "name": "area_unit", "type": "string", "enum": ["m2", "ft2"], "default": "m2" },
+    { "name": "area_built_m2", "type": "number" },
+    { "name": "area_land_m2", "type": "number" },
+
+    { "name": "price_amount", "type": "number" },
+    { "name": "price_currency", "type": "string", "description": "ISO 4217 code (e.g., USD, EUR, ARS)." },
+    { "name": "price_period", "type": "string", "enum": ["total", "monthly", "weekly", "daily", "per_m2", "unknown"], "default": "total" },
+
+    { "name": "amenities", "type": "array", "items": { "type": "string" } },
+    { "name": "features", "type": "array", "items": { "type": "string" } },
+    { "name": "images", "type": "array", "items": { "type": "string", "format": "uri" } },
+    { "name": "main_image_url", "type": "string", "format": "uri" },
+
+    { "name": "contact_name", "type": "string" },
+    { "name": "contact_phone", "type": "string" },
+    { "name": "contact_email", "type": "string" },
+
+    { "name": "published_at", "type": "string", "format": "date-time" },
+    { "name": "updated_at", "type": "string", "format": "date-time" },
+    { "name": "scraped_at", "type": "string", "format": "date-time" },
+
+    { "name": "fx_code", "type": "string", "description": "Target FX bucket for price_lps (e.g., LPS)." },
+    { "name": "fx_rate_to_lps", "type": "number", "description": "Exchange rate used if available (optional at spool time).", "compute_at_merge": true },
+    { "name": "fx_catalog_date", "type": "string", "format": "date", "compute_at_merge": true },
+
+    { "name": "price_lps", "type": "number", "description": "Price converted via exchange catalog to LPS.", "compute_at_merge": true },
+    { "name": "price_per_m2", "type": "number", "description": "Derived = price_amount / area_built_m2 (or area_value fallback).", "compute_at_merge": true },
+    { "name": "price_lps_per_m2", "type": "number", "compute_at_merge": true },
+
+    { "name": "notes", "type": "string" }
+  ],
+
+  "manifest": {
+    "description": "File-level metadata written alongside CSV/JSONL outputs.",
+    "fields": [
+      { "name": "agency", "type": "string" },
+      { "name": "year", "type": "integer" },
+      { "name": "generated_at", "type": "string", "format": "date-time" },
+      { "name": "source_count", "type": "integer", "description": "Raw records seen by orchestrator." },
+      { "name": "written_count", "type": "integer" },
+      { "name": "csv_path", "type": "string" },
+      { "name": "jsonl_path", "type": "string" },
+      { "name": "full_jsonl_path", "type": "string" },
+      { "name": "warnings", "type": "array", "items": { "type": "string" } },
+      { "name": "field_coverage", "type": "object", "description": "% non-blank by field name (0..1)." }
+    ]
+  },
+
+  "csv_header_order": [
+    "listing_id", "agency_code", "agency_name",
+    "source_url", "source_listing_id", "listing_status", "operation_type", "property_type",
+    "country", "state", "city", "neighborhood", "neighborhood_raw", "address", "address_number", "postal_code", "latitude", "longitude",
+    "title", "description",
+    "bedrooms", "bathrooms", "parking_spaces", "floor", "floors_total", "year_built",
+    "area_value", "area_unit", "area_built_m2", "area_land_m2",
+    "price_amount", "price_currency", "price_period",
+    "amenities", "features", "images", "main_image_url",
+    "contact_name", "contact_phone", "contact_email",
+    "published_at", "updated_at", "scraped_at",
+    "fx_code", "fx_rate_to_lps", "fx_catalog_date",
+    "price_lps", "price_per_m2", "price_lps_per_m2",
+    "notes"
+  ],
+
+  "merge": {
+    "align_on": ["listing_id", "agency_code", "year"],
+    "post_merge_cleaning": {
+      "normalize_whitespace": true,
+      "neighborhood_fix_basic": true
+    },
+    "price": {
+      "compute_price_per_m2": {
+        "numerator": "price_amount",
+        "denominator_preferred": "area_built_m2",
+        "denominator_fallback": "area_value"
+      },
+      "compute_price_lps": {
+        "target_code": "LPS",
+        "fx_catalog": "config/exchange_catalog.json",
+        "fx_rate_field": "fx_rate_to_lps",
+        "catalog_date_field": "fx_catalog_date"
+      }
+    }
+  }
+}

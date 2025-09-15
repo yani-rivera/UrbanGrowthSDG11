@@ -7,8 +7,16 @@ import json
 import argparse
 import os
 from datetime import datetime
+
+import sys
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+
+
 from neighborhood_utils import load_neighborhoods, match_neighborhood
-from parser_utils import normalize_price, extract_bedrooms, extract_bathrooms, extract_area
+from modules.parser_utils import normalize_price, extract_bedrooms, extract_bathrooms, extract_area
 
 
 

@@ -1,376 +1,403 @@
 #!/usr/bin/env python3
 """
-SplitByCue v4.0 — clean baseline (spec + robust impl)
+SplitByCue_v2
+---------------
+Robust splitter for agency TXT feeds using a cue character (default comma) to
+identify record starts, with safeguards for:
+  - UTF-8 (BOM-safe) reading only
+  - "first-letter uppercase" start gate (not ALL-caps required)
+  - ignore numeric-grouping commas ("$1,500") as cue at start of line
+  - glue continuation lines when previous ends with comma/semicolon
+  - force-glue lines that begin with a price/number
+  - optional inline (same-line) multi-record splitting with price-before check
+  - per-agency NOT_START_WORDS to avoid false starts (e.g., RES., COND., TORRE)
 
-Goals (stable + predictable):
-  • Input: iterable of text lines (strings). Headers start with '#'.
-  • Start-of-listing when:
-      - a cue (',' ':' or '.') appears within first N chars (max_cue_pos), AND
-      - the text BEFORE the cue looks like a place/name (not an amenity token).
-  • Inline starts: if a single physical line contains another listing later, split it
-    (conservatively) — usually only after a price fragment like "Lps. 10,000.00" or "$ 650.00".
-  • Glue: all other lines/pieces attach to the current listing.
-  • Numeric-grouping commas (e.g., 14, 000.00) never trigger a start.
-  • "Never end on comma": if the current row ends with "," we keep gluing.
-    On flush (header/EOF) we can strip a dangling comma.
-  • ALWAYS return a list (never None). Empty input -> [].
-
-Config (either positional or dict as 3rd arg):
-  • listing_marker / cue: 'CUE:COMMA' | 'CUE:COLON' | 'CUE:DOT' | ',' | ':' | '.'
-  • max_cue_pos: int (default 40; Racing often needs ~50)
-  • require_upper: bool (gate on initial capital of first token; often False for Spanish data)
-  • require_price_before: bool (default True; reduces false inline splits)
-  • not_start_words: list[str] amenity words (AL, AS/AL, COMEDOR, BAÑO, ...)
-  • no_trailing_comma_end: bool (default True)
-  • strip_trailing_commas_on_flush: bool (default True)
-  • debug: bool (print trace to stderr)
-
-Compatibility:
-  • Works with direct calls: split_by_cue(lines, cue, cfg_dict) — like your pipeline.
-  • Also works with CLI. See main() at bottom.
+Outputs one record per line by default (plain text). Can also emit CSV with
+--csv if desired (single "record" column).
 """
+from __future__ import annotations
 
-from typing import Iterable, List, Tuple
-import sys
-import re
 import argparse
+import io
+import re
+import sys
+from pathlib import Path
+import json
+from typing import Iterable, List, Sequence, Dict, Any
 
-# ---------- Debug ----------
-DEBUG = False
+# ------------------------------- Defaults ------------------------------------
+DEFAULT_CUE = ","
+DEFAULT_MAX_CUE_POS = 25
+DEFAULT_REQUIRE_UPPER = True
+DEFAULT_REQUIRE_PRICE_BEFORE = True
+DEFAULT_INLINE_PRICE_LOOKBACK = 50
+DEFAULT_TRAILING_COMMA_GLUE = True
+DEFAULT_NOT_START_WORDS = [
+    "RES","RES.","RESIDENCIAL","COND","COND.","CONDOMINIO",
+    "TORRE","EDIF","EDIF.","EDIFICIO","KM","KILOMETRO","KILÓMETRO",
+    "CARRETERA","BARRIO","COL","COL.","COLONIA","URB","URB.",
+    "URBANIZACION","URBANIZACIÓN","MZA","MANZANA","LOTE",
+    "BLOQUE","PAS","PAS.","PASAJE","BO","BO."
+]
 
-def dbg(*a):
-    if DEBUG:
-        print('[SplitByCue]', *a, file=sys.stderr)
+# --------------------------------- Regex -------------------------------------
+ALPHA_CHARS = "A-Za-zÁÉÍÓÚÜÑáéíóúüñ"
+LETTER_PRESENT_RE = re.compile(rf"[{ALPHA_CHARS}]")
+FIRST_ALPHA_TOKEN_RE = re.compile(rf"([{ALPHA_CHARS}][\w\.-ÁÉÍÓÚÜÑáéíóúüñ]*)")
+PRICE_AT_START_RE = re.compile(
+    r"^\s*(?:[$¢L]|Lps\.?|L\.?)?\s*\d{1,3}(?:,\d{3})*(?:\.\d+)?\b",
+    re.IGNORECASE,
+)
+PRICE_ANYWHERE_RE = re.compile(
+    r"(?:[$¢L]|Lps\.?|L\.?)?\s*\d{1,3}(?:,\d{3})*(?:\.\d+)?\b",
+    re.IGNORECASE,
+)
+CONNECTOR_START_RE = re.compile(r"^\s*(y|e|con|incluye|cerca de|sobre|entre)\b", re.IGNORECASE)
+TRAILING_COMMA_RE = re.compile(r"[;,]\s*$")
 
-# ---------- Defaults ----------
-DEFAULT_NOT_START = {
-    # amenities / features / common non-names
-    "AL","AS","AL/AS","AS/AL",
-    "SALA","COMEDOR","COCINA","BAÑO","BAÑOS",
-    "GARAGE","GARAJE","CISTERNA","JARDIN","JARDÍN",
-    "PATIO","VIGILANCIA","AREA","ÁREA","TERRAZA","PISCINA",
-    "CIRCUITO","CERRADO","PLANTA","PLANTAS","HAB","HABITACIONES",
-}
+# --------------------------------- IO ----------------------------------------
 
-PRICE_RE = re.compile(r'(?:LPS?\.?|Lps\.?|L\.?|\$)\s?\d[\d\s.,/]*$')
+def read_lines_utf8_sig(path: str) -> List[str]:
+    with io.open(path, "r", encoding="utf-8-sig", newline=None) as f:
+        return f.readlines()
 
-# ---------- Helpers ----------
+# ------------------------------ Heuristics -----------------------------------
 
-def _flush_line(current_parts, out_list, strip_trailing_commas_on_flush=True):
-    if not current_parts:
-        return
-    line = " ".join(current_parts).rstrip()
-    if strip_trailing_commas_on_flush:
-        line = re.sub(r',\s*$', '', line)
-    out_list.append(line)
-    current_parts.clear()
-
-
-def normalize_cue(cue: str) -> str:
-    if not cue:
-        return ","
-    key = str(cue).strip().lower()
-    if "comma" in key or "cue:comma" in key:
-        return ","
-    if "colon" in key or "cue:colon" in key:
-        return ":"
-    if "dot" in key or "cue:dot" in key or "punto" in key:
-        return "."
-    if len(cue) == 1 and cue in {",", ":", "."}:
-        return cue
-    return cue
-
-
-def is_header(line: str) -> bool:
-    return line.strip().startswith('#')
-
-
-def _ends_with_soft_comma(text: str) -> bool:
-    return bool(re.search(r',\s*$', text))
+def first_alpha_token(text: str) -> str:
+    m = FIRST_ALPHA_TOKEN_RE.search(text)
+    return m.group(1) if m else ""
 
 
-def find_cue_index(line: str, cue: str) -> int:
-    """Find first cue index, but skip numeric-grouping commas: DIGIT , [SPACE]? DIGIT."""
-    if cue != ',':
-        return line.find(cue)
-    i = 0
-    while True:
-        i = line.find(',', i)
-        if i == -1:
-            return -1
-        prev = line[i-1] if i-1 >= 0 else ''
-        j = i + 1
-        if j < len(line) and line[j] == ' ':
-            j += 1
-        nxt = line[j] if j < len(line) else ''
-        if prev.isdigit() and nxt.isdigit():
-            i += 1
-            continue
-        return i
+def passes_upper_gate(head: str, require_upper: bool) -> bool:
+    if not require_upper:
+        return True
+    tok = first_alpha_token(head)
+    return bool(tok) and tok[0].isupper()
 
 
+def token_before_cue(head: str) -> str:
+    tok = re.split(r"\s+", head.strip())[0] if head.strip() else ""
+    norm = re.sub(rf"[^\w\.{ALPHA_CHARS}]", "", tok)
+    return norm.upper()
 
-def _prefix_looks_like_name(line: str, idx: int, stop_words: set) -> bool:
-    orig = line[:idx].strip().strip(",.;:()[]")
-    if not orig:
+
+def is_forbidden_start(head: str, not_start_words: Sequence[str]) -> bool:
+    tok = token_before_cue(head)
+    return tok in {w.upper() for w in not_start_words}
+
+
+def starts_with_price(line: str) -> bool:
+    return bool(PRICE_AT_START_RE.match(line))
+
+
+def looks_like_start(
+    line: str,
+    *,
+    cue: str,
+    max_cue_pos: int,
+    require_upper: bool,
+    not_start_words: Sequence[str],
+) -> bool:
+    p = line.find(cue)
+    if p == -1 or p > max_cue_pos:
         return False
-
-    parts = [w for w in orig.split() if w]
-    if not parts:
+    head = line[:p]
+    if not LETTER_PRESENT_RE.search(head):
         return False
-
-    # reject if the LAST word is an amenity/common word
-    if parts[-1].upper() in stop_words:
+    if not passes_upper_gate(head, require_upper):
         return False
-
-    if len(parts) == 1:
-        w = parts[0]
-        if "/" in w:
-            return False
-        core = re.sub(r"[^A-Za-zÁÉÍÓÚÑ0-9]", "", w)
-        # IMPORTANT: use original case for isupper()
-        return w.isupper() and len(core) >= 3
-
-    # Multi-word: mostly uppercase *in the original text*
-    letters = [c for c in orig if c.isalpha()]
-    if not letters:
+    if is_forbidden_start(head, not_start_words):
         return False
-    upper_ratio = sum(1 for c in orig if c.isalpha() and c.isupper()) / len(letters)
-    return upper_ratio >= 0.8
-
-
-
-def is_cue_start(line: str, cue: str, max_cue_pos: int, require_upper: bool, stop_words: set) -> bool:
-    idx = find_cue_index(line, cue)
-    if idx == -1 or idx > max_cue_pos:
-        return False
-    if not _prefix_looks_like_name(line, idx, stop_words):
-        return False
-    if require_upper:
-        tok = line.lstrip().split(' ')[0]
-        if not tok or not tok[0].isupper():
-            return False
     return True
 
 
-def embedded_split(text: str, cue: str, *, stop_words: set, require_price_before: bool, never_end_on_comma: bool) -> List[Tuple[str, bool]]:
-    """Split a physical line into logical pieces where inline new listings appear.
-    Conservative: require name-like token + (optionally) a price immediately before.
-    Returns [(chunk, forced_start), ...].
-    """
-    if not text:
-        return [("", False)]
-
-    cue_esc = re.escape(cue)
-    pat = re.compile(rf'(?:(?<=^)|(?<=\s))([A-ZÁÉÍÓÚÑ0-9][A-ZÁÉÍÓÚÑ0-9/# .-]{{1,40}}){cue_esc}(?=\s)')
-
-    starts: List[int] = []
-    tokens: List[str] = []
-    for m in pat.finditer(text):
-        s = m.start(1)
-        cpos = m.end() - 1
-        token = m.group(1).strip().upper()
-        # Skip numeric-grouping commas: 14, 000.00
-        if cue == ',':
-            prev = text[cpos-1] if cpos-1 >= 0 else ''
-            j = cpos + 1
-            if j < len(text) and text[j] == ' ':
-                j += 1
-            nxt = text[j] if j < len(text) else ''
-            if prev.isdigit() and nxt.isdigit():
-                continue
-        if s <= 1:
-            continue
-        if token in stop_words:
-            continue
-        if require_price_before:
-            window = text[max(0, s-40):s]
-            if not PRICE_RE.search(window):
-                continue
-        starts.append(s)
-        tokens.append(token)
-
-    if not starts:
-        return [(text, False)]
-
-    pieces: List[Tuple[str, bool]] = []
-    pos = 0
-    for i, start in enumerate(starts):
-        left = text[pos:start].strip()
-        if left:
-            pieces.append((left, False))
-        end = starts[i+1] if i+1 < len(starts) else len(text)
-        chunk = text[start:end].strip()
-        if chunk:
-            pieces.append((chunk, True))
-        pos = end
-
-    if pos < len(text):
-        tail = text[pos:].strip()
-        if tail:
-            pieces.append((tail, False))
-
-    # Never end a listing on comma: if the previous piece ends with ',', merge next
-    if never_end_on_comma and pieces:
-        merged: List[Tuple[str, bool]] = []
-        for chunk, forced in pieces:
-            if merged and _ends_with_soft_comma(merged[-1][0]):
-                prev = merged.pop()
-                merged.append((prev[0] + ' ' + chunk, False))
-            else:
-                merged.append((chunk, forced))
-        pieces = merged
-
-    return pieces or [(text, False)]
-
-# ---------- Core ----------
-
-def split_by_cue(lines: Iterable[str], cue, max_cue_pos=40, require_upper=True) -> List[str]:
-    """Core segmentation. Works with either:
-        (lines, cue, max_cue_pos:int, require_upper:bool)
-      or
-        (lines, cue, cfg:dict)
-    """
-    # Guard against None/falsey
-    if not lines:
-        return []
-
-    # Back-compat shim: allow a config dict as the 3rd positional arg
-    cfg = {}
-    stop_words = set(DEFAULT_NOT_START)
-    require_price_before = True
-    never_end_on_comma = True
-    strip_commas_on_flush = True
-
-    if isinstance(max_cue_pos, dict):
-        cfg = max_cue_pos
-        cue = cfg.get('listing_marker', cfg.get('cue', cue))
-        try:
-            max_cue_pos = int(cfg.get('max_cue_pos', 40))
-        except Exception:
-            max_cue_pos = 40
-        require_upper = bool(cfg.get('require_upper', require_upper))
-        require_price_before = bool(cfg.get('require_price_before', True))
-        never_end_on_comma = bool(cfg.get('no_trailing_comma_end', True))
-        strip_commas_on_flush = bool(cfg.get('strip_trailing_commas_on_flush', True))
-        extra = cfg.get('not_start_words') or cfg.get('no_start_words') or []
-        stop_words |= {str(w).strip().upper() for w in extra}
-        global DEBUG
-        DEBUG = bool(cfg.get('debug', False))
-
-    cue = normalize_cue(cue)
-    try:
-        max_cue_pos = int(max_cue_pos)
-    except Exception:
-        max_cue_pos = 40
-    require_upper = bool(require_upper)
-
-    dbg(f"START cue={cue!r} max_cue_pos={max_cue_pos} require_upper={require_upper} price_before={require_price_before} never_end_on_comma={never_end_on_comma}")
-
-    out: List[str] = []
-    cur: List[str] = []
-
-    for i, raw in enumerate(lines, 1):
-        s = str(raw).strip()
-        if not s:
-            dbg(f"L{i} SKIP empty")
-            continue
-        dbg(f"L{i} IN: {s}")
-
-        # explode into logical pieces
-        pieces = embedded_split(
-            s, cue,
-            stop_words=stop_words,
-            require_price_before=require_price_before,
-            never_end_on_comma=never_end_on_comma,
-        )
-
-        for chunk, forced in pieces:
-            if not chunk:
-                continue
-
-            if is_header(chunk):
-                _flush_line(cur, out, strip_trailing_commas_on_flush=strip_commas_on_flush)  # <- cur, not current
-                out.append(chunk)
-                dbg("  -> HEADER flush + emit")
-                continue
+def strong_start(line: str, *, cue: str, max_cue_pos: int, require_upper: bool, not_start_words: Sequence[str]) -> bool:
+    if starts_with_price(line):
+        return False
+    return looks_like_start(line, cue=cue, max_cue_pos=max_cue_pos, require_upper=require_upper, not_start_words=not_start_words)
 
 
-            # decide start vs glue
-            start = forced or is_cue_start(chunk, cue, max_cue_pos, require_upper, stop_words)
+def should_glue(prev: str | None, line: str, *, cue: str, max_cue_pos: int, require_upper: bool, not_start_words: Sequence[str], trailing_comma_glue: bool) -> bool:
+    if starts_with_price(line):
+        return True
+    if trailing_comma_glue and prev and TRAILING_COMMA_RE.search(prev):
+        return not strong_start(line, cue=cue, max_cue_pos=max_cue_pos, require_upper=require_upper, not_start_words=not_start_words)
+    if CONNECTOR_START_RE.match(line):
+        return True
+    return False
 
-            # If current ends with a comma, force GLUE regardless
-            if start and never_end_on_comma and cur and _ends_with_soft_comma(' '.join(cur)):
-                start = False
+# --------------------------- Embedded splitter --------------------------------
 
-            if start:
-                if cur:
-                    line = ' '.join(cur).rstrip()
-                    if strip_commas_on_flush and _ends_with_soft_comma(line):
-                        line = re.sub(r',\s*$', '', line)
-                    out.append(line)
-                    dbg("  -> START: flush current")
-                cur = [chunk]
-                dbg("  -> START new listing")
-            else:
-                if cur:
-                    cur.append(chunk)
-                    dbg("  -> GLUE to current")
+def inline_splits(text: str, *, cue: str, max_cue_pos: int, require_upper: bool, not_start_words: Sequence[str], require_price_before: bool, price_lookback: int) -> List[str]:
+    parts: List[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        rel_cue = text.find(cue, i)
+        if rel_cue == -1:
+            parts.append(text[i:])
+            break
+        if rel_cue - i <= max_cue_pos:
+            head = text[i:rel_cue]
+            if LETTER_PRESENT_RE.search(head) and passes_upper_gate(head, require_upper) and not is_forbidden_start(head, not_start_words):
+                j = rel_cue + 1
+                found_next = False
+                while j < n:
+                    next_rel = text.find(cue, j)
+                    if next_rel == -1:
+                        break
+                    seg_start = j
+                    if next_rel - seg_start <= max_cue_pos:
+                        head2 = text[seg_start:next_rel]
+                        if LETTER_PRESENT_RE.search(head2) and passes_upper_gate(head2, require_upper) and not is_forbidden_start(head2, not_start_words):
+                            if not require_price_before:
+                                parts.append(text[i:seg_start].strip())
+                                i = seg_start
+                                found_next = True
+                                break
+                            else:
+                                lookback_start = max(i, seg_start - price_lookback)
+                                window = text[lookback_start:seg_start]
+                                if PRICE_ANYWHERE_RE.search(window):
+                                    parts.append(text[i:seg_start].strip())
+                                    i = seg_start
+                                    found_next = True
+                                    break
+                    j = next_rel + 1
+                if not found_next:
+                    parts.append(text[i:].strip())
+                    break
                 else:
-                    # backfill to previous non-header row
-                    if out and not is_header(out[-1]):
-                        out[-1] = out[-1] + ' ' + chunk
-                        dbg("  -> BACKFILL to prev row")
-                    else:
-                        cur = [chunk]
-                        dbg("  -> START implicit (no current)")
+                    continue
+        i = rel_cue + 1
+    cleaned = [re.sub(r"\s+", " ", p).strip().rstrip(",;") for p in parts if p and p.strip()]
+    return cleaned
 
-    if cur:
-        line = ' '.join(cur).rstrip()
-        if strip_commas_on_flush and _ends_with_soft_comma(line):
-            line = re.sub(r',\s*$', '', line)
-        out.append(line)
-        dbg("END: flush trailing current   COMPLETE LISTINS")
+# ------------------------------- Core API ------------------------------------
+
+
+def _split_by_cue_core(
+    lines: Iterable[str],
+    *,
+    cue: str = DEFAULT_CUE,
+    max_cue_pos: int = DEFAULT_MAX_CUE_POS,
+    require_upper: bool = DEFAULT_REQUIRE_UPPER,
+    not_start_words: Sequence[str] = DEFAULT_NOT_START_WORDS,
+    require_price_before: bool = DEFAULT_REQUIRE_PRICE_BEFORE,
+    inline_price_lookback: int = DEFAULT_INLINE_PRICE_LOOKBACK,
+    trailing_comma_glue: bool = DEFAULT_TRAILING_COMMA_GLUE,
+) -> List[str]:
+    out: List[str] = []
+    current: str | None = None
+
+    def flush():
+        nonlocal current
+        if current is not None:
+            s = re.sub(r"\s+", " ", current).strip().rstrip(",;")
+            if s:
+                out.append(s)
+        current = None
+
+    for raw in lines:
+        line = raw.rstrip("\n\r")
+        if should_glue(
+            current, line,
+            cue=cue, max_cue_pos=max_cue_pos,
+            require_upper=require_upper,
+            not_start_words=not_start_words,
+            trailing_comma_glue=trailing_comma_glue,
+        ):
+            current = (current + " " + line.strip()) if current else line.strip()
+            continue
+
+        if looks_like_start(
+            line, cue=cue, max_cue_pos=max_cue_pos,
+            require_upper=require_upper, not_start_words=not_start_words,
+        ):
+            pieces = inline_splits(
+                line.strip(),
+                cue=cue,
+                max_cue_pos=max_cue_pos,
+                require_upper=require_upper,
+                not_start_words=not_start_words,
+                require_price_before=require_price_before,
+                price_lookback=inline_price_lookback,
+            )
+            if pieces:
+                flush()
+                for p in pieces[:-1]:
+                    out.append(p)
+                current = pieces[-1]
+            else:
+                flush()
+                current = line.strip()
+        else:
+            current = (current + " " + line.strip()) if current else line.strip()
+
+    if current is not None and current.strip():
+        s = re.sub(r"\s+", " ", current).strip().rstrip(",;")
+        if s:
+            out.append(s)
 
     return out
 
-# ---------- CLI ----------
 
-def main():
-    p = argparse.ArgumentParser()
-    p.add_argument('-i', '--input', required=True)
-    p.add_argument('-o', '--output', required=True)
-    p.add_argument('--cue', default=',')
-    p.add_argument('--max-cue-pos', type=int, default=40)
-    p.add_argument('--no-require-uppercase', action='store_true')
-    p.add_argument('--no-require-price-before', action='store_true')
-    p.add_argument('--not-start-words', nargs='*', default=None)
-    p.add_argument('--no-trailing-comma-end', action='store_true')
-    p.add_argument('--no-strip-commas-on-flush', action='store_true')
-    p.add_argument('--debug', action='store_true')
-    args = p.parse_args()
+  
+# Wrapper to accept cfg dict or path
+def _coerce_cfg(cfg):
+    if cfg is None or isinstance(cfg, dict):
+        return cfg
+    p = Path(cfg)
+    if not p.exists():
+        raise FileNotFoundError(f"Config file not found: {p}")
+    if p.suffix.lower() == ".json":
+        return json.loads(p.read_text(encoding="utf-8"))
+    if p.suffix.lower() in (".yaml", ".yml"):
+        import yaml
+        return yaml.safe_load(p.read_text(encoding="utf-8"))
+    if p.suffix.lower() == ".toml":
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
+        return tomllib.loads(p.read_text(encoding="utf-8"))
+    raise ValueError(f"Unsupported config type: {p.suffix}")
 
-    with open(args.input, encoding='utf-8') as f:
-        lines = f.readlines()
 
-    cfg = {
-        'cue': args.cue,
-        'max_cue_pos': args.max_cue_pos,
-        'require_upper': not args.no_require_uppercase,
-        'require_price_before': not args.no_require_price_before,
-        'no_trailing_comma_end': not args.no_trailing_comma_end,
-        'strip_trailing_commas_on_flush': not args.no_strip_commas_on_flush,
-        'debug': args.debug,
+# ----- Back-compat wrapper: accept dict or path as second arg -----------------
+from pathlib import Path
+import json as _json
+
+def _coerce_cfg(cfg_like):
+    """Return a dict from a cfg-like value: dict or path to JSON/YAML/TOML."""
+    if cfg_like is None or isinstance(cfg_like, dict):
+        return cfg_like or {}
+    p = Path(cfg_like)
+    if not p.exists():
+        raise FileNotFoundError(f"Config file not found: {p}")
+    sfx = p.suffix.lower()
+    txt = p.read_text(encoding="utf-8")
+    if sfx == ".json":
+        return _json.loads(txt)
+    if sfx in (".yaml", ".yml"):
+        try:
+            import yaml  # type: ignore
+        except Exception as e:
+            raise RuntimeError("YAML config specified but PyYAML is not installed. Run `pip install pyyaml`.") from e
+        return yaml.safe_load(txt) or {}
+    if sfx == ".toml":
+        try:
+            import tomllib  # py>=3.11
+        except Exception:
+            try:
+                import tomli as tomllib  # type: ignore
+            except Exception as e:
+                raise RuntimeError("TOML config specified but tomllib/tomli not available. Install `tomli` for Py<3.11.") from e
+        return tomllib.loads(txt) or {}
+    raise ValueError(f"Unsupported config file type: {sfx}")
+
+def split_by_cue(lines: Iterable[str], cfg: Dict[str, Any] | str | None = None, **overrides) -> List[str]:
+    """Compat entry point.
+
+    Supports:
+      split_by_cue(lines, cfg_dict)
+      split_by_cue(lines, 'configs/agency.json')
+      split_by_cue(lines, cue=',', max_cue_pos=25, ...)
+    Dict values are merged with explicit keyword overrides.
+    """
+    cfg = _coerce_cfg(cfg)
+    params = {
+        "cue": cfg.get("cue", DEFAULT_CUE),
+        "max_cue_pos": int(cfg.get("max_cue_pos", DEFAULT_MAX_CUE_POS)),
+        "require_upper": bool(cfg.get("require_upper", DEFAULT_REQUIRE_UPPER)),
+        # legacy key: no_trailing_comma_end (True disables glue)
+        "trailing_comma_glue": bool(overrides.get("trailing_comma_glue",
+            (not cfg.get("no_trailing_comma_end")) if "no_trailing_comma_end" in cfg else cfg.get("trailing_comma_glue", DEFAULT_TRAILING_COMMA_GLUE))),
+        "require_price_before": bool(cfg.get("require_price_before", DEFAULT_REQUIRE_PRICE_BEFORE)),
+        "inline_price_lookback": int(cfg.get("inline_price_lookback", DEFAULT_INLINE_PRICE_LOOKBACK)),
+        "not_start_words": cfg.get("not_start_words", DEFAULT_NOT_START_WORDS),
     }
-    if args.not_start_words:
-        cfg['not_start_words'] = args.not_start_words
+    # Apply explicit overrides on top
+    params.update(overrides)
+    return _split_by_cue_core(lines, **params)
 
-    # Route via back-compat signature (3rd arg is cfg dict)
-    results = split_by_cue(lines, cue=args.cue, max_cue_pos=cfg) or []
+# --------------------------------- CLI ---------------------------------------
 
-    with open(args.output, 'w', encoding='utf-8') as f:
-        for line in results:
-            f.write(line + '\n')
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description="Split agency TXT by cue into one-record-per-line")
+    p.add_argument("-i", "--input", required=True, help="Path to input TXT (UTF-8/UTF-8-SIG)")
+    p.add_argument("-o", "--output", required=False, help="Path to output file (defaults to stdout)")
+    p.add_argument("--cue", default=DEFAULT_CUE, help="Cue character to detect starts (default ',')")
+    p.add_argument("--max-cue-pos", type=int, default=DEFAULT_MAX_CUE_POS, help=f"Max index of first cue to qualify as start (default {DEFAULT_MAX_CUE_POS})")
+    req_upper = p.add_mutually_exclusive_group()
+    req_upper.add_argument("--require-uppercase", dest="require_upper", action="store_true", default=DEFAULT_REQUIRE_UPPER, help="Require first alphabetic token to start uppercase (default on)")
+    req_upper.add_argument("--no-require-uppercase", dest="require_upper", action="store_false", help="Disable uppercase requirement")
 
-if __name__ == '__main__':
-    main()
+    price_before = p.add_mutually_exclusive_group()
+    price_before.add_argument("--require-price-before", dest="require_price_before", action="store_true", default=DEFAULT_REQUIRE_PRICE_BEFORE, help="For inline splits, require a price within lookback before a new start (default on)")
+    price_before.add_argument("--no-require-price-before", dest="require_price_before", action="store_false", help="Disable price-before check for inline splits")
+
+    p.add_argument("--inline-price-lookback", type=int, default=DEFAULT_INLINE_PRICE_LOOKBACK, help=f"Chars to look back for a price before inline start (default {DEFAULT_INLINE_PRICE_LOOKBACK})")
+
+    trailing = p.add_mutually_exclusive_group()
+    trailing.add_argument("--trailing-comma-glue", dest="trailing_comma_glue", action="store_true", default=DEFAULT_TRAILING_COMMA_GLUE, help="Glue next line when previous ended with comma/semicolon (default on)")
+    trailing.add_argument("--no-trailing-comma-glue", dest="trailing_comma_glue", action="store_false", help="Disable trailing-comma glue")
+
+    p.add_argument("--not-start-words", default=",".join(DEFAULT_NOT_START_WORDS), help="Comma-separated list of forbidden leading tokens (e.g., RES., COND., TORRE)")
+
+    p.add_argument("--csv", action="store_true", help="Write CSV with a single 'record' column instead of TXT")
+
+    return p
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    ap = build_arg_parser()
+    args = ap.parse_args(argv)
+
+    if len(args.cue) != 1:
+        print("--cue must be a single character (e.g., ',')", file=sys.stderr)
+        return 2
+
+    lines = read_lines_utf8_sig(args.input)
+    not_start_words = [w.strip() for w in (args.not_start_words or "").split(",") if w.strip()]
+
+    records = split_by_cue(
+        lines,
+        cue=args.cue,
+        max_cue_pos=args.max_cue_pos,
+        require_upper=args.require_upper,
+        not_start_words=not_start_words,
+        require_price_before=args.require_price_before,
+        inline_price_lookback=args.inline_price_lookback,
+        trailing_comma_glue=args.trailing_comma_glue,
+    )
+
+    if args.output:
+        out_path = args.output
+        if args.csv:
+            import csv
+            with io.open(out_path, "w", encoding="utf-8-sig", newline="") as f:
+                w = csv.writer(f)
+                w.writerow(["record"])
+                for r in records:
+                    w.writerow([r])
+        else:
+            with io.open(out_path, "w", encoding="utf-8-sig", newline="\n") as f:
+                for r in records:
+                    f.write(r + "\n")
+    else:
+        if args.csv:
+            import csv
+            w = csv.writer(sys.stdout)
+            w.writerow(["record"])
+            for r in records:
+                w.writerow([r])
+        else:
+            for r in records:
+                sys.stdout.write(r + "\n")
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

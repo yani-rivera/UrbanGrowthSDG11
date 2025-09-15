@@ -4,15 +4,6 @@ from __future__ import annotations
 import re
 from typing import Iterable, List, Dict, Optional
 
-import sys,os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from modules.ListingUppercaseMask import build_mask, slice_blocks_from_mask
-#from modules.forcebulletv3 import bulletize_line, verify_lines
-from modules.forcebullet import bulletize
-from modules.SplitByCue import split_by_cue
-
-
 # --------------------------------------------------------------------------------------
 # Module config (overridden by configure_preprocess)
 _CFG: Dict[str, object] = {
@@ -45,9 +36,6 @@ _PRICE_ONLY = re.compile(
 )
 _AREA_TAIL = re.compile(r"(m2|m²|mt2|mts2|mts|vrs2|vrs²|vrs|vr2|vr)\s*$", re.IGNORECASE)
 
-#===========
-
-
 
 def configure_preprocess(config: Dict[str, object]) -> None:
     """Shallow-merge agency config into module defaults."""
@@ -56,7 +44,6 @@ def configure_preprocess(config: Dict[str, object]) -> None:
     for k in list(_CFG.keys()):
         if k in config:
             _CFG[k] = config[k]
-    
 
 
 # --------------------------------------------------------------------------------------
@@ -97,12 +84,9 @@ def preprocess_split(raw_lines, *, mode=None, marker=None):
         nonlocal buf, cur_marker
         if buf:
             out.append({"kind": "listing", "lines": buf, "marker": cur_marker or "*"})
-             
             buf, cur_marker = [], None
 
     header_rx = re.compile(r"^\s*#\s*")
-
-    
 
     if not mode:
         mode = "LITERAL"
@@ -113,20 +97,12 @@ def preprocess_split(raw_lines, *, mode=None, marker=None):
         return preprocess_split(raw_lines, mode="LITERAL", marker="*")
 
     if mode == "UPPERCASE":
-        lines = list(raw_lines)  # raw_lines may be a generator
-        mask = build_mask(
-            lines,
-            header_marker=str(_CFG.get("header_marker", "#")),
-            start_exceptions=_CFG.get("start_exceptions", []),
-        )
-        return slice_blocks_from_mask(
-        lines,
-        mask,
-        marker_visual=(marker or "*"),
-        header_marker=str(_CFG.get("header_marker", "#")),
-        )
+        # keep your UPPERCASE logic; the important part is the same state discipline:
+        # - start a new listing only when the uppercase predicate is true
+        # - append lines once, and flush on next start/header
+        ...
+        return out
 
-    
     # LITERAL mode (explicit markers like "*", "-")
     lit = str(marker or "*").strip()
     lit_rx = re.compile(rf"^\s*{re.escape(lit)}\s+")
@@ -234,36 +210,18 @@ def preprocess_join(blocks: List[Block], *, sanitize: Optional[bool] = None,
 def preprocess_listings(raw_lines: Iterable[str], marker: Optional[str] = None,
                         agency: Optional[str] = None) -> List[str]:
     # map marker into a phase-1 mode
-     
     m = str(marker or _CFG.get("listing_marker", "*")).upper()
-    mu=_CFG.get("listing_marker", "*").upper()
-    marker = _CFG.get("listing_marker")
-    marker_s = (marker or "").strip()
-     
     mode: Optional[str]
     lit: Optional[str] = None
-    
-
-       # ----- CUE path: collapse with SplitByCue, DO NOT call preprocess_join -----
-    if marker_s.upper().startswith("CUE:"):
-    # Example: "CUE:COMMA" | "CUE:DOT" | "CUE:regex:..."
-        rows = split_by_cue(raw_lines, _CFG)
-        return rows
+    if m in {"NUMBERED", "#NUM", "#NUMDOT"}:
+        mode = "NUMBERED"
+    elif m == "UPPERCASE":
+        mode = "UPPERCASE"
     else:
+        mode = "LITERAL"; lit = marker or str(_CFG.get("listing_marker", "*"))
 
-        if m in {"NUMBERED", "#NUM", "#NUMDOT"}:
-            mode = "NUMBERED"
-        elif m == "UPPERCASE":
-            mode = "UPPERCASE"
-       
-        else:
-            mode = "LITERAL"; lit = marker or str(_CFG.get("listing_marker", "*"))
-             
-        blocks = preprocess_split(raw_lines, mode=mode, marker=lit)
-        rows = preprocess_join(blocks)
-    # Ensuere that everylisting have an "*" start
-    #rows = bulletize(((l) for l in rows),_CFG )
-
+    blocks = preprocess_split(raw_lines, mode=mode, marker=lit)
+    rows = preprocess_join(blocks)
     return rows
 
 

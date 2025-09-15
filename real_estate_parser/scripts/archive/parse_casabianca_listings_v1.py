@@ -8,8 +8,8 @@ import re
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from modules.record_parser import parse_record, preprocess_listings
-
+from modules.record_parser import parse_record
+from modules.agency_preprocess import preprocess_listings
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -54,14 +54,22 @@ def detect_section_context(line: str, config: dict):
 
 
 def format_listing_row(parsed, raw_line, listing_no):
+    # Title: first 60 chars or fallback
+    title = raw_line.strip()
+    if len(title) > 60:
+        title = title[:60] + "..."
+
+    # Area: prefer construction, fallback to terrain
+    area_val = parsed.get("area_construction") or parsed.get("area_terrain") or ""
+
     return {
         "Listing ID": listing_no,
-        "Title": (raw_line[:60] + "...") if len(raw_line) > 60 else raw_line,
+        "Title": title if title else parsed.get("neighborhood", ""),
         "Neighborhood": parsed.get("neighborhood", ""),
         "Bedrooms": parsed.get("bedrooms", ""),
         "Bathrooms": parsed.get("bathrooms", ""),
-        "AT": parsed.get("area_terrain", ""),  # keep as separate column if you want
-        "Area": parsed.get("area_construction") or parsed.get("area_terrain") or "",
+        "AT": parsed.get("area_terrain", ""),   # keep raw terrain
+        "Area": area_val,                       # normalized
         "Price": parsed.get("price", ""),
         "Currency": parsed.get("currency", ""),
         "Transaction": parsed.get("transaction", ""),
@@ -70,6 +78,7 @@ def format_listing_row(parsed, raw_line, listing_no):
         "Date": parsed.get("date", ""),
         "Notes": raw_line.strip(),
     }
+
 
 
 
@@ -92,7 +101,7 @@ def main():
         except Exception:
             pass
 
-    agency = args.agency or infer_agency(args.config, default="Eugenia")
+    agency = args.agency or infer_agency(args.config, default="Casabianca")
     date   = args.date   or infer_date(args.file)
 
     with open(args.file, "r", encoding="utf-8") as f:
