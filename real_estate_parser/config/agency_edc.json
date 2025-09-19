@@ -1,0 +1,99 @@
+{ "agency": "EDC",
+ "nemonic":"EDC",
+  "listing_marker": "*",
+  "preprocessing_needed": true,
+  "sanitize": false,
+  "glue_price_tails": true,
+  "glue_area_tails": true,
+  "preprocess": [1,2],
+  "emit_marker": false,
+  "HumanInTheLoop":"lisitingmarker",
+
+  "currency_aliases": {
+    "$": "USD",
+    "L": "HNL",
+    "L.": "HNL",
+    "Lps": "HNL",
+    "Lps.": "HNL",
+    "L. ": "HNL",
+    "LPS.": "HNL",
+    "US$": "USD",
+    "US$.": "USD"
+  },
+
+ "header_marker": "#",
+ "symbols": ["*", "•", ">", "-"],
+
+  "neighborhood_rule": {
+    "strategy": "first_comma",      
+    "max_token_span": 20
+  },
+
+    "neighborhood_flow": {
+    "flow_type": "simple"},
+
+   "abbrev_exceptions": ["col", "res", "urb", "bo","Blvd.","BLVD."],
+
+  "agencies": {
+    "EDC": {
+      "neighborhood_rule": {
+        "strategy_order": ["delimiter"],
+        "prefix_tokens": ["col.", "res.", "barrio", "urb.", "blvd.", "anillo periferico"],
+        "max_token_span": 30
+      }
+    }
+    
+  },
+
+  "transaction_keywords": {
+    "alquiler": "Rent",
+    "alquileres": "Rent",
+    "venta": "Sale",
+    "se vende": "Sale",
+    "renta": "Rent",
+    "valor": "Sale",
+    "precio": "Sale"
+  },
+
+  "type_keywords": {
+    "house": ["res", "residencia", "casa", "townhouse"],
+    "apartment": ["apto", "apartamento", "condominio"],
+    "commercial": ["local", "oficina", "bodega", "negocio"],
+    "land": ["terreno", "lote", "lotes", "manzana", "manzanas", "vrs", "vrs²", "vr²"]
+  },
+  "enable_word_first_bedbath": true,
+
+  "bedroom_keywords": ["hab", "habitaciones", "dormitorios", "dormitorio", "hab.", "habitaci√≥n","Dormitorios"],
+
+  "bathroom_keywords": ["baño", "baños", "banos", "bafios", "ba√±o", "ba√±os"],
+
+  "area_aliases": {
+    "ac": ["mts", "m2", "metros", "mt2", "mts2", "m²", "metros2"],
+    "at": ["vrs", "vr2", "vrs2", "v²", "vr²", "varas", "v2"]
+  },
+
+  "start_exceptions": [
+    "Mts.", "Mts", "mt2", "m²", "mts", "mts2", "Mts. ",
+    "Lps", "Lps.", "L.", "$", "Lps. ",
+    "vr2", "vrs", "Vrs", "Vr²", "Vrs²",
+    "Res.", "res.", "area", "área",
+    "baños", "baño", "habitaciones", "hab.", "cubículos", "dormitorios",
+    "garaje", "lavandería", "cocina", "sala", "comedor"
+  ],
+
+
+
+  "neighborhood_aliases": {
+    "COL. PALMIRA": ["PALMIRA", "COL PALMIRA", "COLONIA PALMIRA"],
+    "COL. LOS ANGELES": ["LOS ANGELES", "COL LOS ANGELES"],
+    "RES. MONSEÑOR FIALLOS": ["MONSEÑOR FIALLOS"]
+  },
+
+  "section_headers": [
+    { "pattern": "ALQUILER DE APARTAMENTOS", "transaction": "Rent", "type": "Apartment", "category": "ALQUILER DE APARTAMENTOS" },
+    { "pattern": "ALQUILER DE CASAS",        "transaction": "Rent", "type": "House",     "category": "ALQUILER DE CASAS" },
+    { "pattern": "VENTA DE APARTAMENTOS",    "transaction": "Sale", "type": "Apartment", "category": "VENTA DE APARTAMENTOS" },
+    { "pattern": "VENTA DE CASAS",           "transaction": "Sale", "type": "House",     "category": "VENTA DE CASAS" },
+    { "pattern": "VENTA DE TERRENOS",        "transaction": "Sale", "type": "Land",      "category": "VENTA DE TERRENOS" }
+  ]
+}

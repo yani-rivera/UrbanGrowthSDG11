@@ -5,7 +5,7 @@ import sys,csv
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from datetime import datetime
 import argparse, csv, json, os, re, hashlib
-from modules.SplitByCue import process
+
 
 ###############
 from modules.parser_utils import clean_text_for_price,extract_price
@@ -68,11 +68,7 @@ def main(file, config_path, output_dir):
 
     # =====LOAD FILE AND PREPROCESS
 
-    blocks = process(
-    file, 
-    marker="CUE:COMMA"
-    )
-    print(blocks)
+
 
     configure_preprocess(cfg)
     listings = preprocess_listings(load_lines(file),
@@ -225,9 +221,12 @@ def main(file, config_path, output_dir):
 #=========
     if rows:
         os.makedirs(args.output_dir, exist_ok=True)
-        dateprint='20151028'
+        date = m.group(1) if m else "unknown"
 
-        outpath = outdir+"/"+agency+"_"+dateprint+".csv"
+    # Extract year from date if possible
+        year = date[:4] if date and date != "unknown" else "unknown"
+
+        outpath = outdir+"/"+agency+"_"+date+".csv"
         with open(outpath, "w", newline="", encoding="utf-8-sig") as f:
             print("[SANITY] type(rows):", type(rows), "len(rows):", len(rows))
             if rows:

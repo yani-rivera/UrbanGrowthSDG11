@@ -22,16 +22,22 @@
 
   "neighborhood_rule": {
     "strategy": "first_comma",      
-    "max_token_span": 20
+    "qualifier_prefixes": ["residencial","fraccionamiento","colonia","barrio","privada","condominio","urb"],
+    "abbr_map": { "residencial":"Res.", "fraccionamiento":"Fracc.", "colonia":"Col.", "barrio":"Bo.", "avenida":"Av." },
+    "expand_map": { "res.":"residencial", "fracc.":"fraccionamiento", "col.":"colonia", "bo.":"barrio", "ave.":"avenida" ,"blv":"boulevard"},
+    "display": { "case": "title", "case_core_only": true }
   },
 
     "neighborhood_flow": {
     "flow_type": "simple"},
 
+
+
+
   "agencies": {
     "SERPECAL": {
       "neighborhood_rule": {
-        "strategy_order": ["delimiter"],
+        "strategy_order": ["delimiter", "prefix_token", "fallback"],
         "prefix_tokens": ["col.", "res.", "barrio", "urb.", "blvd.", "anillo periferico"],
         "max_token_span": 30
       }

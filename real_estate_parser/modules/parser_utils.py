@@ -34,6 +34,12 @@ def _to_float(num: str) -> float | None:
 _BED_WORDS = r"(?:hab(?:itaciones)?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?)"
 BED_RX_1 = re.compile(rf"\b(\d{{1,2}})\s*{_BED_WORDS}\b", re.IGNORECASE)
 BED_RX_2 = re.compile(r"\b(\d{1,2})\s*[Hh]\b")  # 3H, 4 h
+BED_RX_WORD_FIRST = re.compile(
+    rf"\b{_BED_WORDS}\s*[:\-]?\s*(\d{{1,2}})\b",
+    re.IGNORECASE
+)
+
+
 
 # bathrooms: decimals/½, words + shorthand B
 BATH_WORD = r"ba(?:ños|nos|ño|no)s?"
@@ -43,6 +49,14 @@ BATH_RX_SHORT  = re.compile(r"\b(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\s*[Bb]\b")  # 2
 
 # optional "3/2" shorthand: assume beds/baths if enabled
 SLASH_RX = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\b")
+
+# inverse baths
+
+BATH_RX_WORD_FIRST = re.compile(
+    rf"\b{BATH_WORD}\s*[:\-]?\s*(\d{{1,2}}(?:[.,]\d)?|\d\s*1/2|½)\b",
+    re.IGNORECASE
+)
+
 
 ####------Price regex
 _UNIT_PRICE_RE = re.compile(
@@ -202,7 +216,14 @@ def extract_bedrooms(text: str, config: dict | None = None):
     m = BED_RX_2.search(t)
     if m:
         return int(m.group(1))
-    # 3) "3/2" pattern (config-gated; on by default)
+    # 3) word-first "Dormitorios 3"
+    # 3) word-first "Dormitorios 3"
+    if not config or config.get("enable_word_first_bedbath", False):
+        m = BED_RX_WORD_FIRST.search(t)
+        if m:
+         return int(m.group(1))
+
+    # 4) "3/2" pattern (config-gated; on by default)
     allow_slash = True if not config else bool(config.get("allow_slash_bed_bath", True))
     if allow_slash:
         m = SLASH_RX.search(t)
@@ -294,6 +315,16 @@ def extract_bathrooms(text: str, config: dict | None = None) -> Optional[float]:
             if base is not None:
                 baths = (base + 0.5)
                 half_already_accounted = True
+#==========inverse baths
+    if baths is None:                     # after main/y-medio/short failed
+        m = BATH_RX_WORD_FIRST.search(text)
+        if m:
+            grp = m.group(1).replace("½", "0.5").replace(" ", "")
+            grp = grp.replace(",", ".").replace("1/2", "0.5")
+            v = _to_float(grp)
+            if v is not None:
+                baths = v
+
 
     # 3) "X <keyword>" (config-driven)
     if kw_alt and baths is None:

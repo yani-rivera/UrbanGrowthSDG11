@@ -26,7 +26,7 @@ PRICE_RX = re.compile(r"(?i)(?:\$\s*\.?|LPS?\.?|L\.)\s*[\d.,\s]+")
 # Header: optional bullet, 1–6 #'s, optional trailing colon
 HEADER_RX = re.compile(r"""^\s*
     (?:[-*+•–—·]\s+)?        # optional bullet
-    (?P<hashes>#{1,6})\s*    # markdown hashes
+    (?P<hashes>\#{1,6})\s*   # markdown hashes
     (?P<title>.+?)\s*:?\s*$  # header text (trim optional colon)
 """, re.X)
 

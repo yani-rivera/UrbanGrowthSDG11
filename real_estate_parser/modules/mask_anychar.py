@@ -3,6 +3,19 @@
 import re
 from typing import Iterable, Union
 
+#========
+
+
+PAT_START = re.compile(r'(?m)^\s*(?:\d{2}\s*[-–—]\s*\d{2}|\d{2}\.(?!\d))\s*')
+
+
+#======
+ 
+def bulletize_at_start(text: str) -> str:
+    """Replace leading 'dd-dd' or 'dd.' with '* ' at the start of each line."""
+    return PAT_START.sub('* ', text)
+
+
 def normalize_listing_leader(line: str, cfg: dict) -> str:
     """
     Normalize an agency's leading listing marker(s) into the canonical listing_marker.

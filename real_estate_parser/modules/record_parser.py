@@ -107,23 +107,7 @@ def _num_from_locale(s: str) -> Optional[float]:
         return None
 
 
-# --------------------------------------------------------------------------------------
-# Local strict extractors (used if project versions are missing)
-
-
-
-# def clean_neighborhood_before_currency(text: str, cfg: dict) -> str:
-#     """
-#     Return neighborhood = everything before the first currency alias. Makos or other
-#     """
-#     cur_keys = sorted(cfg.get("currency_aliases", {}).keys(), key=len, reverse=True)
-#     cur_alt  = "|".join(re.escape(k) for k in cur_keys)
-
-#     m = re.search(rf"\b(?:{cur_alt})\b", text, flags=re.IGNORECASE)
-#     if m:
-#         return text[:m.start()].strip()
-#     return text.strip()
-
+ 
 
 
 
@@ -199,23 +183,23 @@ def _cur_map(cur: str, cfg: Optional[dict] = None) -> str:
     return m.get(cur, cur)
 
 
-def _local_extract_price(text: str, cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
-    t = text or ""
-    cands = []
-    for m in _PRICE_SYM.finditer(t):
-        cur = m.group(1).upper().rstrip(".")
-        val = _num_from_locale(m.group(2))
-        if val is None:
-            continue
-        cands.append((val, _cur_map(cur, cfg)))
-    cur_seen = cands[-1][1] if cands else None
-    for m in _PRICE_MIL.finditer(t):
-        base = _num_from_locale(m.group(1))
-        if base is not None:
-            cands.append((base * 1000.0, cur_seen))
-    if not cands:
-        return (None, None)
-    return max(cands, key=lambda x: x[0])
+# def _local_extract_price(text: str, cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
+#     t = text or ""
+#     cands = []
+#     for m in _PRICE_SYM.finditer(t):
+#         cur = m.group(1).upper().rstrip(".")
+#         val = _num_from_locale(m.group(2))
+#         if val is None:
+#             continue
+#         cands.append((val, _cur_map(cur, cfg)))
+#     cur_seen = cands[-1][1] if cands else None
+#     for m in _PRICE_MIL.finditer(t):
+#         base = _num_from_locale(m.group(1))
+#         if base is not None:
+#             cands.append((base * 1000.0, cur_seen))
+#     if not cands:
+#         return (None, None)
+#     return max(cands, key=lambda x: x[0])
 
 
 def _norm_unit(u: str) -> str:
@@ -236,18 +220,18 @@ def _local_extract_area(text: str, _cfg: Optional[dict] = None) -> Tuple[Optiona
     return (val, unit) if val is not None else (None, unit)
 
 
-def _local_extract_bedrooms(text: str, cfg: Optional[dict] = None) -> Optional[int]:
-   # t = text or ""
-    #m = BED_RX_WORD.search(t) or BED_RX_H.search(t)
-    #if m:
-    #    v = int(m.group(1))
-    #    return v if 0 < v < 20 else None
-    #if (cfg or {}).get("allow_slash_bed_bath", True):
-    #    m = SLASH_RX.search(t)
-    #    if m:
-    #        v = int(m.group(1))
-    #        return v if 0 < v < 20 else None
-    return extract_bedrooms(text, cfg)
+# def _local_extract_bedrooms(text: str, cfg: Optional[dict] = None) -> Optional[int]:
+#    # t = text or ""
+#     #m = BED_RX_WORD.search(t) or BED_RX_H.search(t)
+#     #if m:
+#     #    v = int(m.group(1))
+#     #    return v if 0 < v < 20 else None
+#     #if (cfg or {}).get("allow_slash_bed_bath", True):
+#     #    m = SLASH_RX.search(t)
+#     #    if m:
+#     #        v = int(m.group(1))
+#     #        return v if 0 < v < 20 else None
+#     return extract_bedrooms(text, cfg)
 
 
 def _to_float_half(s: Optional[str]) -> Optional[float]:
@@ -258,26 +242,26 @@ def _to_float_half(s: Optional[str]) -> Optional[float]:
     return _num_from_locale(s)
 
 
-def _local_extract_bathrooms(text: str, cfg: Optional[dict] = None) -> Optional[float]:
-    t = text or ""
-    m = BATH_RX_MAIN.search(t)
-    if m:
-        v = _to_float_half(m.group(1))
-        return v if v and 0 < v < 20 else None
-    m = BATH_RX_MEDIO.search(t)
-    if m:
-        base = _to_float_half(m.group(1))
-        return (base + 0.5) if base else None
-    m = BATH_RX_B.search(t)
-    if m:
-        v = _to_float_half(m.group(1))
-        return v if v and 0 < v < 20 else None
-    if (cfg or {}).get("allow_slash_bed_bath", True):
-        m = SLASH_RX.search(t)
-        if m:
-            v = _to_float_half(m.group(2))
-            return v if v and 0 < v < 20 else None
-    return None
+# def _local_extract_bathrooms(text: str, cfg: Optional[dict] = None) -> Optional[float]:
+#     t = text or ""
+#     m = BATH_RX_MAIN.search(t)
+#     if m:
+#         v = _to_float_half(m.group(1))
+#         return v if v and 0 < v < 20 else None
+#     m = BATH_RX_MEDIO.search(t)
+#     if m:
+#         base = _to_float_half(m.group(1))
+#         return (base + 0.5) if base else None
+#     m = BATH_RX_B.search(t)
+#     if m:
+#         v = _to_float_half(m.group(1))
+#         return v if v and 0 < v < 20 else None
+#     if (cfg or {}).get("allow_slash_bed_bath", True):
+#         m = SLASH_RX.search(t)
+#         if m:
+#             v = _to_float_half(m.group(2))
+#             return v if v and 0 < v < 20 else None
+#     return None
 
 
 # Wrappers that accept both (text) and (text, config)
@@ -343,13 +327,14 @@ def extract_neighborhood(text: str, cfg: dict) -> str:
     text = text or ""
     
     rule = (cfg or {}).get("neighborhood_rule", {}) or {}
-    ##print("DEBUG.=====RULE from extract_neighborhood:", rule)
+    #print("DEBUG.=====RULE from extract_neighborhood:", rule)
     strategy = rule.get("strategy", "first_line")
     #print("DEBUG.=====StratEgy from extract_neighborhood:", strategy)
     try:
         # pass the rule as cfg to apply_strategy so it sees abbrev_exceptions, etc.
+         
         neigh = apply_strategy(text, strategy, rule)
-        ##print("DEBUG.=====After STRATEGY:", neigh)
+         
         if isinstance(neigh, str) and neigh.strip():
             return neigh.strip()
     except Exception:

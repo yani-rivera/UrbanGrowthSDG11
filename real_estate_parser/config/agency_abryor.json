@@ -5,7 +5,8 @@
   "sanitize": false,
   "glue_price_tails": true,
   "glue_area_tails": true,
-   "listing_marker_tochange": "*", 
+  "human_in_the_loop_star": true,
+
 
   "currency_aliases": {
     "$": "USD",

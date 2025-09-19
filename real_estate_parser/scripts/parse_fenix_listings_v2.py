@@ -18,6 +18,8 @@ from scripts.helpers import (
     count_star_bullets,
     split_raw_and_parse_line,make_prefile_star
 )
+from modules.noboundaries_segmenter import segment_by_anchor,write_pre_file
+
 #####---------------------------------------------------
 
 
@@ -60,10 +62,14 @@ def main(file, config_path, output_dir):
 
     # =====LOAD FILE AND PREPROCESS
 
-    configure_preprocess(cfg)
-    listings = preprocess_listings(load_lines(file),
-                marker=cfg.get("listing_marker"),
-                agency=agency)
+    # configure_preprocess(cfg)
+    # listings = preprocess_listings(load_lines(file),
+    #             marker=cfg.get("listing_marker"),
+    #             agency=agency,)
+    if cfg.get("listing_marker") == "CUE:COMMAORCOLON":
+        listings, meta = segment_by_anchor(load_lines(file), cfg)
+        write_pre_file(listings, agency=agency, original_filename=os.path.basename(file))
+
 
     #=========== Detect tyoe and transaction
 

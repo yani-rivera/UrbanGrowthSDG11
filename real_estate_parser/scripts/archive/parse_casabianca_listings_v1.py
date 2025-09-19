@@ -1,161 +1,236 @@
-#!/usr/bin/env python3
-import argparse
-import csv
-import os
-import sys
-import json
-import re
-from datetime import datetime
+import argparse, csv, os, re, json
 
+
+import sys,csv
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from modules.record_parser import parse_record
-from modules.agency_preprocess import preprocess_listings
-
-def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+from datetime import datetime
+import argparse, csv, json, os, re, hashlib
 
 
-def infer_agency(config_path: str, default: str = "") -> str:
-    if not config_path:
-        return default
-    base = os.path.basename(config_path)
-    m = re.search(r"agency[_\- ]?([A-Za-z0-9]+)", base, re.IGNORECASE)
-    if m:
-        return m.group(1).capitalize()
-    parent = os.path.basename(os.path.dirname(config_path))
-    return parent.capitalize() if parent else (default or "Agency")
+###############
+from modules.parser_utils import clean_text_for_price,extract_price
+from modules.agency_preprocess import configure_preprocess, preprocess_listings
+from modules.record_parser import parse_record, detect_section_context
+from scripts.helpers import infer_agency, infer_date, format_listing_row, FIELDNAMES, DEFAULT_PIPELINE_VERSION,build_release_row
+from scripts.helpers import (
+    make_prefile_numbered,
+    count_numbered_bullets,
+    count_star_bullets,
+    split_raw_and_parse_line,
+)
 
 
-def infer_date(file_path: str, default: str = "") -> str:
-    base = os.path.basename(file_path)
-    m = re.search(r'(20\d{6}|\d{8})', base)
-    if m:
-        d = m.group(1)
-        yyyy, mm, dd = d[0:4], d[4:6], d[6:8]
-        try:
-            return datetime(int(yyyy), int(mm), int(dd)).strftime("%Y-%m-%d")
-        except Exception:
-            pass
-    return default or datetime.now().strftime("%Y-%m-%d")
-
-
-def detect_section_context(line: str, config: dict):
-    t = (line or "").strip().upper()
-    for entry in (config or {}).get("section_headers", []):
-        pat = (entry.get("pattern") or "").strip().upper()
-        if pat and pat in t:
-            return (
-                entry.get("transaction") or None,
-                entry.get("type") or None,
-                entry.get("category") or pat
-            )
-    return (None, None, None)
-
-
-def format_listing_row(parsed, raw_line, listing_no):
-    # Title: first 60 chars or fallback
-    title = raw_line.strip()
-    if len(title) > 60:
-        title = title[:60] + "..."
-
-    # Area: prefer construction, fallback to terrain
-    area_val = parsed.get("area_construction") or parsed.get("area_terrain") or ""
-
-    return {
-        "Listing ID": listing_no,
-        "Title": title if title else parsed.get("neighborhood", ""),
-        "Neighborhood": parsed.get("neighborhood", ""),
-        "Bedrooms": parsed.get("bedrooms", ""),
-        "Bathrooms": parsed.get("bathrooms", ""),
-        "AT": parsed.get("area_terrain", ""),   # keep raw terrain
-        "Area": area_val,                       # normalized
-        "Price": parsed.get("price", ""),
-        "Currency": parsed.get("currency", ""),
-        "Transaction": parsed.get("transaction", ""),
-        "Type": parsed.get("property_type", ""),
-        "Agency": parsed.get("agency", ""),
-        "Date": parsed.get("date", ""),
-        "Notes": raw_line.strip(),
-    }
+#####---------------------------------------------------
 
 
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--file", required=True, help="Raw text file")
-    ap.add_argument("--config", required=True, help="Agency config JSON")
-    ap.add_argument("--output-dir", required=True, help="Output directory for CSV")
-    ap.add_argument("--agency", required=False, help="Agency name (optional, inferred from config)")
-    ap.add_argument("--date", required=False, help="Listing date YYYY-MM-DD (optional, inferred from --file)")
-    ap.add_argument("--neighborhoods", required=False, help="Known neighborhoods JSON (optional)")
-    args = ap.parse_args()
+# in scripts/parse_casabianca_listings_v1.py
 
-    config = load_json(args.config)
 
-    if args.neighborhoods and os.path.exists(args.neighborhoods):
-        try:
-            known_neigh = load_json(args.neighborhoods)
-            # config["known_neighborhoods"] = known_neigh  # optional hook
-        except Exception:
-            pass
+# def make_prefile(input_path, agency, tmp_root="output"):
+#     """Replace inline `NN.` with '*' when masquerade is requested."""
+#     base = os.path.basename(input_path)
+#     pre_dir = os.path.join(tmp_root, agency, "pre", agency.lower())
+#     os.makedirs(pre_dir, exist_ok=True)
+#     pre_path = os.path.join(pre_dir, f"pre_{base}")
+#     with open(input_path, "r", encoding="utf-8", errors="ignore") as fi, \
+#          open(pre_path, "w", encoding="utf-8") as fo:
+#         for ln in fi:
+#             fo.write(re.sub(r"(?<!\d)(\d{1,3})\.(?=\s*\S)", "* ", ln))
+#     return pre_path
 
-    agency = args.agency or infer_agency(args.config, default="Casabianca")
-    date   = args.date   or infer_date(args.file)
+def load_lines(path):
+    with open(path, "r", encoding="utf-8", errors="ignore") as fh:
+        for ln in fh:
+            yield ln.rstrip("\n")
 
-    with open(args.file, "r", encoding="utf-8") as f:
-        raw_lines = [ln.rstrip("\n") for ln in f]
-    listings = preprocess_listings(raw_lines, marker=config.get("listing_marker", "-"))
+def main(file, config_path, output_dir):
+    cfg = json.load(open(config_path, encoding="utf-8"))
+    agency = infer_agency(config_path)
+    date   = infer_date(file)
+    year = date[:4]
 
+     #======
+
+    if cfg.get("listing_marker") == "NUMBERED" and cfg.get("auto_masquerade_numdot"):
+        file = make_prefile_numbered(
+            input_path=file,
+            agency=agency, 
+            year=year      # optional; inferred from path if omitted
+              # ensure we don't silently fall back
+        )
+
+    # =====LOAD FILE AND PREPROCESS
+
+    configure_preprocess(cfg)
+    listings = preprocess_listings(load_lines(file),
+                marker=cfg.get("listing_marker"),
+                agency=agency)
+
+    #=========== Detect tyoe and transaction
+
+    current_tx = current_type = current_cat = None
     rows = []
-    listing_no = 0
-    current_tx, current_type, current_cat = None, None, None
+    for i, ln in enumerate(listings, 1):
 
-    for ln in listings:
-        tx, ty, cat = detect_section_context(ln, config)
+        tx, ty, cat = detect_section_context(ln, cfg)
         if tx or ty or cat:
-            current_tx   = tx  or current_tx
-            current_type = ty  or current_type
-            current_cat  = cat or current_cat
-            continue
+                current_tx  = tx  or current_tx
+                current_type= ty  or current_type
+                current_cat = cat or current_cat
+                continue
 
-        listing_no += 1
+        raw_line, text_for_parse = split_raw_and_parse_line(ln)
+#=================
+###### START PHASE 3==PARSING
+#==================
+        
+        
         parsed = parse_record(
-            ln,
-            config,
-            agency=agency,
-            date=date,
-            listing_no=listing_no,
+            text_for_parse, cfg,
+            agency=agency, date=date, listing_no=i,
             default_transaction=current_tx,
             default_type=current_type,
             default_category=current_cat,
         )
+        # 
+        # --- price: strip per-unit & normalize currency spacing, then prefer higher ---
+   
+        clean_for_price = clean_text_for_price(text_for_parse)
+        try_amount, try_curr = extract_price(clean_for_price, cfg)
+        cur_amount = parsed.get("price") or ""
+         
+        if try_amount and (not cur_amount or float(try_amount) > float(cur_amount or 0)):
+            parsed["price"], parsed["currency"] = try_amount, try_curr
 
-        if not isinstance(parsed, dict):
-            continue
+        
 
-        if not parsed.get("property_type") or str(parsed.get("property_type")).lower() == "other":
-            parsed["property_type"] = current_type or "other"
-        if not parsed.get("transaction"):
-            parsed["transaction"] = current_tx or ""
-        if not parsed.get("category"):
-            parsed["category"] = current_cat or ""
+    
 
-        rows.append(format_listing_row(parsed, ln, listing_no))
+        # --- area/AT mapping (construction m² preferred; terrain v² as fallback) ---
+        ac = parsed.get("area_construction_m2") or parsed.get("area_m2") or ""
+        at = parsed.get("area_terrain_v2")      or parsed.get("terrain_v2") or ""
+        area_val, area_unit = ("", "")
 
-    os.makedirs(args.output_dir, exist_ok=True)
-    outpath = os.path.join(args.output_dir, f"{agency}_{date.replace('-', '')}.csv")
 
+        if ac:
+            area_val, area_unit = ac, "m²"
+        elif at:
+            area_val, area_unit = at, "v²"
+        AT_val, AT_unit = (at or "", "v²" if at else "")
+
+
+        # line to display in notes
+
+        final_line =  ln
+
+        #####
+        
+
+        row = {
+            "Listing ID": i,
+            "title": final_line[:60],
+            "neighborhood": parsed.get("neighborhood",""),
+            "bedrooms": parsed.get("bedrooms",""),
+            "bathrooms": parsed.get("bathrooms",""),
+
+        # land size
+            "AT": parsed.get("AT",""),
+            "AT_unit": parsed.get("AT_unit",""),
+
+        # built/general area
+            "area": parsed.get("area",""),
+            "area_unit": parsed.get("area_unit",""),
+            "area_m2": parsed.get("area_m2",""),
+
+            "price": parsed.get("price",""),
+            "currency": parsed.get("currency",""),
+            "transaction": parsed.get("transaction",""),
+            "property_type": parsed.get("property_type",""),
+            "agency": parsed.get("agency","") or agency,
+            "date": parsed.get("date","") or date,
+            "raw": final_line,
+            "source_type": 'ocr_manual',
+            "ingestion_id": os.path.basename(file),
+            "pipeline_version": cfg.get("pipeline_version", "v1.0"),
+        }
+
+        ###debug
+        
+        row = format_listing_row(
+        parsed, raw_line, i,
+        source_type="ocr_manual",
+        ingestion_id=os.path.basename(file),
+        pipeline_version="v1.0",)
+        
+        
+        if row and isinstance(row, dict):
+            rows.append(row)
+             
+            
+        output_fields = [
+        "Listing ID", "title", "neighborhood", "bedrooms", "bathrooms",
+        "AT", "AT_unit",
+        "area", "area_unit", "area_m2",
+        "price", "currency", "transaction", "property_type",
+        "agency", "date", "notes", "source_type", "ingestion_id", "pipeline_version",
+        ]
+
+        
+
+     
+ #================ FOR END========
+ # Ensure agency comes from args
+    agency="casabianca"
+
+    # Derive date from prefile if not already set
+    #if "date" not in locals() or not date:
+    file_name = os.path.basename(args.file)
+    m = re.search(r'(\d{8})', file_name)  # look for 20151028
+    date = m.group(1) if m else "unknown"
+
+    # Extract year from date if possible
+    year = date[:4] if date and date != "unknown" else "unknown"
+
+    # Build directory: output/Agency/Year
+    outdir = os.path.join(args.output_dir, "Casabianca", year)
+  
+#=========
     if rows:
-        with open(outpath, "w", newline="", encoding="utf-8") as outcsv:
-            writer = csv.DictWriter(outcsv, fieldnames=rows[0].keys())
+        os.makedirs(args.output_dir, exist_ok=True)
+        dateprint=date
+
+        outpath = outdir+"/"+agency+"_"+dateprint+".csv"
+        with open(outpath, "w", newline="", encoding="utf-8-sig") as f:
+            print("[SANITY] type(rows):", type(rows), "len(rows):", len(rows))
+            if rows:
+                #print("[SANITY] first row keys:", list(rows[0].keys()))
+                print("[SANITY] sample last row title:", rows[-1].get("title"))
+
+            writer = csv.DictWriter(f, fieldnames=output_fields)
             writer.writeheader()
-            writer.writerows(rows)
+            for r in rows:
+            # make sure all fields exist
+                for k in output_fields:
+                    r.setdefault(k, "")
+                writer.writerow(r)
+
         print(f"✅ Exported {len(rows)} listings to {outpath}")
     else:
         print(f"⚠️ No listings parsed. Check header detection and marker in {args.file}.")
-
-
+       
+        
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--file", required=True)
+    ap.add_argument("--config", required=True)
+    ap.add_argument("--output-dir", required=True)
+    ap.add_argument("--debug", action="store_true")
+    args = ap.parse_args()
+
+    print("[entry] starting parse_casabianca_listings_v1.py")
+    main(args.file, args.config, args.output_dir)
+
+  
