@@ -1,48 +1,21 @@
 {
-  "agency": "Makos",
-  "nemonic":"MAKOS",
+  "agency": "Roca",
+  "nemonic":"ROCA",
   "header_marker": "#",
   "listing_marker": "NUMBERED",      
   "auto_masquerade_numdot": true,
   "sanitize": false,
   "glue_price_tails": true,
-  "glue_area_tails": false,
+  "glue_area_tails": true,
   "preprocess": [1,2],
   "emit_marker": true,
 
 
- "neighborhood_rule": {
-  "strategy": "before_brack",
-  "strategy_order": ["delimiter"],
-  "max_token_span": 40,
-  "abbrev_exceptions": ["col", "res", "urb", "bo","Blvd.","BLVD."],
-  "neighborhood_split_on_currency": true,
-  "neighborhood_pre_price_keep": "last_token",
-  "currency_aliases": {
-      "$": "USD",
-      "US$": "USD",
-      "USD": "USD",
-      "U$S": "USD",
-      "DOLARES": "USD",
-      "DÓLARES": "USD",
-      "L": "LPS",
-      "L.": "LPS",
-      "LPS": "LPS",
-      "LPS.": "LPS",
-      "LEMPIRA": "LPS",
-      "LEMPIRAS": "LPS",
-      "Lps.": "LPS",
-      "Lps. ": "LPS"
-    }
-
- },
-
- "price_hints": {
-  "prefer_first_after_dot": true,
-  "scan_window_chars": 40,
-  "allow_range": true
-},
-
+  "neighborhood_rule": {
+    "strategy": "first_comma",      
+    "max_token_span": 30,
+     "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av."]
+  },
 
   "bathroom_keywords": ["baño", "baños", "banos", "bafios", "ba√±o", "ba√±os","bañod"],
   "bathroom_infer_from_bedrooms": true,
@@ -61,7 +34,7 @@
    ],
 
 
-  "currency_aliases": { "L.": "HNL", "$": "USD", "US$": "USD" ,"$": "USD","Lps,":"HNL","Lps, ":"HNL","US$ ": "USD","Lps.":"HNL"},
+  "currency_aliases": { "L.": "HNL", "$": "USD", "US$": "USD" ,"$": "USD","Lps,":"HNL","Lps, ":"HNL","US$ ": "USD","U$":"USD"},
   
   "area_aliases": {
     "ac": ["m²","m2","mt2","mts2","metros cuadrados"],
@@ -87,22 +60,33 @@
     "Commercial": ["local","bodega"],
     "Land": ["terreno","lote"]
   },
-"parsing_overrides": {
+  "parsing_overrides": {
   "allow_slash_bed_bath": true,
   "price_accept_mil": true,
   "price_accept_k": true,
   "price_require_currency": true,
   "treat_price_per_m2_as": "skip",
+  "inherit_currency_in_ranges": true,
+  "inherit_currency_in_ranges_min_value": 1000,
+  "multi_price_policy": "first_only",
+  
   "price_keywords": [
     "precio","venta","alquiler","renta",
     "mensual","/mes","por mes"
   ],
-  "multi_price_policy": "range",
+  
   "multi_price_pair_by_area": true, 
   "multi_price_area_window_chars": 40,
   "multi_price_max_variants": 4
 },
 
+"masks_extras": {
+  "levels": ["niv", "niv.", "nivel", "niveles"],
+  "parking": ["gje", "garage", "garaje", "garajes", "cochera", "cocheras", "parqueo", "parqueos"],
+  "labels": ["ID", "Ref", "Código", "Code", "Price"]
+},
+
+"range_separators": ["-", "–", "—", "/", " to ", " a ", " hasta "],
 
 "section_headers": [
   { "pattern": "#ALQUILER DE CASAS",              "transaction": "Rent", "type": "House",      "category": "ALQUILER DE CASAS" },

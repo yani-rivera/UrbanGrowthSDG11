@@ -3,7 +3,7 @@
   "nemonic":"FENX",
   "preprocessing_needed": true,
   "header_marker": "#",
-  "listing_marker": "CUE:COMMAORCOLON" , 
+  "listing_marker": "noboundaries" , 
   "listing_marker_tochange":null,   
   "auto_masquerade_numdot": false,
   "sanitize": false,

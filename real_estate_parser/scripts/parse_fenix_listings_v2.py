@@ -62,11 +62,8 @@ def main(file, config_path, output_dir):
 
     # =====LOAD FILE AND PREPROCESS
 
-    # configure_preprocess(cfg)
-    # listings = preprocess_listings(load_lines(file),
-    #             marker=cfg.get("listing_marker"),
-    #             agency=agency,)
-    if cfg.get("listing_marker") == "CUE:COMMAORCOLON":
+   
+    if cfg.get("listing_marker") == "noboundaries":
         listings, meta = segment_by_anchor(load_lines(file), cfg)
         write_pre_file(listings, agency=agency, original_filename=os.path.basename(file))
 

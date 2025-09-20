@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SplitByCue_v2.8 20250920 =>cue decoded
+SplitByCue_v2
 ---------------
 Robust splitter for agency TXT feeds using a cue character (default comma) to
 identify record starts, with safeguards for:
@@ -62,44 +62,6 @@ def read_lines_utf8_sig(path: str) -> List[str]:
         return f.readlines()
 
 # ------------------------------ Heuristics -----------------------------------
-
-def decode_cue(cue: str) -> str:
-    """
-    Decode a cue name into its corresponding character.
-
-    Supported mappings:
-      CUE:DOT       -> "."
-      CUE:COMMA     -> ","
-      CUE:SEMICOLON -> ";"
-      CUE:COLON     -> ":"
-
-    If cue is already one of the characters (".", ",", ";", ":"),
-    it is returned unchanged.
-
-    Raises ValueError if cue is not recognized.
-    """
-    if not cue:
-        raise ValueError("Cue cannot be empty")
-
-    # Direct characters are allowed
-    if cue in {".", ",", ";", ":"}:
-        return cue
-
-    # Normalize case
-    cue_norm = cue.strip().upper()
-
-    mapping = {
-        "CUE:DOT": ".",
-        "CUE:COMMA": ",",
-        "CUE:SEMICOLON": ";",
-        "CUE:COLON": ":",
-    }
-
-    if cue_norm in mapping:
-        return mapping[cue_norm]
-
-    raise ValueError(f"Unknown cue: {cue}")
-
 
 def first_alpha_token(text: str) -> str:
     m = FIRST_ALPHA_TOKEN_RE.search(text)
@@ -227,14 +189,13 @@ def _split_by_cue_core(
 ) -> List[str]:
     out: List[str] = []
     current: str | None = None
-    #print("DEBUG:",cue)
+
     def flush():
         nonlocal current
         if current is not None:
             s = re.sub(r"\s+", " ", current).strip().rstrip(",;")
             if s:
                 out.append(s)
-                 
         current = None
 
     for raw in lines:
@@ -304,9 +265,36 @@ def _coerce_cfg(cfg):
 
 
 # ----- Back-compat wrapper: accept dict or path as second arg -----------------
+from pathlib import Path
+import json as _json
 
-
-
+def _coerce_cfg(cfg_like):
+    """Return a dict from a cfg-like value: dict or path to JSON/YAML/TOML."""
+    if cfg_like is None or isinstance(cfg_like, dict):
+        return cfg_like or {}
+    p = Path(cfg_like)
+    if not p.exists():
+        raise FileNotFoundError(f"Config file not found: {p}")
+    sfx = p.suffix.lower()
+    txt = p.read_text(encoding="utf-8")
+    if sfx == ".json":
+        return _json.loads(txt)
+    if sfx in (".yaml", ".yml"):
+        try:
+            import yaml  # type: ignore
+        except Exception as e:
+            raise RuntimeError("YAML config specified but PyYAML is not installed. Run `pip install pyyaml`.") from e
+        return yaml.safe_load(txt) or {}
+    if sfx == ".toml":
+        try:
+            import tomllib  # py>=3.11
+        except Exception:
+            try:
+                import tomli as tomllib  # type: ignore
+            except Exception as e:
+                raise RuntimeError("TOML config specified but tomllib/tomli not available. Install `tomli` for Py<3.11.") from e
+        return tomllib.loads(txt) or {}
+    raise ValueError(f"Unsupported config file type: {sfx}")
 
 def split_by_cue(lines: Iterable[str], cfg: Dict[str, Any] | str | None = None, **overrides) -> List[str]:
     """Compat entry point.
@@ -318,11 +306,8 @@ def split_by_cue(lines: Iterable[str], cfg: Dict[str, Any] | str | None = None, 
     Dict values are merged with explicit keyword overrides.
     """
     cfg = _coerce_cfg(cfg)
-    cue=cfg.get("listing_marker", DEFAULT_CUE)
-    cue=decode_cue(cue)
-    #print("DEBUG DECODE CUE",cue)
     params = {
-        "cue":cue,
+        "cue": cfg.get("cue", DEFAULT_CUE),
         "max_cue_pos": int(cfg.get("max_cue_pos", DEFAULT_MAX_CUE_POS)),
         "require_upper": bool(cfg.get("require_upper", DEFAULT_REQUIRE_UPPER)),
         # legacy key: no_trailing_comma_end (True disables glue)
@@ -334,7 +319,6 @@ def split_by_cue(lines: Iterable[str], cfg: Dict[str, Any] | str | None = None, 
     }
     # Apply explicit overrides on top
     params.update(overrides)
-    #print("DEBUG",params)
     return _split_by_cue_core(lines, **params)
 
 # --------------------------------- CLI ---------------------------------------

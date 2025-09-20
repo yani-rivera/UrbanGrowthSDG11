@@ -148,28 +148,26 @@ def _norm_spaces(s: str) -> str:
 def normalize_text(text):
     return re.sub(r"[^\w\s]", "", text.lower())
 
-def build_currency_regex(cfg: dict) -> Optional[re.Pattern]:
+
+def split_on_first_key(text: str, cfg: Dict, start: int = 0) -> str:
     """
-    Compile a regex that matches any configured currency alias (case-insensitive).
-    Uses cfg["currency_aliases"].keys() as the single source of truth.
+    Return everything before the first alias in cfg["split_currency"].
+    If no alias is found, return the original text.
     """
-    keys = list((cfg or {}).get("currency_aliases", {}).keys())
+    keys = cfg.get("currency_split", [])
     if not keys:
-        return None
-    # Longest-first so 'US$' matches before '$'
-    alt = "|".join(re.escape(k) for k in sorted(keys, key=len, reverse=True))
-    return re.compile(rf"(?:{alt})", flags=re.IGNORECASE)
+        return text
 
-# --------------------------------------------------------------------------------------
-# Neighborhood (best-effort). If you already have a dedicated module, feel free to override.
+    # Longest-first so "Lps." wins over "L"
+    pattern = "|".join(re.escape(k) for k in sorted(keys, key=len, reverse=True))
+    rx = re.compile(pattern, flags=re.IGNORECASE)
 
-
-
-    # 2) Fallback: first chunk before delimiter
-    if delim in text:
-        return _norm_spaces(text.split(delim, 1)[0]).upper()
-
-    return None
+    m = rx.search(text, pos=start)
+    if m:
+        return text[:m.start()].strip()
+    
+    else:
+        return text
 
 
 
@@ -177,11 +175,11 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
      
     cfg = cfg or {}
     text = text or ""
-    #text=strip_property_prefixes(text,cfg)
     text=apply_abbrev_reduction(text,cfg)
     temtext=text
-    
     span = int(cfg.get("max_token_span", 40))
+    #print(cfg.get("currency_aliases",{}))
+    
 
     # Normalize leading bullets/spaces once for all strategies
     text = text.lstrip("*• ")
@@ -217,26 +215,28 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
     elif strategy == "before_colon":
         temtext= text.split(':')[0]
 
+    elif strategy == "before_dot":
+        idx = text.find(".")
+        if idx >= 4:
+            temtext = text[:idx]
+        else:
+            temtext = text
+
+
     elif strategy == "before_comma_or_colon":
         temtext= re.split('[;,]', text)[0]
 
     elif strategy == "before_currency":
-        rx = build_currency_regex(cfg)
-        if not rx:
-            temtext=""
-        m = rx.search(text or "")
-        temtext= text[: m.start()].strip() if m else ""
-
-
-
-    elif strategy == "is_currency":
-        # Diagnostic strategy: returns the matched currency token or "" if none.
-        rx = build_currency_regex(cfg)
-        if not rx:
-            temtext=""
-        else:
-            m = rx.search(text or "")
-            temtext= m.group(0)
+        
+        temtext=split_on_first_key(text,cfg,5)
+       
+    elif strategy == "before_brack":
+        
+        temtext= text.split('(')[0]
+          
+    elif strategy == "before_semicolon":
+        
+        temtext= text.split(';')[0]
 
     # Back-compat common name
     elif strategy == "before_comma_or_dot":

@@ -16,14 +16,16 @@ from scripts.helpers import (
     make_prefile_numbered,
     count_numbered_bullets,
     count_star_bullets,
-    split_raw_and_parse_line,write_prefile,make_prefile_star
+    split_raw_and_parse_line,make_prefile_star
 )
+from modules.noboundaries_segmenter import segment_by_anchor,write_pre_file
+
 #####---------------------------------------------------
 
 
 
 
-# in scripts/parse_satelite_listings_v1.py
+# in scripts/parse_inmovivienda_listings_v1.py
 
 
 
@@ -37,9 +39,9 @@ def main(file, config_path, output_dir):
     cfg = json.load(open(config_path, encoding="utf-8"))
     agency = infer_agency(config_path)
     date   = infer_date(file)
-    
     year = date[:4]
-     #======
+
+
 
     # ----- Phase 1: normalize leading listing markers (only if configured)
     # Phase-1 only if there's anything to change
@@ -53,23 +55,23 @@ def main(file, config_path, output_dir):
               # ensure we don't silently fall back
         )
 
+     #======
+
     if cfg.get("listing_marker") == "NUMBERED" and cfg.get("auto_masquerade_numdot"):
         file = make_prefile_numbered(file, agency)
 
     # =====LOAD FILE AND PREPROCESS
 
-    configure_preprocess(cfg)
-    listings = preprocess_listings(load_lines(file),
+   
+    if cfg.get("listing_marker") == "noboundaries":
+        listings, meta = segment_by_anchor(load_lines(file), cfg)
+        write_pre_file(listings, agency=agency, original_filename=os.path.basename(file))
+
+    else:
+            configure_preprocess(cfg)
+            listings = preprocess_listings(load_lines(file),
                 marker=cfg.get("listing_marker"),
                 agency=agency)
-    
-    ### Keep a copy of preprocessed lines for notes
-
-    out_path = write_prefile(
-    registry_path="config/agencies_registry.json",
-    input_file=args.file,   # the same file you’re parsing
-    rows=listings
-    )
 
 
     #=========== Detect tyoe and transaction
@@ -86,11 +88,6 @@ def main(file, config_path, output_dir):
                 continue
 
         raw_line, text_for_parse = split_raw_and_parse_line(ln)
-
- #######
-
-    
-
 #=================
 ###### START PHASE 3==PARSING
 #==================
@@ -191,7 +188,7 @@ def main(file, config_path, output_dir):
      
  #================ FOR END========
  # Ensure agency comes from args
-    agency="Satelite"
+    agency="inmovivienda"
 
     # Derive date from prefile if not already set
     #if "date" not in locals() or not date:
@@ -203,18 +200,18 @@ def main(file, config_path, output_dir):
     year = date[:4] if date and date != "unknown" else "unknown"
 
     # Build directory: output/Agency/Year
-    outdir = os.path.join(args.output_dir, "Satelite", year)
+    outdir = os.path.join(args.output_dir, "Inmovivienda", year)
     print("outdoe==>",outdir)
 #=========
     if rows:
         os.makedirs(args.output_dir, exist_ok=True)
-        dateprint='20151028'
+        dateprint=date
 
         outpath = outdir+"/"+agency+"_"+dateprint+".csv"
         with open(outpath, "w", newline="", encoding="utf-8-sig") as f:
             print("[SANITY] type(rows):", type(rows), "len(rows):", len(rows))
             if rows:
-                print("[SANITY] first row keys:", list(rows[0].keys()))
+                #print("[SANITY] first row keys:", list(rows[0].keys()))
                 print("[SANITY] sample last row title:", rows[-1].get("title"))
 
             writer = csv.DictWriter(f, fieldnames=output_fields)
@@ -240,7 +237,7 @@ if __name__ == "__main__":
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
-    print("[entry] starting parse_satelite_listings_v1.py")
+    print("[entry] starting parse_inmovivienda_listings_v1.py")
     main(args.file, args.config, args.output_dir)
 
   

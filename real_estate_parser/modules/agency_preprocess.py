@@ -113,12 +113,14 @@ def preprocess_split(raw_lines, *, mode=None, marker=None):
         return preprocess_split(raw_lines, mode="LITERAL", marker="*")
 
     if mode == "UPPERCASE":
+        #print("DEBUG ENTER SPLIT UPPERCASE")
         lines = list(raw_lines)  # raw_lines may be a generator
         mask = build_mask(
             lines,
             header_marker=str(_CFG.get("header_marker", "#")),
             start_exceptions=_CFG.get("start_exceptions", []),
         )
+    
         return slice_blocks_from_mask(
         lines,
         mask,
@@ -247,6 +249,7 @@ def preprocess_listings(raw_lines: Iterable[str], marker: Optional[str] = None,
        # ----- CUE path: collapse with SplitByCue, DO NOT call preprocess_join -----
     if marker_s.upper().startswith("CUE:"):
     # Example: "CUE:COMMA" | "CUE:DOT" | "CUE:regex:..."
+        #print("calling split by cue")
         rows = split_by_cue(raw_lines, _CFG)
         return rows
     else:
@@ -254,6 +257,7 @@ def preprocess_listings(raw_lines: Iterable[str], marker: Optional[str] = None,
         if m in {"NUMBERED", "#NUM", "#NUMDOT"}:
             mode = "NUMBERED"
         elif m == "UPPERCASE":
+            
             mode = "UPPERCASE"
        
         else:

@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 import os, re, json, csv
 from pathlib import Path
 from datetime import datetime
-
+import unicodedata
 
 # --- CSV schema (units included) ---
 # scripts/helpers.py
@@ -41,34 +41,40 @@ def _dt(date_str: str) -> datetime:
             pass
     raise ValueError(f"Bad date: {date_str}")
 
-def _render_pre_out(registry_path: Path, agency: str, date_str: str) -> Path:
-    """Return the pre_out file path for agency/date based on registry template."""
-    reg = json.loads(Path(registry_path).read_text(encoding="utf-8"))
-    tmpl = reg["defaults"]["paths"]["pre_out"]
-    dt = _dt(date_str)
-    ctx = {
-        "Agency": agency.capitalize(),
-        "agency": agency.lower(),
-        "year": dt.strftime("%Y"),
-        "yyyymm": dt.strftime("%Y%m"),
-        "date": dt.strftime("%Y%m%d"),
-    }
-    return Path(tmpl.format(**ctx))
 
-def write_prefile(registry_path: str | Path, agency: str, date_str: str, rows: list[str]) -> Path:
-    """
-    Write prefile (one row per line) to the correct path defined in agencies_registry.json.
-    Returns the written path.
-    """
-    out_path = _render_pre_out(Path(registry_path), agency, date_str)
+
+
+def write_prefile(registry_path, input_file, rows, output_root="output"):
+    input_file = Path(input_file)
+
+    # infer agency + date from the *input file*
+    agency_key = infer_agency(input_file)              # e.g. "agency_propiedades"
+    base       = agency_key.replace("agency_", "")     # "propiedades"
+    date_str   = infer_date(input_file).replace("-", "")  # "20101126"
+    year       = date_str[:4]
+    base=base.split("_")[0]
+    # directory casing from registry
+    reg   = json.loads(Path(registry_path).read_text(encoding="utf-8"))
+    entry = (reg.get("agencies") or {}).get(agency_key, {})
+    style = str(entry.get("dir_case", "lower")).lower()
+    if style == "upper":
+        Agency = base.upper()
+    elif style == "mixed":
+        Agency = entry.get("Agency (in-file)", base)
+    else:
+        Agency = base.capitalize()  # default neat dir name
+
+    # build the canonical path (no template, no filename in directory)
+    out_path = Path(output_root) / Agency / "pre" / year / f"pre_{base.lower()}_{date_str}.txt"
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # one-time sanity print (remove after confirming)
+    #print("[prefile ctx] Agency=", Agency, " base=", base, " date=", date_str, " ->", out_path)
+
     with out_path.open("w", encoding="utf-8", newline="\n") as f:
         for r in rows:
             f.write((r or "").rstrip("\n") + "\n")
     return out_path
-
-#==========End prefile write
-
 
 
 
@@ -208,7 +214,7 @@ def infer_date(file_path: str, default: str = "") -> str:
     return f"{y}-{mo}-{d}"
 
 # --- Numbered-listings prefile (shared by all agencies) -----------------------
-import os, re, unicodedata
+
 
 # Match only real bullets at line start: 1. TEXT / 12) TEXT / 7.- TEXT
 # Avoid prices like 1.100 or 1,000 by requiring a letter after the bullet.

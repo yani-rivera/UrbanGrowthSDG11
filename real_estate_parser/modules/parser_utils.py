@@ -31,8 +31,11 @@ def _to_float(num: str) -> float | None:
         return None
 
 # bedrooms: words + shorthand H
-_BED_WORDS = r"(?:hab(?:itaciones)?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?)"
-BED_RX_1 = re.compile(rf"\b(\d{{1,2}})\s*{_BED_WORDS}\b", re.IGNORECASE)
+#_BED_WORDS = r"(?:hab(?:itaciones)?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?)"
+_BED_WORDS = r"(?:hab(?:itaciones)?|habit\.?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?)"
+
+
+BED_RX_1 = re.compile(rf"\b(\d{{1,2}})\s*{_BED_WORDS}(?!\w)", re.IGNORECASE)
 BED_RX_2 = re.compile(r"\b(\d{1,2})\s*[Hh]\b")  # 3H, 4 h
 BED_RX_WORD_FIRST = re.compile(
     rf"\b{_BED_WORDS}\s*[:\-]?\s*(\d{{1,2}})\b",

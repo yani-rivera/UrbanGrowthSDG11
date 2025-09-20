@@ -61,14 +61,12 @@ def main(file, config_path, output_dir):
     
     #============
     
-    out_path = write_prefile(
+    write_prefile(
     registry_path="config/agencies_registry.json",
-    agency="Simar",
-    date_str=date,   # or "2025-09-04"
+    input_file=args.file,   # the same file you’re parsing
     rows=listings
-        )
-    print("prefile saved at:", out_path)
-
+    )
+    
     #print ("DEBUG LISTITNG MARKER==>",file)
 
     #=========== Detect tyoe and transaction

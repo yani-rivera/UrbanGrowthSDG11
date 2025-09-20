@@ -16,7 +16,7 @@ from scripts.helpers import (
     make_prefile_numbered,
     count_numbered_bullets,
     count_star_bullets,
-    split_raw_and_parse_line,make_prefile_star
+    split_raw_and_parse_line,make_prefile_star,write_prefile
 )
 #####---------------------------------------------------
 
@@ -77,6 +77,7 @@ def main(file, config_path, output_dir):
                 continue
 
         raw_line, text_for_parse = split_raw_and_parse_line(ln)
+        
 #=================
 ###### START PHASE 3==PARSING
 #==================
@@ -191,6 +192,11 @@ def main(file, config_path, output_dir):
     # Build directory: output/Agency/Year
     outdir = os.path.join(args.output_dir, "Inverprop", year)
     print("outdoe==>",outdir)
+
+#----------------PREFILE
+
+    write_prefile(outdir, agency, date,text_for_parse)
+
 #=========
     if rows:
         os.makedirs(args.output_dir, exist_ok=True)

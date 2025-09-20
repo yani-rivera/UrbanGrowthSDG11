@@ -12,8 +12,7 @@
 
 
  "neighborhood_rule": {
-  "strategy": "before_brack",
-  "strategy_order": ["delimiter"],
+  "strategy": "before_comma_or_dot",
   "max_token_span": 40,
   "abbrev_exceptions": ["col", "res", "urb", "bo","Blvd.","BLVD."],
   "neighborhood_split_on_currency": true,

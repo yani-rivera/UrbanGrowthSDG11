@@ -1,18 +1,24 @@
 {"agency": "Simar",
   "nemonic":"SIMR",
   "preprocessing_needed": true,
-  "listing_marker": "CUE:dot",
+  "listing_marker": "CUE:DOT",
+  "listing_marker_tochange":null,
   "auto_masquerade_numdot": false,
   "sanitize": true,
   "glue_price_tails": true,
   "glue_area_tails": true,
-  "preprocess": [2],
-  "emit_marker": false, 
+  "preprocess": [1,2],
+  "emit_marker": false,
+  "max_cue_pos":30,
+  "require_upper":true,
+  "trailing_comma_glue":true,
+  "require_price_before":false,
+
    "neighborhood_rule": {
     "strategy_order": ["delimiter"],
     "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av.","Lps."],    
     "max_token_span": 25,
-     "strategy": "dot"    
+     "strategy": "before_dot"    
   },
 
     "neighborhood_flow": {"flow_type": "simple"},

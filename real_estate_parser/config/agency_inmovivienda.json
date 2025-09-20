@@ -1,55 +1,23 @@
-{"agency": "Galex",
-  "nemonic":"GALX",
+{"agency": "Inmovivienda",
+  "nemonic":"INMVD",
   "preprocessing_needed": true,
-  "listing_marker": "noboundaries",
+  "listing_marker": "*",
   "auto_masquerade_numdot": false,
   "sanitize": true,
   "glue_price_tails": true,
   "glue_area_tails": true,
   "preprocess": [2],
   "emit_marker": false, 
-   "require_uppercase": true,
-
-
-  "neighborhood_rule": {
-    "strategy": "before_currency", 
+   "neighborhood_rule": {
+    "strategy": "before_colon", 
     "strategy_order": ["delimiter"],
     "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av."],    
     "max_token_span": 20
   },
 
-  "neighborhood_flow": {"flow_type": "simple"},
-  "currency_split":["$","L.","("],
-
-  "currency_aliases": {
-    "$": "USD",
-    "$.": "USD",
-    "$. ": "USD",
-    "$ ": "USD",
-    "L": "HNL",
-    "L.": "HNL",
-    "Lps": "HNL",
-    "Lps.": "HNL",
-    "L. ": "HNL",
-    "LPS.": "HNL",
-    "L ": "HNL"
-  },
-  "symbols": ["*", "•", ">", "-"],
-  "start_exceptions": [
-    "Mts.", "Mts", "mt2", "m²", "mts", "mts2", "Mts. ",
-    "Lps", "Lps.", "L.", "$", "Lps. ",
-    "vr2", "vrs", "Vrs", "Vr²", "Vrs²",
-    "Res.", "res.", "area", "área",
-    "baños", "baño", "habitaciones", "hab.", "cubículos", "dormitorios",
-    "garaje", "lavandería", "cocina", "sala", "comedor"
-  ],
-  "neighborhood_aliases": {
-    "COL. PALMIRA": ["PALMIRA", "COL PALMIRA", "COLONIA PALMIRA"],
-    "COL. LOS ANGELES": ["LOS ANGELES", "COL LOS ANGELES"],
-    "RES. MONSEÑOR FIALLOS": ["MONSEÑOR FIALLOS"]
-  },
-
- "mode": "plain",
+    "neighborhood_flow": {"flow_type": "simple"},
+  
+"mode": "plain",
   "windows": {
   "head_window_chars": 60,
   "price_lookahead_lines": 2,
@@ -98,6 +66,34 @@
 
 
 
+
+  "currency_aliases": {
+    "$": "USD",
+    "$.": "USD",
+    "$. ": "USD",
+    "$ ": "USD",
+    "L": "HNL",
+    "L.": "HNL",
+    "Lps": "HNL",
+    "Lps.": "HNL",
+    "L. ": "HNL",
+    "LPS.": "HNL",
+    "L ": "HNL"
+  },
+  "symbols": ["*", "•", ">", "-"],
+  "start_exceptions": [
+    "Mts.", "Mts", "mt2", "m²", "mts", "mts2", "Mts. ",
+    "Lps", "Lps.", "L.", "$", "Lps. ",
+    "vr2", "vrs", "Vrs", "Vr²", "Vrs²",
+    "Res.", "res.", "area", "área",
+    "baños", "baño", "habitaciones", "hab.", "cubículos", "dormitorios",
+    "garaje", "lavandería", "cocina", "sala", "comedor"
+  ],
+  "neighborhood_aliases": {
+    "COL. PALMIRA": ["PALMIRA", "COL PALMIRA", "COLONIA PALMIRA"],
+    "COL. LOS ANGELES": ["LOS ANGELES", "COL LOS ANGELES"],
+    "RES. MONSEÑOR FIALLOS": ["MONSEÑOR FIALLOS"]
+  },
 
     "area_aliases": {
     "ac": ["m²", "m2", "mt2", "mts2", "mts²", "metros", "metros2", "metros²"],

@@ -1,25 +1,22 @@
-{"agency": "Galex",
-  "nemonic":"GALX",
+{"agency": "Invisa",
+  "nemonic":"INVSA",
   "preprocessing_needed": true,
-  "listing_marker": "noboundaries",
+  "listing_marker": "*",
   "auto_masquerade_numdot": false,
   "sanitize": true,
   "glue_price_tails": true,
   "glue_area_tails": true,
   "preprocess": [2],
   "emit_marker": false, 
-   "require_uppercase": true,
-
-
-  "neighborhood_rule": {
-    "strategy": "before_currency", 
+   "neighborhood_rule": {
+    "strategy": "before_colon", 
     "strategy_order": ["delimiter"],
     "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av."],    
     "max_token_span": 20
   },
 
-  "neighborhood_flow": {"flow_type": "simple"},
-  "currency_split":["$","L.","("],
+    "neighborhood_flow": {"flow_type": "simple"},
+  
 
   "currency_aliases": {
     "$": "USD",
@@ -48,56 +45,6 @@
     "COL. LOS ANGELES": ["LOS ANGELES", "COL LOS ANGELES"],
     "RES. MONSEÑOR FIALLOS": ["MONSEÑOR FIALLOS"]
   },
-
- "mode": "plain",
-  "windows": {
-  "head_window_chars": 60,
-  "price_lookahead_lines": 2,
-  "price_lookahead_chars": 320,
-  "anchor_lookback_chars": 60,
-  "min_anchor_gap": 10
-},
-
-
-"start_gate": {
-  "block_price_first": true,
-  "block_area_number_first": true,
-  "block_feature_words_first": true,
-
-  "family_tags": ["Res.", "Col.", "Colonia", "Barrio", "Bo."],
-  "family_soft_validate": true,           
-  "connectors": ["de","del","la","las","los","y","el"],
-  "family_name_max_tokens": 7,
-
-  "allow_numeric_date_neighborhoods": true,
-  "numeric_date_pattern": "(?i)^[\\s\"'\u201c\u201d\u2018\u2019]*(\\d{1,2})(?:\u00ba|ro|er)?\\s+(?:de|del)\\s+(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\\b",
-
-  "qualifiers_after_name": [
-    "zona\\s+\\d+","sector\\s+\\d+",
-    "etapa\\s+(?:[IVXLC]+|\\d+)","fase\\s+\\d+",
-    "km\\s+\\d+","anexo","manzana\\s+[A-Z0-9]+","bloque\\s+\\w+"
-  ]
-},
-
-"gazetteer": {
-  "enabled": true,
-  "mode": "hint",                       
-  "prefer_document_lexicon": true,     
-  "city_gazetteer_path": "config/config_known_neighborhoods.json",
-  "fuzzy_max_distance": 1,
-  "max_influenced_starts": 30,
-  "cooldown_lines": 2
-},
-
-
-"headers": { "keep": true, "preserve_whitespace": true },
-"inline_split": { "clone_per_price": false },
-
-
-
-
-
-
 
     "area_aliases": {
     "ac": ["m²", "m2", "mt2", "mts2", "mts²", "metros", "metros2", "metros²"],

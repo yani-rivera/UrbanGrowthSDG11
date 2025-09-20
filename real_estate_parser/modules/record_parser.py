@@ -333,7 +333,7 @@ def extract_neighborhood(text: str, cfg: dict) -> str:
     try:
         # pass the rule as cfg to apply_strategy so it sees abbrev_exceptions, etc.
          
-        neigh = apply_strategy(text, strategy, rule)
+        neigh = apply_strategy(text, strategy, cfg)
          
         if isinstance(neigh, str) and neigh.strip():
             return neigh.strip()
@@ -469,7 +469,7 @@ def parse_record(text, config, *, agency="", date="", listing_no=0,
         parsed["category"] = default_category
 
     # 5) title (whatever your logic is)
-    parsed["title"] = parsed.get("title") or text_norm[:140]
+    parsed["title"] = parsed.get("title") or text_norm[:60]
     #==========================================
     # DEBUG: show inherited defaults coming in
     #print("return record parsed:", text_norm)

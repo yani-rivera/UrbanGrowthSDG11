@@ -4,7 +4,7 @@ import re
 from typing import Iterable, List, Dict, Sequence, Optional
 
 # --- Debug (optional) ---------------------------------------------------------
-DEBUG_MASK_SUMMARY = False
+DEBUG_MASK_SUMMARY = True
 DEBUG_EXCEPTIONS   = False
 
 # --- Unicode-friendly classes (Spanish included) ------------------------------
@@ -12,7 +12,7 @@ _UP = r"A-ZÁÉÍÓÚÜÑ"
 _LO = r"a-záéíóúüñ"
 
 # Split leading "title chunk" at first ., or , or :
-_LEAD_BREAK = re.compile(r"[.,:]", re.UNICODE)
+_LEAD_BREAK = re.compile(r"[.,:;]", re.UNICODE)
 # Strip leading bullets like "* ", "- ", "• "
 _BULLET_LEAD_RE = re.compile(r"^\s*([*\-•])\s*")
 
@@ -84,7 +84,10 @@ def build_mask(
       4) uppercase-start test on chunk
       5) demotion: if line i is a start and its chunk had NO terminator (. , :),
          and line i+1 also qualifies as an uppercase start, demote i+1 to continuation.
+
     """
+
+    print("DEBUG START LISTING UPPERCASE MASK")
     # materialize & de-bullet once (accept generators safely)
     lines: List[str] = [_strip_bullet(ln) for ln in list(raw_lines)]
 

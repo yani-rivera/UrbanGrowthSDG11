@@ -1,0 +1,105 @@
+{
+  "agency": "OD",
+  "nemonic":"OD",
+  "listing_marker": "*",
+  "listing_marker_tochange": null,
+  "preprocessing_needed": true,
+  "header_marker": "#",     
+  "auto_masquerade_numdot": false,
+  "sanitize": true,
+  "glue_price_tails": true,
+  "glue_area_tails": false,
+  "preprocess": [1,2],
+  "emit_marker": false,
+
+    "neighborhood_rule": {
+    "strategy": "before_colon", 
+    "strategy_order": ["delimiter"],
+    "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av."],    
+    "max_token_span": 30
+  },
+
+    "neighborhood_flow": {
+    "flow_type": "simple"},
+
+
+  "currency_aliases": {
+    "$": "USD",
+    "US$": "USD",
+    "USD": "USD",
+    "L": "HNL",
+    "L.": "HNL",
+    "LPS": "HNL",
+    "LPS.": "HNL",
+    "LPS ": "HNL",
+    "LPS. ": "HNL",
+    "LPS.  ": "HNL",
+    "$.": "USD"
+  },
+
+  "bathroom_keywords": ["baño", "baños", "banos", "bafios", "ba√±o", "ba√±os","bañod"],
+  "bathroom_infer_from_bedrooms": true,
+  "bathroom_ensuite_regex": true,
+  "bathroom_ensuite_markers": [
+  "cada\\s+un[oa].{0,40}bañ" ,
+  "cada una con su baño",
+  "cada uno con su baño",
+  "cada habitación con su baño",
+  "cada recamara con su baño",
+  "cada recámara con su baño",
+  "cada cuarto con su baño",
+  "todas con baño",
+  "todas con bano",
+  "con su baño"
+   ],
+
+
+  "area_aliases": {
+    "ac": ["m²", "m2", "mt2", "mts2", "mts²", "metros", "metros2", "metros²"],
+    "at": ["vrs²", "vrs2", "vr2", "vr²", "vrs", "vara", "varas", "v²", "vr"],
+    "mz": ["manzana", "manzanas", "mz"]
+  },
+"section_headers": [
+  { "pattern": "#ALQUILER DE CASAS",         "transaction": "Rent",  "type": "House",      "category": "ALQUILER DE CASAS" },
+  { "pattern": "#ALQUILER DE APARTAMENTOS",  "transaction": "Rent",  "type": "Apartment",  "category": "ALQUILER DE APARTAMENTOS" },
+  { "pattern": "#ALQUILER DE BODEGAS",      "transaction": "Rent",  "type": "Commercial", "category": "ALQUILER DE BODEGAS" },
+  { "pattern": "#ALQUILER DE LOCALES",      "transaction": "Rent",  "type": "Commercial", "category": "ALQUILER DE LOCALES" },
+  { "pattern": "#ALQUILER DE TERRENOS",      "transaction": "Rent",  "type": "Land",       "category": "ALQUILER DE TERRENOS" },
+  { "pattern": "ALQUILERES COMERCIALES",     "transaction": "Rent",  "type": "Commercial", "category": "PROPIEDADES COMERCIALES" },
+  { "pattern": "#VENTA DE CASAS",            "transaction": "Sale",  "type": "House",      "category": "VENTA DE CASAS" },
+  { "pattern": "#VENTA DE TERRENOS",         "transaction": "Sale",  "type": "Land",       "category": "VENTA DE TERRENOS" }
+],
+
+  "type_keywords": {
+    "Apartment": ["apto", "apart", "apartamento", "apt."],
+    "House":     ["casa", "res.", "residencial", "urb.", "urb "],
+    "Commercial":["local", "bodega", "comercial", "oficina"],
+    "Land":      ["terreno", "lote", "solar"]
+  },
+
+  "neighborhood_abbrev": {
+    "COL. ": "COL. ",
+    "RES. ": "RES. ",
+    "URB. ": "URB. ",
+    "BLVD. ": "BLVD. "
+  },
+  
+ "area_unit_conversions_m2": {
+  "m²": 1, "m2": 1, "mt2": 1, "mts2": 1, "metros cuadrados": 1,
+  "vrs²": 0.705012, "vrs2": 0.705012, "vr2": 0.705012, "varas cuadradas": 0.705012,
+  "mz": 7050, "manzana": 7050, "manzanas": 7050
+ },
+
+ "area_preferences": {
+  "prefer_near_price": true,
+  "window_chars": 60,
+  "min_m2": 10,
+  "max_m2": 20000
+   },
+ "area_routing": "by_unit",
+ "area_swap_guard": true,
+ "area_units": {
+  "AC_m2": ["m2","m²","mt2","mts2","metro cuadrado","metros cuadrados"],
+  "AT_v2": ["v2","v²","vara","varas","varas cuadradas","varas2","vrs2","vz2","vr2","manzana","manzanas","mz"]
+ }
+}
