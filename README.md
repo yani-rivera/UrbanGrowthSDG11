@@ -7,6 +7,7 @@
 
 ![Example of raw real-estate web listing](HouseSalesWebPage.png)
 
+*Figure 1. Distribution of residential house sale prices by benchmark year, shown for quality control and outlier validation purposes.*
 
 
 
