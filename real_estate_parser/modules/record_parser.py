@@ -110,191 +110,153 @@ def _num_from_locale(s: str) -> Optional[float]:
  
 
 
+def detect_section_context(
+    text: str,
+    cfg: Optional[dict] = None
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
 
-def detect_section_context(text: str, cfg: Optional[dict] = None) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     if not text:
         return (None, None, None)
 
     marker = (cfg or {}).get("header_marker", "#")
 
-    # Normalize: strip BOM and left spaces so "#..." at col > 0 still counts
+    # Normalize
     s = text.replace("\ufeff", "").lstrip()
 
-    # Only header lines (marker at start after lstrip)
-    if not re.match(rf"^{re.escape(marker)}", s):
+    # Must be a header line
+    if not s.startswith(marker):
         return (None, None, None)
 
-    # --- Config-driven section headers (case-insensitive) ---
+    # --- Config-driven headers (authoritative) ---
     sh = (cfg or {}).get("section_headers") or []
-    if sh:
-        best = None  # (span_len, tx, ty, category)
-        for item in sh:
-            pat = item.get("pattern")
-            if not pat:
-                continue
-            m = re.search(pat, s, flags=re.IGNORECASE)
-            if m:
-                span_len = m.end() - m.start()
-                if (best is None) or (span_len > best[0]):
-                    best = (
-                        span_len,
-                        item.get("transaction"),
-                        item.get("type"),
-                        item.get("category") or s[len(marker):].strip(" :\t")
-                    )
-        if best:
-            _, tx, ty, cat = best
-            return (tx, ty, cat)
+    best = None  # (span_len, tx, ty, category)
 
-    # Fallback heuristic
+    for item in sh:
+        pat = item.get("pattern")
+        if not pat:
+            continue
+
+        m = re.search(pat, s, flags=re.IGNORECASE)
+        if not m:
+            continue
+
+        span_len = m.end() - m.start()
+        if best is None or span_len > best[0]:
+            best = (
+                span_len,
+                item.get("transaction"),   # already canonical
+                item.get("type"),
+                item.get("category") or s[len(marker):].strip(" :\t-")
+            )
+
+    if best:
+        _, tx, ty, cat = best
+        print ("HEADER", tx,ty, cat)
+        return (tx, ty, cat)
+
+    # --- Fallback (only if config misses a header) ---
+   
     h = s[len(marker):].strip().upper()
-    tx = "Rent" if "ALQUIL" in h else ("Sale" if "VENTA" in h else None)
-    ty = ("Apartment" if "APART" in h
-          else "House" if ("CASA" in h or "CASAS" in h)
-          else "Commercial" if ("BODEGA" in h or "PROPIEDADES COMERCIALES" in h)
-          else "Land" if ("TERRENO" in h or "TERRENOS" in h)
-          else None)
-    return (tx, ty, h)
 
+    tx = (
+        "alquiler" if ("ALQUIL" in h or "RENT" in h)
+        else "venta" if ("VENTA" in h or "SALE" in h)
+        else None
+    )
+
+    return (tx, None, h)
 
 
 _AREA_RX = re.compile(
     r"\b(\d{1,5}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s*"
-    r"(m2|m²|mt2|mts2|mts|metros\s*cuadrados?|vrs2|vrs²|vrs|vr2|vr|varas?\s*cuadradas?)\b",
+    r"(m2|m²|mt2|mts2|mts|metros\s*cuadrados?|area_m2|vrs2|vrs²|vrs|vr2|vr|varas?\s*cuadradas?)\b",
     re.I,
 )
 
-_BED_WORDS = r"(?:hab(?:itaciones)?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?)"
+_BED_WORDS = r"(?:hab(?:itaciones)?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?|beds)"
 BED_RX_WORD = re.compile(rf"\b(\d{{1,2}})\s*{_BED_WORDS}\b", re.I)
 BED_RX_H = re.compile(r"\b(\d{1,2})\s*[Hh]\b")  # 3H
-SLASH_RX = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\b")
 
-BATH_WORD = r"ba(?:ños|nos|ño|no)s?"
-BATH_RX_MAIN = re.compile(rf"\b(\d{{1,2}}(?:[.,]\d)?|\d\s*1/2|½)\s*{BATH_WORD}\b", re.I)
-BATH_RX_MEDIO = re.compile(rf"\b(\d{{1,2}})\s*y\s*medio\s*{BATH_WORD}?\b", re.I)
-BATH_RX_B = re.compile(r"\b(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\s*[Bb]\b", re.I)  # 2B
+SLASH_RX = re.compile(
+    r"\b(\d{1,2})\s*/\s*(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\b"
+)
+
+BATH_WORD = r"\b(bañ(?:o|os)|ban(?:o|os)|ba)\b"
+BATH_RX_MAIN = re.compile(
+    rf"\b(\d{{1,2}}(?:[.,]\d)?|\d\s*1/2|½)\s*{BATH_WORD}\b", re.I
+)
+
+BATH_RX_MEDIO = re.compile(
+    rf"\b(\d{{1,2}})\s*y\s*medio(?:\s+{BATH_WORD})?\b", re.I
+)
+
+BATH_RX_B = re.compile(
+    r"\b(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\s*[Bb]\b", re.I
+)
 
 
-def _cur_map(cur: str, cfg: Optional[dict] = None) -> str:
-    m = {"US$": "USD", "$": "USD", "USD": "USD", "L.": "HNL", "LPS": "HNL", "LPS.": "HNL", "HNL": "HNL"}
-    if cfg and isinstance(cfg.get("currency_aliases"), dict):
-        for k, v in cfg["currency_aliases"].items():
-            m[str(k).upper()] = str(v).upper()
-    return m.get(cur, cur)
+
+# def _cur_map(cur: str, cfg: Optional[dict] = None) -> str:
+#     m = {"US$": "USD", "$": "USD", "USD": "USD", "L.": "HNL", "LPS": "HNL", "LPS.": "HNL", "HNL": "HNL"}
+#     if cfg and isinstance(cfg.get("currency_aliases"), dict):
+#         for k, v in cfg["currency_aliases"].items():
+#             m[str(k).upper()] = str(v).upper()
+#     return m.get(cur, cur)
 
 
-# def _local_extract_price(text: str, cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
-#     t = text or ""
-#     cands = []
-#     for m in _PRICE_SYM.finditer(t):
-#         cur = m.group(1).upper().rstrip(".")
-#         val = _num_from_locale(m.group(2))
-#         if val is None:
-#             continue
-#         cands.append((val, _cur_map(cur, cfg)))
-#     cur_seen = cands[-1][1] if cands else None
-#     for m in _PRICE_MIL.finditer(t):
-#         base = _num_from_locale(m.group(1))
-#         if base is not None:
-#             cands.append((base * 1000.0, cur_seen))
-#     if not cands:
-#         return (None, None)
 #     return max(cands, key=lambda x: x[0])
 
 
 def _norm_unit(u: str) -> str:
     u = (u or "").lower().replace(" ", "")
-    if u in {"m2", "m²", "mt2", "mts2", "mts", "metroscuadrados"}:
+    if u in {"m2", "m²", "mt2", "mts2", "mts", "metroscuadrados","area_m2"}:
         return "m2"
     if u in {"vrs2", "vrs²", "vrs", "vr2", "vr", "varascuadradas", "varacuadrada"}:
         return "vrs2"
     return u
 
 
-def _local_extract_area(text: str, _cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
-    m = _AREA_RX.search(text or "")
-    if not m:
-        return (None, None)
-    val = _num_from_locale(m.group(1))
-    unit = _norm_unit(m.group(2))
-    return (val, unit) if val is not None else (None, unit)
+# def _local_extract_area(text: str, _cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
+#     m = _AREA_RX.search(text or "")
+#     if not m:
+#         return (None, None)
+#     val = _num_from_locale(m.group(1))
+#     unit = _norm_unit(m.group(2))
+#     return (val, unit) if val is not None else (None, unit)
 
 
-# def _local_extract_bedrooms(text: str, cfg: Optional[dict] = None) -> Optional[int]:
-#    # t = text or ""
-#     #m = BED_RX_WORD.search(t) or BED_RX_H.search(t)
-#     #if m:
-#     #    v = int(m.group(1))
-#     #    return v if 0 < v < 20 else None
-#     #if (cfg or {}).get("allow_slash_bed_bath", True):
-#     #    m = SLASH_RX.search(t)
-#     #    if m:
-#     #        v = int(m.group(1))
-#     #        return v if 0 < v < 20 else None
-#     return extract_bedrooms(text, cfg)
 
 
-def _to_float_half(s: Optional[str]) -> Optional[float]:
-    if not s:
-        return None
-    s = s.replace("½", ".5")
-    s = re.sub(r"(\d)\s*1/2", r"\1.5", s)
-    return _num_from_locale(s)
 
+# def _to_float_half(s: Optional[str]) -> Optional[float]:
+#     if not s:
+#         return None
+#     s = s.replace("½", ".5")
+#     s = re.sub(r"(\d)\s*1/2", r"\1.5", s)
+#     return _num_from_locale(s)
 
-# def _local_extract_bathrooms(text: str, cfg: Optional[dict] = None) -> Optional[float]:
-#     t = text or ""
-#     m = BATH_RX_MAIN.search(t)
-#     if m:
-#         v = _to_float_half(m.group(1))
-#         return v if v and 0 < v < 20 else None
-#     m = BATH_RX_MEDIO.search(t)
-#     if m:
-#         base = _to_float_half(m.group(1))
-#         return (base + 0.5) if base else None
-#     m = BATH_RX_B.search(t)
-#     if m:
-#         v = _to_float_half(m.group(1))
-#         return v if v and 0 < v < 20 else None
-#     if (cfg or {}).get("allow_slash_bed_bath", True):
-#         m = SLASH_RX.search(t)
-#         if m:
-#             v = _to_float_half(m.group(2))
-#             return v if v and 0 < v < 20 else None
-#     return None
+ 
 
 
 # Wrappers that accept both (text) and (text, config)
-def EXTRACT_PRICE(text: str, cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
-    fn = _ext_price or _local_extract_price
-    try:
-        return fn(text, cfg)
-    except TypeError:
-        return fn(text)  # type: ignore[misc]
+# def EXTRACT_PRICE(text: str, cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
+#     fn = _ext_price or _local_extract_price
+#     try:
+#         return fn(text, cfg)
+#     except TypeError:
+#         return fn(text)  # type: ignore[misc]
 
 
-def EXTRACT_AREA(text: str, cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
-    fn = _ext_area or _local_extract_area
-    try:
-        return fn(text, cfg)
-    except TypeError:
-        return fn(text)  # type: ignore[misc]
+# def EXTRACT_AREA(text: str, cfg: Optional[dict] = None) -> Tuple[Optional[float], Optional[str]]:
+#     fn = _ext_area or _local_extract_area
+#     try:
+#         return fn(text, cfg)
+#     except TypeError:
+#         return fn(text)  # type: ignore[misc]
 
 
-def EXTRACT_BEDS(text: str, cfg: Optional[dict] = None) -> Optional[int]:
-    fn = _ext_beds or _local_extract_bedrooms
-    try:
-        return fn(text, cfg)
-    except TypeError:
-        return fn(text)  # type: ignore[misc]
 
 
-def EXTRACT_BATHS(text: str, cfg: Optional[dict] = None) -> Optional[float]:
-    fn = _ext_baths or _local_extract_bathrooms
-    try:
-        return fn(text, cfg)
-    except TypeError:
-        return fn(text)  # type: ignore[misc]
 
 
 # --------------------------------------------------------------------------------------

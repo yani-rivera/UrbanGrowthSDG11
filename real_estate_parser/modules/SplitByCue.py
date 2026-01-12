@@ -24,6 +24,8 @@ import sys
 from pathlib import Path
 import json
 from typing import Iterable, List, Sequence, Dict, Any
+from collections import deque
+ 
 
 # ------------------------------- Defaults ------------------------------------
 DEFAULT_CUE = ","
@@ -63,6 +65,52 @@ def read_lines_utf8_sig(path: str) -> List[str]:
 
 # ------------------------------ Heuristics -----------------------------------
 
+import re
+
+# $ 1,200.00  |  Lps. 1,200  |  L 1,200 — tweak if you have others
+_PRICE_RE = re.compile(r'(?:\$|Lps\.?|L)\s*\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?', re.UNICODE)
+
+# Heads like "Col. Marichal:", "Res. Las Uvas:", or generic Title Case "El Hatillo:"
+_HEAD_COLON_RE = re.compile(
+    r'(?P<head>(?:Col\.|Res\.|Bo\.|Urb\.)\s+[A-ZÁÉÍÓÚÑ][^:]{1,50}|[A-ZÁÉÍÓÚÑ][^:]{2,50})\s*:',
+    re.UNICODE
+)
+
+def _split_on_colon_after_price(line: str, cue: str) -> list[str]:
+    """If a Title-like '...:' appears after a price in this line, split there."""
+    # Only applies when this agency’s cue is colon
+    if cue != ":":
+        return [line.strip()]
+    s = line.strip()
+    pieces: list[str] = []
+    cut = 0
+    pos = 0
+    while True:
+        m = _HEAD_COLON_RE.search(s, pos)
+        if not m:
+            break
+        head_start = m.start()
+        # Has a price between last cut and this head?
+        if _PRICE_RE.search(s[cut:head_start]):
+            prev = s[cut:head_start].strip()
+            if prev:
+                pieces.append(prev)
+            cut = head_start  # start new listing at the head (keeps its ':')
+            pos = m.end()
+        else:
+            pos = m.end()
+    tail = s[cut:].strip()
+    if tail:
+        pieces.append(tail)
+    return pieces
+
+
+
+
+
+
+ #----------
+
 def decode_cue(cue: str) -> str:
     """
     Decode a cue name into its corresponding character.
@@ -100,6 +148,18 @@ def decode_cue(cue: str) -> str:
 
     raise ValueError(f"Unknown cue: {cue}")
 
+def _ensure_char_cue(cue: str) -> str:
+    """Accept 'CUE:COLON'/'CUE:COMMA'/... or a single char and return ':', ',', ';', or '.'."""
+    if isinstance(cue, str) and len(cue) == 1:
+        return cue
+    m = {
+        "CUE:COLON": ":",
+        "CUE:SEMICOLON": ";",
+        "CUE:COMMA": ",",
+        "CUE:DOT": ".",
+    }
+    return m.get(str(cue).upper(), str(cue))  # fallback = pass-through
+
 
 def first_alpha_token(text: str) -> str:
     m = FIRST_ALPHA_TOKEN_RE.search(text)
@@ -128,26 +188,6 @@ def starts_with_price(line: str) -> bool:
     return bool(PRICE_AT_START_RE.match(line))
 
 
-def looks_like_start(
-    line: str,
-    *,
-    cue: str,
-    max_cue_pos: int,
-    require_upper: bool,
-    not_start_words: Sequence[str],
-) -> bool:
-    p = line.find(cue)
-    if p == -1 or p > max_cue_pos:
-        return False
-    head = line[:p]
-    if not LETTER_PRESENT_RE.search(head):
-        return False
-    if not passes_upper_gate(head, require_upper):
-        return False
-    if is_forbidden_start(head, not_start_words):
-        return False
-    return True
-
 
 def strong_start(line: str, *, cue: str, max_cue_pos: int, require_upper: bool, not_start_words: Sequence[str]) -> bool:
     if starts_with_price(line):
@@ -155,133 +195,240 @@ def strong_start(line: str, *, cue: str, max_cue_pos: int, require_upper: bool, 
     return looks_like_start(line, cue=cue, max_cue_pos=max_cue_pos, require_upper=require_upper, not_start_words=not_start_words)
 
 
-def should_glue(prev: str | None, line: str, *, cue: str, max_cue_pos: int, require_upper: bool, not_start_words: Sequence[str], trailing_comma_glue: bool) -> bool:
-    if starts_with_price(line):
-        return True
-    if trailing_comma_glue and prev and TRAILING_COMMA_RE.search(prev):
-        return not strong_start(line, cue=cue, max_cue_pos=max_cue_pos, require_upper=require_upper, not_start_words=not_start_words)
-    if CONNECTOR_START_RE.match(line):
-        return True
-    return False
+PRICE_RE = re.compile(r'(?:\$|Lps\.?|L)\s*\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?', re.UNICODE)
+LETTER_RE = re.compile(r'[A-Za-zÁÉÍÓÚÑáéíóúñ]', re.UNICODE)
+ABBREV_DOT_BLOCK = ("Col.", "Res.", "Av.", "Blvd.", "Km.", "No.", "Urb.", "Bo.", "Sta.", "St.", "Dr.", "Ing.")
 
-# --------------------------- Embedded splitter --------------------------------
+def _pre_split_colon_after_price(line: str, cue: str) -> List[str]:
+    """Call your existing _split_on_colon_after_price if present; else no-op."""
+    fn = globals().get("_split_on_colon_after_price")
+    if callable(fn):
+        pieces = fn(line, cue)
+        if pieces:
+            return pieces
+    return [line]
 
-def inline_splits(text: str, *, cue: str, max_cue_pos: int, require_upper: bool, not_start_words: Sequence[str], require_price_before: bool, price_lookback: int) -> List[str]:
-    parts: List[str] = []
-    i = 0
-    n = len(text)
-    while i < n:
-        rel_cue = text.find(cue, i)
-        if rel_cue == -1:
-            parts.append(text[i:])
-            break
-        if rel_cue - i <= max_cue_pos:
-            head = text[i:rel_cue]
-            if LETTER_PRESENT_RE.search(head) and passes_upper_gate(head, require_upper) and not is_forbidden_start(head, not_start_words):
-                j = rel_cue + 1
-                found_next = False
-                while j < n:
-                    next_rel = text.find(cue, j)
-                    if next_rel == -1:
-                        break
-                    seg_start = j
-                    if next_rel - seg_start <= max_cue_pos:
-                        head2 = text[seg_start:next_rel]
-                        if LETTER_PRESENT_RE.search(head2) and passes_upper_gate(head2, require_upper) and not is_forbidden_start(head2, not_start_words):
-                            if not require_price_before:
-                                parts.append(text[i:seg_start].strip())
-                                i = seg_start
-                                found_next = True
-                                break
-                            else:
-                                lookback_start = max(i, seg_start - price_lookback)
-                                window = text[lookback_start:seg_start]
-                                if PRICE_ANYWHERE_RE.search(window):
-                                    parts.append(text[i:seg_start].strip())
-                                    i = seg_start
-                                    found_next = True
-                                    break
-                    j = next_rel + 1
-                if not found_next:
-                    parts.append(text[i:].strip())
-                    break
-                else:
-                    continue
-        i = rel_cue + 1
-    cleaned = [re.sub(r"\s+", " ", p).strip().rstrip(",;") for p in parts if p and p.strip()]
-    return cleaned
-
-# ------------------------------- Core API ------------------------------------
-
-
-def _split_by_cue_core(
-    lines: Iterable[str],
-    *,
-    cue: str = DEFAULT_CUE,
-    max_cue_pos: int = DEFAULT_MAX_CUE_POS,
-    require_upper: bool = DEFAULT_REQUIRE_UPPER,
-    not_start_words: Sequence[str] = DEFAULT_NOT_START_WORDS,
-    require_price_before: bool = DEFAULT_REQUIRE_PRICE_BEFORE,
-    inline_price_lookback: int = DEFAULT_INLINE_PRICE_LOOKBACK,
-    trailing_comma_glue: bool = DEFAULT_TRAILING_COMMA_GLUE,
-) -> List[str]:
-    out: List[str] = []
-    current: str | None = None
-    #print("DEBUG:",cue)
-    def flush():
-        nonlocal current
-        if current is not None:
-            s = re.sub(r"\s+", " ", current).strip().rstrip(",;")
-            if s:
-                out.append(s)
-                 
-        current = None
-
-    for raw in lines:
-        line = raw.rstrip("\n\r")
-        if should_glue(
-            current, line,
-            cue=cue, max_cue_pos=max_cue_pos,
-            require_upper=require_upper,
-            not_start_words=not_start_words,
-            trailing_comma_glue=trailing_comma_glue,
-        ):
-            current = (current + " " + line.strip()) if current else line.strip()
-            continue
-
-        if looks_like_start(
-            line, cue=cue, max_cue_pos=max_cue_pos,
-            require_upper=require_upper, not_start_words=not_start_words,
-        ):
-            pieces = inline_splits(
-                line.strip(),
-                cue=cue,
-                max_cue_pos=max_cue_pos,
-                require_upper=require_upper,
-                not_start_words=not_start_words,
-                require_price_before=require_price_before,
-                price_lookback=inline_price_lookback,
-            )
-            if pieces:
-                flush()
-                for p in pieces[:-1]:
-                    out.append(p)
-                current = pieces[-1]
-            else:
-                flush()
-                current = line.strip()
-        else:
-            current = (current + " " + line.strip()) if current else line.strip()
-
-    if current is not None and current.strip():
-        s = re.sub(r"\s+", " ", current).strip().rstrip(",;")
+def _flush(accum_parts: List[str], out: List[str]) -> None:
+    if accum_parts:
+        s = re.sub(r"\s+", " ", " ".join(accum_parts)).strip().rstrip(",;")
         if s:
             out.append(s)
+        accum_parts.clear()
 
+def _force_start_colon_semicolon(line: str, cue: str, max_cue_pos: int) -> bool:
+    p = line.find(cue)
+    return (p != -1 and p <= max_cue_pos)
+
+def _force_start_comma(line: str, max_cue_pos: int) -> bool:
+    # 1) early comma
+    p = line.find(",")
+    if p == -1 or p > max_cue_pos:
+        return False
+    # 2) not numeric comma (avoid thousands)
+    if (p > 0 and line[p-1].isdigit()) or (p+1 < len(line) and line[p+1].isdigit()):
+        return False
+    # 3) head looks like a place
+    head = line[:p]
+    if not LETTER_RE.search(head):
+        return False
+    # 4) price soon after the comma (within ~40 chars)
+    tail = line[p+1:p+1+40]
+    if not PRICE_RE.search(tail):
+        return False
+    return True
+
+def _force_start_dot(line: str, max_cue_pos: int) -> bool:
+    # Very conservative dot start
+    p = line.find(".")
+    if p == -1 or p > max_cue_pos:
+        return False
+    # avoid decimals like 1,200.00 or 1200.00
+    if (p > 0 and line[p-1].isdigit()) or (p+1 < len(line) and line[p+1].isdigit()):
+        return False
+    head = line[:p].strip()
+    # avoid common abbreviations ending exactly at the dot
+    if any(head.endswith(abbrev[:-1]) or head.endswith(abbrev) for abbrev in ABBREV_DOT_BLOCK):
+        return False
+    # either next token starts uppercase OR a price shows quickly
+    tail = line[p+1:].lstrip()
+    return (tail[:1].isupper() or PRICE_RE.search(tail[:40]) is not None)
+
+# -------------------- A) colon/semicolon agencies ----------------------------
+
+def split_by_colon_semicolon(
+    lines: Iterable[str],
+    *,
+    cue: str,
+    max_cue_pos: int = 32,
+    staging_window: int = 1,
+) -> List[str]:
+    """
+    One-listing-per-line for ':' or ';' agencies.
+    - Header-first (lines containing '#...'): always flush, always emit verbatim (strip only EOLs), set context elsewhere.
+    - Force-start when cue is within max_cue_pos.
+    - Optional same-line guardrail: pre-split when another Head: appears after a price.
+    """
+    out: List[str] = []
+    accum_parts: List[str] = []
+    staging: deque[str] = deque()  # N-line look-ahead; N=1 by default
+
+    for raw in lines:
+        line = raw.rstrip("\r\n").replace("\u00A0", " ")
+
+        # HEADER FIRST (anywhere in line)
+        hp = line.find("#")
+        if hp != -1:
+            left = line[:hp].rstrip()
+            header = line[hp:]  # verbatim
+            if left:
+                # treat left as continuation then flush
+                staging.append(left.strip())
+                while staging:
+                    accum_parts.append(staging.popleft())
+                _flush(accum_parts, out)
+            else:
+                # header at col 0
+                while staging:
+                    accum_parts.append(staging.popleft())
+                _flush(accum_parts, out)
+            out.append(header)   # ALWAYS emit
+            continue
+
+        # Same-line guardrail (if available)
+        for seg in _pre_split_colon_after_price(line, cue):
+            seg = seg.strip()
+            if not seg:
+                continue
+            staging.append(seg)
+            # START beats GLUE (force on early ':' or ';')
+            if _force_start_colon_semicolon(seg, cue, max_cue_pos):
+                # older staged lines belong to previous listing
+                while len(staging) > 1:
+                    accum_parts.append(staging.popleft())
+                _flush(accum_parts, out)
+                # newest staged line starts new listing
+                accum_parts.append(staging.pop())
+                staging.clear()
+                continue
+
+            # Not a start: keep staging bounded
+            while len(staging) > staging_window:
+                accum_parts.append(staging.popleft())
+
+    # EOF
+    while staging:
+        accum_parts.append(staging.popleft())
+    _flush(accum_parts, out)
+    return out
+
+# -------------------- B) comma/dot agencies ----------------------------------
+
+def split_by_comma_dot(
+    lines: Iterable[str],
+    *,
+    cue: str,                               # ',' or '.'
+    max_cue_pos: int = 32,
+    staging_window: int = 1,
+) -> List[str]:
+    """
+    One-listing-per-line for ',' or '.' agencies (guarded starts).
+    Comma: start only if (early comma) & (not numeric) & (price soon after) & (head has letters).
+    Dot:   start only if (early dot)   & (not numeric) & (not common abbrev) & (Uppercase next or price soon).
+    """
+    out: List[str] = []
+    accum_parts: List[str] = []
+    staging: deque[str] = deque()
+
+    for raw in lines:
+        line = raw.rstrip("\r\n").replace("\u00A0", " ")
+
+        # HEADER FIRST (anywhere)
+        hp = line.find("#")
+        if hp != -1:
+            left = line[:hp].rstrip()
+            header = line[hp:]
+            if left:
+                staging.append(left.strip())
+                while staging:
+                    accum_parts.append(staging.popleft())
+                _flush(accum_parts, out)
+            else:
+                while staging:
+                    accum_parts.append(staging.popleft())
+                _flush(accum_parts, out)
+            out.append(header)
+            continue
+
+        # (No same-line pre-split for comma/dot by default – keep simple & safe)
+        seg = line.strip()
+        if not seg:
+            continue
+        staging.append(seg)
+
+        # START detection by cue type
+        is_start = False
+        if cue == ",":
+            is_start = _force_start_comma(seg, max_cue_pos)
+        elif cue == ".":
+            is_start = _force_start_dot(seg, max_cue_pos)
+
+        if is_start:
+            while len(staging) > 1:
+                accum_parts.append(staging.popleft())
+            _flush(accum_parts, out)
+            accum_parts.append(staging.pop())
+            staging.clear()
+            continue
+
+        # Not a start: bound staging
+        while len(staging) > staging_window:
+            accum_parts.append(staging.popleft())
+
+    # EOF
+    while staging:
+        accum_parts.append(staging.popleft())
+    _flush(accum_parts, out)
+    return out
+
+# -------------------- Router --------------------------------------------------
+
+def split_by_cue_v2(
+    lines,
+    *,
+    cue: str,
+    max_cue_pos: int = 32,
+    staging_window: int = 1,
+):
+    cue = _ensure_char_cue(cue)  # <-- critical
+    if cue in (":", ";"):
+        return split_by_colon_semicolon(
+            lines, cue=cue, max_cue_pos=max_cue_pos, staging_window=staging_window
+        )
+    if cue in (",", "."):
+        return split_by_comma_dot(
+            lines, cue=cue, max_cue_pos=max_cue_pos, staging_window=staging_window
+        )
+    # Fallback: treat as plain continuation, header-aware
+    out, accum = [], []
+    for raw in lines:
+        s = raw.rstrip("\r\n").replace("\u00A0", " ").strip()
+        if not s:
+            continue
+        if s.lstrip().startswith("#"):
+            if accum:
+                out.append(re.sub(r"\s+", " ", " ".join(accum)).strip().rstrip(",;"))
+                accum = []
+            out.append(s)
+            continue
+        accum.append(s)
+    if accum:
+        out.append(re.sub(r"\s+", " ", " ".join(accum)).strip().rstrip(",;"))
     return out
 
 
-  
+# -----------------------------------------------------------------------------
+
+
 # Wrapper to accept cfg dict or path
 def _coerce_cfg(cfg):
     if cfg is None or isinstance(cfg, dict):
@@ -308,34 +455,16 @@ def _coerce_cfg(cfg):
 
 
 
-def split_by_cue(lines: Iterable[str], cfg: Dict[str, Any] | str | None = None, **overrides) -> List[str]:
-    """Compat entry point.
-
-    Supports:
-      split_by_cue(lines, cfg_dict)
-      split_by_cue(lines, 'configs/agency.json')
-      split_by_cue(lines, cue=',', max_cue_pos=25, ...)
-    Dict values are merged with explicit keyword overrides.
-    """
+def split_by_cue(lines, cfg=None, **overrides):
     cfg = _coerce_cfg(cfg)
-    cue=cfg.get("listing_marker", DEFAULT_CUE)
-    cue=decode_cue(cue)
-    #print("DEBUG DECODE CUE",cue)
-    params = {
-        "cue":cue,
-        "max_cue_pos": int(cfg.get("max_cue_pos", DEFAULT_MAX_CUE_POS)),
-        "require_upper": bool(cfg.get("require_upper", DEFAULT_REQUIRE_UPPER)),
-        # legacy key: no_trailing_comma_end (True disables glue)
-        "trailing_comma_glue": bool(overrides.get("trailing_comma_glue",
-            (not cfg.get("no_trailing_comma_end")) if "no_trailing_comma_end" in cfg else cfg.get("trailing_comma_glue", DEFAULT_TRAILING_COMMA_GLUE))),
-        "require_price_before": bool(cfg.get("require_price_before", DEFAULT_REQUIRE_PRICE_BEFORE)),
-        "inline_price_lookback": int(cfg.get("inline_price_lookback", DEFAULT_INLINE_PRICE_LOOKBACK)),
-        "not_start_words": cfg.get("not_start_words", DEFAULT_NOT_START_WORDS),
-    }
-    # Apply explicit overrides on top
-    params.update(overrides)
-    #print("DEBUG",params)
-    return _split_by_cue_core(lines, **params)
+    cue = decode_cue(str(cfg.get("listing_marker", DEFAULT_CUE)))
+    max_cue_pos = int(cfg.get("max_cue_pos", 32))
+    staging_window = int(cfg.get("staging_window", 1))
+    # Route to v2
+    print ("DEBUG ENTER SPLIBY CUE CALLLING", cfg.get("listing_marker", DEFAULT_CUE))
+    return split_by_cue_v2(
+        lines, cue=cue, max_cue_pos=max_cue_pos, staging_window=staging_window
+    )
 
 # --------------------------------- CLI ---------------------------------------
 

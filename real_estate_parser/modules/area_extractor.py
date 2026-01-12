@@ -83,7 +83,7 @@ def extract_area(text: str, cfg: Optional[Dict[str, Any]] = None) -> Dict[str, A
     AMBIG_M2 = {"m2", "m²"}
     AMBIG_M2_N = {_norm_unit_token(x) for x in AMBIG_M2}  # {'m2'} effectively
 
-    STRONG_AC = set(a.lower() for a in (ac_alias_raw or ["mt2", "mts2", "mtrs2", "metros cuadrados"]))
+    STRONG_AC = set(a.lower() for a in (ac_alias_raw or ["mt2", "mts2", "mtrs2", "metros cuadrados","m2"]))
     # Remove ambiguous tokens from strong AC, then normalize
     STRONG_AC = {_norm_unit_token(x) for x in STRONG_AC if x not in AMBIG_M2}
     VARAS_FAM = {_norm_unit_token(x) for x in (at_alias_raw or ["vrs²","vrs2","vr2","vara2","varas2","varas cuadradas"])}

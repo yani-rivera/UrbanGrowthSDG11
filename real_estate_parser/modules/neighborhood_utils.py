@@ -8,6 +8,38 @@ from typing import List, Dict, Optional, Pattern, Iterable, Union, Any,Tuple
 _DEF_NEIGH_DELIM = ","
 
 #=======================================================================================
+import re
+
+def build_currency_regex(cfg):
+    """
+    Build a compiled regex for currency detection based on config.
+
+    cfg example:
+    {
+        "symbols": ["$", "L", "USD", "HNL", "US$", "Lps"],
+        "case_insensitive": True,
+        "word_boundary": True
+    }
+    """
+
+    symbols = cfg.get("symbols", [])
+    if not symbols:
+        raise ValueError("Currency config must include at least one symbol")
+
+    # Escape symbols for regex safety
+    escaped = [re.escape(s) for s in symbols]
+
+    # Join alternatives
+    pattern = "|".join(escaped)
+
+    if cfg.get("word_boundary", True):
+        pattern = rf"\b({pattern})\b"
+    else:
+        pattern = rf"({pattern})"
+
+    flags = re.I if cfg.get("case_insensitive", True) else 0
+
+    return re.compile(pattern, flags)
 
 
 # Drop property-type prefixes at start, and heal OCR’s leading “C” glitch (e.g., "CApto", "CCol.")
@@ -33,11 +65,13 @@ def strip_property_prefixes(s: str, cfg: dict | None = None) -> str:
     return " ".join(tokens[i:]) if i else txt
 
 DEFAULT_ABBREV_MAP: Dict[str, str] = {
-    "RESIDENCIAL": "RES.",
-    "URBANIZACIÓN": "URB.",
-    "URBANIZACION": "URB.",
-    "COLONIA": "COL.",
-    "BARRIO": "BO.",
+    "RESIDENCIAL": "RES ",
+    "URBANIZACIÓN": "URB ",
+    "URBANIZACION": "URB",
+    "COLONIA": "COL ",
+    "BARRIO": "BO ",
+    "residencial": "RES ",
+    "colonía": "COL"
 }
 
 BARE_ABBREVS_WITH_DOT = {"RES", "URB", "COL", "BO"}
@@ -151,23 +185,38 @@ def normalize_text(text):
 
 def split_on_first_key(text: str, cfg: Dict, start: int = 0) -> str:
     """
-    Return everything before the first alias in cfg["split_currency"].
-    If no alias is found, return the original text.
+    Return everything before the first colon or currency indicator
+    (whichever appears first, starting at position `start`).
+
+    Uses cfg["currency_split"] for valid currency aliases.
+    Skips splitting right after abbreviations like COL., URB., RES., BO.
     """
+    if not text:
+        return ""
+
     keys = cfg.get("currency_split", [])
     if not keys:
-        return text
+        return text.strip()
 
-    # Longest-first so "Lps." wins over "L"
-    pattern = "|".join(re.escape(k) for k in sorted(keys, key=len, reverse=True))
+    # Combine currency symbols and colon into one regex
+    pattern = r"(" + "|".join(re.escape(k) for k in sorted(keys + [":"], key=len, reverse=True)) + r")"
     rx = re.compile(pattern, flags=re.IGNORECASE)
 
+    # Search after the specified start position
     m = rx.search(text, pos=start)
-    if m:
-        return text[:m.start()].strip()
-    
-    else:
-        return text
+    if not m:
+        return text.strip()
+
+    # Everything before the first match
+    before = text[:m.start()].strip()
+
+    # Skip cutting if abbreviation detected before position
+    if re.search(r"\b(?:col|urb|res|bo)\.$", before, re.IGNORECASE):
+        return text.strip()
+
+    # Clean trailing punctuation/spaces
+    before = re.sub(r"[\s,.;:]+$", "", before)
+    return before
 
 
 
@@ -175,7 +224,11 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
      
     cfg = cfg or {}
     text = text or ""
+    # Remove leading bullet / marker
+    if text.startswith("*"):
+        text = text[1:].lstrip()
     text=apply_abbrev_reduction(text,cfg)
+     
     temtext=text
     span = int(cfg.get("max_token_span", 40))
     #print(cfg.get("currency_aliases",{}))
@@ -193,7 +246,7 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
 
 
     if strategy == "uppercase":
-         
+        #print("apply uppercase strategy on:",text)
         tokens = text.strip().split()
         uppercase_tokens: List[str] = []
         for tok in tokens:
@@ -204,6 +257,7 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
             else:
                 break
         temtext= " ".join(uppercase_tokens)
+        #print("after uppercase==>",temtext)
 
     elif strategy == "first_comma":
         #print("retrun before coomma:",_cut_before_first_of(text, [","]))
@@ -222,9 +276,20 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
         else:
             temtext = text
 
+    elif strategy == "before_colon_dot":
+        m = re.search(r"[.:]", text)
+        if m and m.start() >= 4:
+            temtext = text[:m.start()]
+
+
+    elif strategy == "before_semicolon_colon_comma":
+        temtext= re.split('[:;,]', text)[0]
 
     elif strategy == "before_comma_or_colon":
-        temtext= re.split('[;,]', text)[0]
+        temtext= re.split('[,:]', text)[0]
+
+    elif strategy == "beforecommacolondollar":
+        temtext= re.split('[:,$]', text)[0]
 
     elif strategy == "before_currency":
         
@@ -232,7 +297,7 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
        
     elif strategy == "before_brack":
         
-        temtext= text.split('(')[0]
+        temtext = re.split(r'[:(]', text)[0]
           
     elif strategy == "before_semicolon":
         
@@ -240,7 +305,20 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
 
     # Back-compat common name
     elif strategy == "before_comma_or_dot":
-       temtext = re.split('[,.]', text)[0]
+        candidates = [
+            i for i, ch in enumerate(text)
+            if ch in ".,"
+            and i >= 4
+        ]
+
+        if candidates:
+            temtext = text[:candidates[0]]
+        else:
+            temtext = text
+
+
+
+
 
     # Unknown strategy
     if not temtext:

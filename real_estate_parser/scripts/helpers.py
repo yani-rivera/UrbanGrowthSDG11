@@ -8,7 +8,7 @@ import os, re, json, csv
 from pathlib import Path
 from datetime import datetime
 import unicodedata
-
+from typing import List
 # --- CSV schema (units included) ---
 # scripts/helpers.py
 FIELDNAMES = [
@@ -41,6 +41,17 @@ def _dt(date_str: str) -> datetime:
             pass
     raise ValueError(f"Bad date: {date_str}")
 
+def write_lines(path: str, lines: list[str]) -> None:
+    """
+    Write a list of lines to a file using UTF-8 encoding.
+    """
+    with open(path, "w", encoding="utf-8") as fh:
+        for ln in lines:
+            # ensure each line ends with newline
+            if not ln.endswith("\n"):
+                fh.write(ln + "\n")
+            else:
+                fh.write(ln)
 
 
 
@@ -265,48 +276,54 @@ def make_prefile_numbered(input_path: str, agency: str,year: str, tmp_root: str 
 
 
 
-def make_prefile_star(input_path: str, agency: str, delimiter: str, year: str, tmp_root: str = "output") -> str:
+def make_prefile_star(input_path: str, agency: str, delimiter: str, year: str, tmp_root: str = "output") -> List[str]:
     """
     Normalize listing delimiters: replace the given delimiter (single char) at the start of a line
     with the canonical '* ' (star + space).
 
-    Output path: output/<Agency>/pre/<year>/<file>
-    Example: input='data/raw/Inverprop/2015/inverprop_20151028.txt'
-             output='output/Inverprop/pre/2015/inverprop_20151028.txt'
-
     Args:
         input_path: path to raw TXT file
-        agency: agency code (e.g., "Inverprop")
+        agency: agency code (unused here, kept for signature consistency)
         delimiter: the actual listing delimiter character to replace (e.g., '*', '-', '#')
-        year: 4-digit year string (e.g., "2015")
-        tmp_root: root output directory (default "output")
+        year: 4-digit year string (unused here, kept for signature consistency)
+        tmp_root: root output directory (unused here, kept for signature consistency)
 
     Returns:
-        Path to the new preprocessed file
+        List of transformed lines (in memory only)
     """
+    base = os.path.basename(input_path)
+    base="pre_"+base
+    pre_dir  = os.path.join(tmp_root, agency, "pre", year)
+    os.makedirs(pre_dir, exist_ok=True)
+    pre_path = os.path.join(pre_dir, base)
+
+    os.makedirs(pre_dir, exist_ok=True)
+     
     if len(delimiter) != 1:
         raise ValueError("delimiter must be a single character")
 
-    base = os.path.basename(input_path)
-    base="pre_"+base
-    pre_dir = os.path.join(tmp_root, agency, "pre", year)
-    os.makedirs(pre_dir, exist_ok=True)
-    pre_path = os.path.join(pre_dir, base)  # same filename, not prefixed with "pre_"
+    bullet_re = re.compile(rf"(?m)^(?P<lead>\s*){re.escape(delimiter)}(?=\s)")
 
-    # Regex: line start (^) + optional whitespace + delimiter + optional whitespace
-    bullet_re = re.compile(rf"(?m)^(?P<lead>\s*){re.escape(delimiter)}\s*")
 
+    out: List[str] = []
     replaced = 0
-    with open(input_path, "r", encoding="utf-8", errors="ignore") as fi, \
-         open(pre_path, "w", encoding="utf-8", errors="ignore") as fo:
+    with open(input_path, "r", encoding="utf-8", errors="ignore") as fi:
         for ln in fi:
-            new, n = bullet_re.subn(r"\g<lead>* ", ln, count=1)
+            new, n = bullet_re.subn(r"\g<lead>" + "* ", ln, count=1)
             if n > 0:
                 replaced += n
-            fo.write(new)
+            out.append(new)
+            #print("DEBUG OUT==>",out)
+    #print("RETURN===>",pre_path)
+    
+    write_lines(pre_path, out)
 
-    print(f"[make_prefile_star] {input_path} → {pre_path} delimiter='{delimiter}' bullets_replaced={replaced}")
+
+ 
+ 
     return pre_path
+    
+   
 
 
 

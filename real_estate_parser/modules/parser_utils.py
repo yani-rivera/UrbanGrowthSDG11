@@ -17,38 +17,73 @@ from modules.area_extractor import extract_area as _extract_area_new
 
 #==================END IMPORTS
 
-# helpers
-def _to_float(num: str) -> float | None:
-    if num is None:
-        return None
-    s = num.strip().replace('½', '.5')
-    # turn "2 1/2" into "2.5"
-    s = re.sub(r'(\d)\s*1/2', r'\1.5', s)
-    s = s.replace('.', '').replace(',', '.')  # 1.200,5 -> 1200.5 ; 2,5 -> 2.5
-    try:
-        return float(s)
-    except ValueError:
-        return None
+ 
+_BED_WORDS = r"(?:hab(?:itaciones)?|habit\.?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?|BEDROOMS)"
 
-# bedrooms: words + shorthand H
-#_BED_WORDS = r"(?:hab(?:itaciones)?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?)"
-_BED_WORDS = r"(?:hab(?:itaciones)?|habit\.?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?)"
+BED_RX_KV = re.compile(
+    r"\b(?:beds?|bedrooms?)\s*[:=]\s*(\d{1,2})\b",
+    re.IGNORECASE
+)
 
 
-BED_RX_1 = re.compile(rf"\b(\d{{1,2}})\s*{_BED_WORDS}(?!\w)", re.IGNORECASE)
+BED_RX_EQUALS = re.compile(
+    r"\b(?:beds?|bedrooms?)\s*=\s*(\d{1,2})\b",
+    re.IGNORECASE
+)
+
+
+BED_RX_1 = re.compile(
+    rf"(?:\((\d{{1,2}})\)|\b(\d{{1,2}}))\s*{_BED_WORDS}(?!\w)",
+    re.IGNORECASE
+)
+
 BED_RX_2 = re.compile(r"\b(\d{1,2})\s*[Hh]\b")  # 3H, 4 h
 BED_RX_WORD_FIRST = re.compile(
     rf"\b{_BED_WORDS}\s*[:\-]?\s*(\d{{1,2}})\b",
     re.IGNORECASE
 )
+#----------
+_NUM_WORDS_0_5 = {
+    "cero": "0",
+    "uno": "1", "una": "1", "un": "1",
+    "dos": "2",
+    "tres": "3",
+    "cuatro": "4",
+    "cinco": "5",
+}
+_NUM_WORDS_RX = re.compile(r"\b(?:cero|uno|una|un|dos|tres|cuatro|cinco)\b", re.IGNORECASE)
 
+def _normalize_small_numbers_0_5(s: str) -> str:
+    # replace standalone number-words with digits; keeps accents untouched elsewhere
+    return _NUM_WORDS_RX.sub(lambda m: _NUM_WORDS_0_5[m.group(0).lower()], s)
+
+#---------
 
 
 # bathrooms: decimals/½, words + shorthand B
-BATH_WORD = r"ba(?:ños|nos|ño|no)s?"
-BATH_RX_MAIN   = re.compile(rf"\b(\d{{1,2}}(?:[.,]\d)?|\d\s*1/2|½)\s*{BATH_WORD}\b", re.IGNORECASE)
-BATH_RX_Y_MEDIO = re.compile(rf"\b(\d{{1,2}})\s*y\s*medio\s*{BATH_WORD}?\b", re.IGNORECASE)
-BATH_RX_SHORT  = re.compile(r"\b(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\s*[Bb]\b")  # 2B, 2.5B
+#BATH_WORD = r"ba(?:ños|nos|ño|no)s?"
+BATH_WORD = r"(?:bañ(?:o|os)|ban(?:o|os)|ba|bathrooms?)"
+
+
+BATH_RX_WORD_NUM = re.compile(
+    rf"\b{BATH_WORD}\s*(\d{{1,2}}(?:[.,]\d)?)\b",
+    re.I
+)
+
+BATH_RX_NUM_WORD = re.compile(
+    rf"\b(\d{{1,2}}(?:[.,]\d)?)\s*{BATH_WORD}\b",
+    re.I
+)
+
+
+BATH_RX = re.compile(rf"\b(\d{{1,2}}(?:[.,]\d)?)\s*{BATH_WORD}", re.I)
+
+
+BATH_RX_MEDIO = re.compile(
+    rf"\b(\d{{1,2}})\s*y\s*medio(?:\s+{BATH_WORD})?\b", re.I)
+
+BATH_RX_B = re.compile(
+    r"\b(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\s*[Bb]\b", re.I)
 
 # optional "3/2" shorthand: assume beds/baths if enabled
 SLASH_RX = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\b")
@@ -73,7 +108,7 @@ _SPACE_COLLAPSE_RE = re.compile(r'\s+')
 
 AREA_RX = re.compile(
     r'\b(\d{1,4}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s*'
-    r'(m2|m²|mt2|mts2|mts|vrs2|vrs²|vrs|vr2|vr)\b',
+    r'(m2|m²|mt2|mts2|mts|area_m2|vrs2|vrs²|vrs|vr2|vr)\b',
     re.IGNORECASE,
 )
 
@@ -84,39 +119,6 @@ PRICE_RX = re.compile(
     re.IGNORECASE,
 )
 
-def _normalize_num_token(num_str: str) -> float | None:
-    """
-    Robustly convert strings like '1,700.00', '1.700,00', '1 700', '1700' to float.
-    Heuristic:
-      - If both ',' and '.' appear: whichever comes last is the decimal separator.
-      - If only ',' appears and groups look like thousands (xxx,xxx[,xxx]) -> remove commas.
-      - Otherwise replace ',' with '.' once if it looks like decimal.
-    """
-    s = num_str.strip().replace(" ", "")
-    has_comma = "," in s
-    has_dot = "." in s
-
-    if has_comma and has_dot:
-        # Heuristic: whichever separator comes last is the decimal
-        if s.rfind(',') > s.rfind('.'):
-            # European style: 1.800,50 -> 1800.50
-            s = s.replace('.', '')
-            s = s.replace(',', '.', 1)
-        else:
-            # US style: 1,800.50 -> 1800.50
-            s = s.replace(',', '')
-    elif has_comma and not has_dot:
-        # Decide if comma is thousands or decimal
-        parts = s.split(",")
-        if all(len(p) == 3 for p in parts[1:-1]) and len(parts[-1]) in (3, 0):
-            s = "".join(parts)            # 1,234,567 -> 1234567
-        else:
-            s = s.replace(",", ".", 1)    # 12,5 -> 12.5
-
-    try:
-        return float(s)
-    except Exception:
-        return None
 
 
 def normalize_currency_spacing(text: str) -> str:
@@ -179,9 +181,6 @@ def normalize_ocr_text(text):
     return s
 
 
-
-
-
 def extract_area(text: str, config: dict):
     """Façade: keep old import path working, call the new module."""
     return _extract_area_new(text, config)
@@ -207,24 +206,37 @@ def clean_listing_line(line):
 
 NUM_WORDS = {"uno":1,"una":1,"dos":2,"tres":3,"cuatro":4,"cinco":5,"seis":6,"siete":7,"ocho":8,"nueve":9,"diez":10}
 
-def _word_to_int(s): return NUM_WORDS.get(s.strip().lower(), None)
+# def _word_to_int(s): return NUM_WORDS.get(s.strip().lower(), None)
 
-def extract_bedrooms(text: str, config: dict | None = None):
-    t = text or ""
+
+""" def extract_bedrooms(text: str, config: dict | None = None):
+    # CHANGED: normalize only 0–5 words; do NOT strip accents
+    t = _normalize_small_numbers_0_5(text or "")
+
     # 1) explicit words
     m = BED_RX_1.search(t)
     if m:
-        return int(m.group(1))
+        n_str = m.group(1) or m.group(2)
+        if n_str is None:
+            return None
+        n = int(n_str)
+        return n if 0 <= n <= 5 else None
+
     # 2) shorthand "3H"
     m = BED_RX_2.search(t)
     if m:
-        return int(m.group(1))
-    # 3) word-first "Dormitorios 3"
+        n = int(m.group(1))
+        return n if 0 <= n <= 5 else None
+
     # 3) word-first "Dormitorios 3"
     if not config or config.get("enable_word_first_bedbath", False):
         m = BED_RX_WORD_FIRST.search(t)
         if m:
-         return int(m.group(1))
+            n = int(m.group(1))
+            return n if 0 <= n <= 5 else None
+
+    #return None
+
 
     # 4) "3/2" pattern (config-gated; on by default)
     allow_slash = True if not config else bool(config.get("allow_slash_bed_bath", True))
@@ -233,32 +245,80 @@ def extract_bedrooms(text: str, config: dict | None = None):
         if m:
             return int(m.group(1))
     return None
+ """
 
 
+def extract_bedrooms(text: str, config: dict | None = None):
+    # CHANGED: normalize only 0–5 words; do NOT strip accents
+    t = _normalize_small_numbers_0_5(text or "")
+
+    # 0) explicit key=value: beds=4, bedrooms=3
+    m = BED_RX_EQUALS.search(t)
+    if m:
+        n = int(m.group(1))
+        return n if 0 <= n <= 5 else None
+
+    # 0) explicit key:value or key=value: beds: 4; bedrooms=3
+    m = BED_RX_KV.search(t)
+    if m:
+        n = int(m.group(1))
+        return n if 0 <= n <= 5 else None
+
+
+
+    # 1) explicit words: "(3) hab", "3 dormitorios"
+    m = BED_RX_1.search(t)
+    if m:
+        n_str = m.group(1) or m.group(2)
+        if n_str is None:
+            return None
+        n = int(n_str)
+        return n if 0 <= n <= 5 else None
+
+    # 2) shorthand "3H"
+    m = BED_RX_2.search(t)
+    if m:
+        n = int(m.group(1))
+        return n if 0 <= n <= 5 else None
+
+    # 3) word-first "Dormitorios 3"
+    if not config or config.get("enable_word_first_bedbath", False):
+        m = BED_RX_WORD_FIRST.search(t)
+        if m:
+            n = int(m.group(1))
+            return n if 0 <= n <= 5 else None
+
+    # 4) "3/2" pattern (config-gated; on by default)
+    allow_slash = True if not config else bool(config.get("allow_slash_bed_bath", True))
+    if allow_slash:
+        m = SLASH_RX.search(t)
+        if m:
+            return int(m.group(1))
+
+    return None
 
 
 
 def extract_bathrooms(text: str, config: dict | None = None) -> Optional[float]:
-    """
-    Bathrooms as float (supports .5) or None if not found.
-    Order of precedence:
-      1) slash shorthand (3/2 or 3-2) -> baths = second number
-      2) "X baños y medio" (config/builtin) -> baths = X + 0.5
-      3) "X baños" (config/builtin) -> baths = X
-      4) ensuite inference (if enabled, and no numeric match)
-      5) tolerant half-bath add-on ("medio baño", "baño y medio", "½ baño"):
-         - if baths is None -> 0.5
-         - else -> baths += 0.5
-    """
     cfg = config or {}
     baths: Optional[float] = None
-    half_already_accounted = False  # to avoid double-counting when we hit "y medio" explicitly
+    half_already_accounted = False
 
     def _to_float(s: str) -> Optional[float]:
         try:
             return float(s.replace(",", "."))
         except Exception:
             return None
+
+    # --------------------------------------------------
+    # 0) Direct numeric + keyword (agency style)
+    #    e.g. "4.5 BATHROOMS"
+    # --------------------------------------------------
+    m = BATH_RX_NUM_WORD.search(text)
+    if m:
+        v = _to_float(m.group(1))
+        if v is not None and v <= 10:
+            return v
 
     # 1) Slash shorthand beds/baths (3/2 or 3-2)
     # Slash shorthand beds/baths (3/2 or 3-2)
@@ -398,10 +458,6 @@ def extract_bathrooms(text: str, config: dict | None = None) -> Optional[float]:
         baths = (baths if baths is not None else 0.0) + 0.5
 
     return baths
-
-
-
-
 
 
 

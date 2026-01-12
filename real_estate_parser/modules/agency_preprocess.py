@@ -264,7 +264,9 @@ def preprocess_listings(raw_lines: Iterable[str], marker: Optional[str] = None,
             mode = "LITERAL"; lit = marker or str(_CFG.get("listing_marker", "*"))
              
         blocks = preprocess_split(raw_lines, mode=mode, marker=lit)
+        print(blocks[:3])
         rows = preprocess_join(blocks)
+        print (rows[:3])
     # Ensuere that everylisting have an "*" start
     #rows = bulletize(((l) for l in rows),_CFG )
 

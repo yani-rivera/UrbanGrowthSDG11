@@ -24,12 +24,7 @@
   },
 
   "replace_map": {
-    "B° ": "BARRIO ",
-    "ALTOS MIRAFLORES": "ALTOS DE MIRAFLORES",
-    "ALTOS MIRAMONTES": "ALTOS DE MIRAMONTES",
-    "ALTOS TONCONTIN": "ALTOS DE TONCONTIN",
-    "LOMAS GUIJARRO": "LOMAS DEL GUIJARRO",
-    "VALLE ANGELES": "VALLE DE ANGELES"
+    "B° ": "BARRIO "
   },
 
   "strip_patterns": {
@@ -44,15 +39,8 @@
   },
 
   "aliases": {
-    "RES. CENTROAMÉRICA": ["RES. CENTROAMERICA"],
-    "VALLE DE ÁNGELES": ["VALLE DE ANGELES"],
-    "BARRIO MORAZÁN": ["BARRIO MORAZAN", "BO MORAZAN"],
-    "ALTOS DE MIRAMONTES": ["ALTOS MIRAMONTES"],
-    "LOMAS DEL GUIJARRO": ["LOMAS GUIJARRO"],
-    "RES. TRAPICHE": ["TRAPICHE"],
-    "EL CHIMBO": ["CHIMBO"],
-    "COL. PALMIRA": ["PALMIRA"],
-    "ALTOS DE TONCONTÍN": ["ALTOS DE TONCONTIN"]
+    "RES. ACME": ["RES. ACME"],
+
   },
 
   "building_tokens": ["torre", "edificio", "tower", "condominio"],

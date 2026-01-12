@@ -1,16 +1,5 @@
 {
-  "casabianca": "CASABI",
-  "cedros": "CEDROS",
-  "etica": "ETICA",
-  "eugenia": "EUGENI",
-  "fenix": "FENIX",
-  "independent": "INDEPE",
-  "innova": "INNOVA",
-  "inverprop": "INVERP",
-  "jireh": "JIREH",
-  "makos": "MAKOS",
-  "nemonics": "{'CASABIANCA': 'CSBC', 'CEDROS': 'CDRO', 'ETICA': 'ETCA', 'EUGENIA': 'EUGE', 'FENIX': 'FENX', 'INDEPENDENT': 'INDPT', 'INNOVA': 'INNO', 'INVERPROP': 'INVP', 'JIREH': 'JREH', 'MAKOS': 'MAKOS', 'SATELITE': 'SATL', 'SERPECAL': 'SPCL', 'VINSA': 'VINSA'}",
-  "satelite": "SATELI",
-  "serpecal": "SERPEC",
-  "vinsa": "VINSA"
+  "acme": "ACM",
+  "northacme": "NPACM"
+
 }

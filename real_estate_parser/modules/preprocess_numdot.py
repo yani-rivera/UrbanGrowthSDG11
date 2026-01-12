@@ -8,7 +8,12 @@ import os, re
 __all__ = ["detect_numdot", "masquerade_numdot", "maybe_masquerade_numdot"]
 
 # — detection: "d." / "dd." followed by a letter or '#'
-_NUMDOT_START  = re.compile(r"^(\s*)(\d{1,3})\.\s*(?=[A-Za-zÁÉÍÓÚÜÑ#])")
+#_NUMDOT_START  = re.compile(r"^(\s*)(\d{1,3})\.\s*(?=[A-Za-zÁÉÍÓÚÜÑ#])")
+_NUMDOT_START = re.compile(
+    r"^(\s*)(\d{1,3})(?:[.\-_–—]{1,2})\s*(?=[A-Za-zÁÉÍÓÚÜÑ#])"
+)
+
+
 _INLINE_NUMDOT = re.compile(r"(?<![\d,])\b(\d{1,3})\.\s*(?=[A-Za-zÁÉÍÓÚÜÑ#])")
 
 # — price + currency glue

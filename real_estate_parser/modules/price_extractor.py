@@ -41,18 +41,11 @@ def _autofix_price_locale(text: str, amount: Optional[float], locale: str = "aut
         except Exception:
             pass
 
-    # Dotted thousands only: 675.000 -> current parser often reads 675000 (US)
-    m = _ES_THOUSANDS_ONLY.search(text)
-    if m and loc in {"auto", "es"}:
-        raw = m.group(0)
-        try:
-            us_read = float(raw.replace(".", ""))   # 675000.0
-            es_read = us_read / 1000.0              # 675.0
-            # Only override if current equals the US misread (prevents false positives)
-            if abs((amount or 0) - us_read) < 0.5:
-                return es_read
-        except Exception:
-            pass
+    # Dotted thousands only: no-op; US parse is already correct for '500.000' -> 500000
+    # (Disabled to prevent 500.000 being scaled down to 500.0)
+    # m = _ES_THOUSANDS_ONLY.search(text)
+    # if m and loc in {"auto", "es"}:
+    #     pass
 
     return amount
 
@@ -92,7 +85,6 @@ def _round_val(val: Optional[float]) -> Optional[float]:
         return float(int(r))
     return r
 
-
 def _scan_candidates(
     s_masked: str,
     pfx_pat,
@@ -106,11 +98,7 @@ def _scan_candidates(
     min_inherit_rhs: float,
     first_only: bool
 ) -> Optional[Tuple[float, str]]:
-    """
-    Walk through masked string and extract first valid price candidate,
-    including handling of ranges.
-    Returns (value, currency) or None if not found.
-    """
+
     candidates: List[Tuple[int, int, float, str]] = []
 
     matches = []
@@ -134,51 +122,57 @@ def _scan_candidates(
         if val is None:
             continue
 
-        # Candidate accepted
         start, end = m.span()
         candidates.append((start, end, val, cur_code or "UNKNOWN"))
 
-        # --- Range handling ---
+        # ---- range handling ----
         rest  = s_masked[end:]
         sep_m = sep_pat.match(rest)
-        if sep_m:
-            rhs = rest[sep_m.end():]
+        if not sep_m:
+            continue
 
-            m_rhs = pfx_pat.match(rhs) or sfx_pat.match(rhs)
-            if m_rhs:
-                gd2       = m_rhs.groupdict()
-                cur2_tok  = gd2.get("cur")
-                num2_text = gd2.get("num")
-                mag2      = gd2.get("mag")
-                cur2_code = _norm_currency(cur2_tok, aliases_map)
-                val2      = _to_float_num(num2_text, mag2)
+        rhs = rest[sep_m.end():]
 
-                if cur2_code or (inherit_in_ranges and val2 is not None and val2 >= min_inherit_rhs):
-                    if first_only:
-                        return (_round_val(val), cur_code)
-                    else:
-                        v = min(val, val2) if (val is not None and val2 is not None) else val
+        # dual-currency guard
+        if sep_m.group(0).strip() == "/":
+            if pfx_pat.match(rhs) or sfx_pat.match(rhs):
+                # dual currency → NOT a range
+                continue
+
+        m_rhs = pfx_pat.match(rhs) or sfx_pat.match(rhs)
+        if m_rhs:
+            gd2       = m_rhs.groupdict()
+            cur2_tok  = gd2.get("cur")
+            num2_text = gd2.get("num")
+            mag2      = gd2.get("mag")
+            cur2_code = _norm_currency(cur2_tok, aliases_map)
+            val2      = _to_float_num(num2_text, mag2)
+
+            if cur2_code or (inherit_in_ranges and val2 is not None and val2 >= min_inherit_rhs):
+                if not first_only and val2 is not None:
+                    v = min(val, val2)
+                    return (_round_val(v), cur_code)
+
+        elif inherit_in_ranges and rhs_looks_pricey(rhs):
+            m_bare = re.match(
+                r"\s*(?P<num>" + _build_number_pattern() + r")(?P<mag>[kKmM])?",
+                rhs
+            )
+            if m_bare:
+                val2 = _to_float_num(m_bare.group("num"), m_bare.group("mag"))
+                if val2 is not None and val2 >= min_inherit_rhs:
+                    if not first_only:
+                        v = min(val, val2)
                         return (_round_val(v), cur_code)
-            else:
-                if inherit_in_ranges and rhs_looks_pricey(rhs):
-                    m_bare = re.match(r"\s*(?P<num>" + _build_number_pattern() + r")(?P<mag>[kKmM])?", rhs)
-                    if m_bare:
-                        val2 = _to_float_num(m_bare.group("num"), m_bare.group("mag"))
-                        if val2 is not None and val2 >= min_inherit_rhs:
-                            if first_only:
-                                return (_round_val(val), cur_code)
-                            else:
-                                v = min(val, val2) if (val is not None) else val2
-                                return (_round_val(v), cur_code)
 
-        if first_only:
-            return (_round_val(val), cur_code)
-
+    # ---- FINAL SELECTION ----
     if not candidates:
         return None
 
-    start, end, val, cur = sorted(candidates, key=lambda t: (t[0], t[1]))[0]
+    # choose most plausible candidate (largest value)
+    start, end, val, cur = max(candidates, key=lambda t: t[2])
     return (_round_val(val), cur)
+
 
 
 def _strip_nbsp(s: str) -> str:
@@ -212,58 +206,69 @@ def _normalize_leading_dot_after_currency(s: str, currency_prefixes: List[str]) 
 def _to_float_num(raw: str, mag: Optional[str]) -> Optional[float]:
     if raw is None:
         return None
+
     s = raw.strip()
     s = _strip_nbsp(s)
 
-    # Mixed separators: both comma and dot present
+    # Support sign/parentheses  (NEW)
+    sign = -1 if s.startswith("(") or s.startswith("-") else 1
+    s = s.lstrip("()+- ").rstrip()
+
+    # Normalize weird spaces
+    s = s.replace("\u202F", " ").replace("\u2009", " ").replace("\u00A0", " ")
+    s = re.sub(r"(?<=\d)\s+(?=[.,]?\d)", "", s)
+
+    # Mixed separators: keep ONLY the last as decimal
     if "," in s and "." in s:
-        # Decide by last separator: if last is '.', assume US (comma thousands, dot decimal)
-        # else assume ES (dot thousands, comma decimal)
-        if s.rfind(".") > s.rfind(","):
-            s = s.replace(",", "")                 # "1,200.50" -> "1200.50"
-        else:
-            s = s.replace(".", "").replace(",", ".")  # "1.200,50" -> "1200.50"
+        last = max(s.rfind(","), s.rfind("."))
+        intpart = re.sub(r"[^\d]", "", s[:last])
+        decpart = re.sub(r"\D", "", s[last+1:])
+        s = f"{intpart}.{decpart}" if decpart else intpart
 
-    # Only comma present
     elif "," in s:
-        # If comma has 1–2 decimals, treat as decimal; else treat as thousands
-        if re.fullmatch(r"\d+,\d{1,2}", s):
-            s = s.replace(",", ".")                # "600,50" -> "600.50"
+        if re.fullmatch(r"\d{1,3}(?:,\d{3})+", s):            # 1,200,000
+            s = s.replace(",", "")
+        elif re.fullmatch(r"\d+,\d{1,3}", s):                 # 600,5  / 600,50 / 600,500 (NEW allows 3)
+            s = s.replace(",", ".")
+        elif re.fullmatch(r"\d+,\d{4,}", s):                  # 800,1000 → likely TWO prices  (NEW)
+            return None
         else:
-            s = s.replace(",", "")                 # "1,200,000" -> "1200000"
+            s = s.replace(",", "")
 
-    # Only dot present
     elif "." in s:
-        # Decimal zeros case: "600.000" -> "600"
-        if re.fullmatch(r"\d+\.000", s):
-            s = s.split(".")[0]
-        # Pure decimal with 1–2 digits: keep decimal
-        elif re.fullmatch(r"\d+\.\d{1,2}", s):
-            pass                                   # keep as-is, e.g. "600.00"
-        # Thousand-grouping style: 1.200.000 / 675.000 / 60.000
-        elif re.fullmatch(r"\d{1,3}(?:\.\d{3})+", s):
+        if re.fullmatch(r"\d{1,3}(?:\.\d{3})+", s) or re.fullmatch(r"\d+\.\d{3}", s):
             s = s.replace(".", "")
-        else:
-            # Fallback: keep dot (rare cases like "123.4" already covered above)
+        elif s.count(".") > 1:
+            last = s.rfind(".")
+            intpart = s[:last].replace(".", "")
+            decpart = re.sub(r"\D", "", s[last+1:])
+            if 1 <= len(decpart) <= 3:                         # NEW: allow 3
+                s = f"{intpart}.{decpart}"
+            else:
+                s = intpart + decpart
+        elif re.fullmatch(r"\d+\.\d{1,3}", s):                 # NEW: allow 3
             pass
+        else:
+            if len(s.split(".")[-1]) == 3:
+                s = s.replace(".", "")
 
-    # Neither comma nor dot → digits only (already fine)
-
+    # Parse
     try:
         val = float(s)
     except ValueError:
-        digits = re.sub(r"[^0-9]", "", s)
+        digits = re.sub(r"\D", "", s)
         val = float(digits) if digits else None
     if val is None:
         return None
 
-    if mag:
-        m = mag.lower()
-        if m == "k":
-            val *= 1_000
-        elif m == "m":
-            val *= 1_000_000
-    return val
+    # Magnitudes
+    m = (mag or "").strip().lower()
+    if m in ("k", "mil"):
+        val *= 1_000
+    elif m in ("m", "mm", "millón", "millon", "millones"):
+        val *= 1_000_000
+
+    return sign * val
 
 
 def _norm_currency(token: str, alias_map: Dict[str, str]) -> Optional[str]:
@@ -320,17 +325,25 @@ def _compile_currency(alias_map: Dict[str, str]) -> Tuple[re.Pattern, List[str]]
 
 
 def _build_number_pattern() -> str:
-    # Accept 225,000 / 225.000 / 225000 / 1.25M / 225k; allow optional spaces after separators
-    core = r"(?:\d{1,3}(?:[.,]\s?\d{3})+|\d+)(?:[.,]\d+)?"
-    return core
+    # thousands first; decimal tail ≤2; (?!00) prevents taking "1.5" from "1.500"
+    return r"(?:\d{1,3}(?:[.,]\s?\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})(?!00)|\d+)"
+
 
 
 def _compile_price_patterns(cur_pat: re.Pattern) -> Tuple[re.Pattern, re.Pattern]:
     num = _build_number_pattern()
     # Prefix: currency (non-letter before), optional spaces, number, optional mag
-    pfx = re.compile(rf"(?<![A-Za-z])(?P<cur>{cur_pat.pattern})\s*(?P<num>{num})(?P<mag>[kKmM])?", re.IGNORECASE)
+    #pfx = re.compile(rf"(?<![A-Za-z])(?P<cur>{cur_pat.pattern})\s*(?P<num>{num})(?P<mag>[kKmM])?", re.IGNORECASE)
+    MAG = r"(?P<mag>(?:mill(?:[óo]n|ones)|mm|m|k|mil))\b"  # longer-first + WORD BOUNDARY
+    pfx = re.compile(rf"(?<![A-Za-z])(?P<cur>{cur_pat.pattern})\s*\.?\s*(?P<num>{num})\s*(?:{MAG})?", re.IGNORECASE)
     # Suffix: number, optional mag, spaces, currency
-    sfx = re.compile(rf"(?P<num>{num})(?P<mag>[kKmM])?\s*(?P<cur>{cur_pat.pattern})", re.IGNORECASE)
+    #sfx = re.compile(rf"(?P<num>{num})(?P<mag>[kKmM])?\s*(?P<cur>{cur_pat.pattern})", re.IGNORECASE)
+    # AFTER — disallow lone 1–9 unless they have cents
+    sfx = re.compile(
+        rf"(?P<num>{num})\s*(?:{MAG})?\s*(?P<cur>{cur_pat.pattern})",
+        re.IGNORECASE
+    )
+
     return pfx, sfx
 
 
@@ -395,14 +408,11 @@ def _apply_masks(text: str, masks: Dict[str, re.Pattern], glue_area_tails: bool,
     return s
 
 
-# -----------------------------
-# Main API
-# -----------------------------
 
 def extract_price(text: str, config: dict) -> Tuple[Optional[float], Optional[str]]:
     if not text:
         return (None, None)
-
+    
     # --- load config knobs ---
     aliases_map = (config.get("currency_aliases") or {})            # {alias -> ISO}
     pov         = (config.get("parsing_overrides") or {})

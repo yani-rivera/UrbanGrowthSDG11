@@ -1,0 +1,86 @@
+# keys.yaml — compares exactly these config parameters across agencies
+
+- key: agency
+  alias: Agency (in-file)
+  transform: strip
+  required: false
+
+- key: nemonic
+  alias: Nemonic
+  transform: upper
+  required: false
+
+- key: listing_marker
+  alias: Listing Marker
+  required: false
+
+- key: listing_marker_tochange
+  alias: Listing Marker → Change To
+  required: false
+- key: HumanInTheLoop
+  alias: HumanInTheLoop
+  required: false
+  
+- key: preprocessing_needed
+  alias: Preprocessing Needed
+  transform: boolify
+  required: false
+
+- key: header_marker
+  alias: Header Marker
+  required: false
+
+- key: auto_masquerade_numdot
+  alias: Auto Masquerade NumDot
+  transform: boolify
+  required: false
+
+- key: sanitize
+  alias: Sanitize
+  transform: boolify
+  required: false
+
+- key: glue_price_tails
+  alias: Glue Price Tails
+  transform: boolify
+  required: false
+
+- key: glue_area_tails
+  alias: Glue Area Tails
+  transform: boolify
+  required: false
+
+- key: preprocess
+  alias: Preprocess Steps
+  transform: join
+  required: false
+
+# (Add more preprocess[i] if other agencies use longer lists)
+
+- key: emit_marker
+  alias: Emit Marker
+  transform: boolify
+  required: false
+
+# --- neighborhood_rule ---
+- key: neighborhood_rule.strategy
+  alias: Neighborhood Strategy
+  required: false
+
+- key: neighborhood_rule.max_token_span
+  alias: Neighborhood Max Token Span
+  transform: int
+  required: false
+
+# strategy_order as separate columns (pad to a safe max length)
+- key: neighborhood_rule.strategy_order[0]
+  alias: Neighborhood StrategyOrder[0]
+  required: false
+
+
+# prefix_tokens (pad out to cover the longest list you expect; missing values will be blank)
+ 
+
+# --- neighborhood_flow ---
+- key: neighborhood_flow.flow_type
+  alias: Neighborhood Flow Type

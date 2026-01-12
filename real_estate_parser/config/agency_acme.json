@@ -1,0 +1,92 @@
+{"agency": "Acme",
+  "nemonic":"ACM",
+  "preprocessing_needed": true,
+  "listing_marker": "CUE:DOT",
+  "listing_marker_tochange":null,
+  "auto_masquerade_numdot": false,
+  "sanitize": true,
+  "glue_price_tails": true,
+  "glue_area_tails": true,
+  "preprocess": [1,2],
+  "emit_marker": false,
+  "max_cue_pos":30,
+  "require_upper":true,
+  "trailing_comma_glue":true,
+  "require_price_before":false,
+
+   "neighborhood_rule": {
+    "strategy_order": ["delimiter"],
+    "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av.","Lps."],    
+    "max_token_span": 25,
+     "strategy": "before_dot"    
+  },
+
+    "neighborhood_flow": {"flow_type": "simple"},
+  
+
+  "currency_aliases": {
+    "$": "USD",
+    "$.": "USD",
+    "$. ": "USD",
+    "$ ": "USD",
+    "L": "HNL",
+    "L.": "HNL",
+    "Lps": "HNL",
+    "Lps.": "HNL",
+    "L. ": "HNL",
+    "LPS.": "HNL",
+    "L ": "HNL"
+  },
+  "symbols": ["*", "•", ">", "-"],
+  "start_exceptions": [
+    "Mts.", "Mts", "mt2", "m²", "mts", "mts2", "Mts. ",
+    "Lps", "Lps.", "L.", "$", "Lps. ",
+    "vr2", "vrs", "Vrs", "Vr²", "Vrs²",
+    "Res.", "res.", "area", "área",
+    "baños", "baño", "habitaciones", "hab.", "cubículos", "dormitorios",
+    "garaje", "lavandería", "cocina", "sala", "comedor"
+  ],
+  "neighborhood_aliases": {
+    "COL. PALMIRA": ["PALMIRA", "COL PALMIRA", "COLONIA PALMIRA"],
+    "COL. LOS ANGELES": ["LOS ANGELES", "COL LOS ANGELES"],
+    "RES. MONSEÑOR FIALLOS": ["MONSEÑOR FIALLOS"]
+  },
+
+    "area_aliases": {
+    "ac": ["m²", "m2", "mt2", "mts2", "mts²", "metros", "metros2", "metros²"],
+    "at": ["vrs²", "vrs2", "vr2", "vr²", "vrs", "vara", "varas", "v²", "vr"],
+    "mz": ["manzana", "manzanas", "mz"]
+  },
+
+  
+  "range_separators": ["/", "-", " a ", " hasta ", "–", "—"],
+
+  "parsing_overrides": {
+    "bathrooms_require_keyword": true,
+    "bathrooms_keywords": ["baño", "baños", "bano", "banos", "bath", "baths", "ba."],
+    "bathrooms_block_near_tokens": ["L.", "Lps", "USD", "US$", "$"],
+    "bathrooms_block_near_area_units": ["m2", "m²", "vrs2", "vrs²", "vr2", "vr²", "vara", "varas"],
+    "bathrooms_max_value": 6,
+    "bathrooms_window_tokens": 6,
+    "allow_slash_bed_bath": true,
+    "price_accept_mil": true,
+    "price_accept_k": true,
+    "price_require_currency": true,
+    "treat_price_per_m2_as": "skip",
+    "inherit_currency_in_ranges": true,
+    "inherit_currency_in_ranges_min_value": 1000,
+    "multi_price_policy": "first_only",
+  
+      "price_keywords": [
+       "precio","venta","alquiler","renta",
+       "mensual","/mes","por mes"
+    ]
+  },
+  "section_headers": [
+    { "pattern": "ALQUILER DE APARTAMENTOS", "transaction": "Rent", "type": "Apartment", "category": "ALQUILER DE APARTAMENTOS" },
+    { "pattern": "ALQUILER DE CASAS", "transaction": "Rent", "type": "House", "category": "ALQUILER DE CASAS" },
+    { "pattern": "VENTA DE APARTAMENTOS", "transaction": "Sale", "type": "Apartment", "category": "VENTA DE APARTAMENTOS" },
+    { "pattern": "VENTA DE CASAS", "transaction": "Sale", "type": "House", "category": "VENTA DE CASAS" },
+    { "pattern": "VENTA DE TERRENOS", "transaction": "Sale", "type": "Land", "category": "VENTA DE TERRENOS" }
+  ]
+}
