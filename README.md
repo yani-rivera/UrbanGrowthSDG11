@@ -1,5 +1,11 @@
 # UrbanGrowthSDG11 – A City-Agnostic Pipeline for Harmonized Housing Listings Data
 
+# SDG-11 Urban Housing Dataset Parser
+
+# SDG-11 Urban Housing Dataset Parser
+
+[![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226144.svg)](https://doi.org/10.5281/zenodo.18226144)
+[![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226606.svg)](https://doi.org/10.5281/zenodo.18226606)
 
 ![Example of raw real-estate web listing](HouseSalesWebPage.png)
 
