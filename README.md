@@ -1,4 +1,4 @@
-# SDG‑11 Urban Housing Dataset for Tegucigalpa (2010–2025)
+# SDG‑11 Urban Housing Dataset Parser
 
 ## 1. Project Overview
 
@@ -16,7 +16,7 @@ Urban housing research and planning in low‑ and middle‑income countries are 
 * Lack of spatially explicit housing market information
 * Inconsistent terminology and formats across time
 
-Tegucigalpa, with an estimated metropolitan population exceeding one million inhabitants, represents Honduras’ primary urban housing market and an ideal case study for SDG‑11 monitoring.
+
 
 ---
 
@@ -24,10 +24,7 @@ Tegucigalpa, with an estimated metropolitan population exceeding one million inh
 
 The dataset is structured around four benchmark years:
 
-* **2010**
-* **2015**
-* **2020**
-* **2025**
+xxxx, each year is a folder under each agency
 
 For each year, listings are sampled at monthly or near‑monthly intervals to capture market conditions while maintaining feasibility and consistency.
 
