@@ -1,6 +1,7 @@
 # SDG‑11 Urban Housing Dataset Parser
 
-![HouseSales](HouseSalesWebPage)
+![Example of raw real-estate web listing](HouseSalesWebPage.png)
+
 
 
 
