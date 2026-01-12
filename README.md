@@ -58,7 +58,7 @@ All listings are converted into a **canonical, one‑line, machine‑parsable fo
 **Example:**
 
 ```
-LOMAS DEL MAYAB: Apartment; SALE; 3 beds; 2 baths; 120 m2; USD 185000;
+LOMAS DEL NUNCAJAMAS: Apartment; SALE; 3 beds; 2 baths; 120 m2; USD 185000;
 ```
 
 This format ensures long‑term stability and reproducibility across years and sources.
