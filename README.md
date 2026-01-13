@@ -193,3 +193,15 @@ The project is currently in the final stages of:
 * Figure and table preparation for publication
 
 Future work includes expanded automation and cross‑city replication.
+
+## 14. How to use this code
+
+## Documentation Index
+
+## How to Navigate This Repository
+
+- **Pipeline overview** → `real_estate_parser/Doc/process_index.md`
+- **Synthetic data & execution** → `real_estate_parser/Doc/data_index.md`
+- **Step-by-step scripts** → `real_estate_parser/Doc/`
+
+
