@@ -35,7 +35,7 @@ Urban housing research and planning in low‑ and middle‑income countries are 
 
 The dataset is structured around four benchmark years:
 
-xxxx, each year is a folder under each agency
+ each year is a folder under each agency
 
 For each year, listings are sampled at monthly or near‑monthly intervals to capture market conditions while maintaining feasibility and consistency.
 
