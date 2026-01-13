@@ -1,0 +1,81 @@
+#ALQUILER DE CASAS
+* Centro de Toontown:
+  apartamento hermoso y muy cómodo, 2 hab 1 baño 65 m2
+  balcón pequeño, sin garaje, agua 24 hrs (de bozo)
+  ambiente tranquilo, edificio seguro, $480 mensuales
+
+* Barrio Carrot Hills:
+  casa cómoda de 2 habitaciones 1 baño 120 m2
+  patio frontal, ideal familia pequeña, zona tranquila
+  agua permanente, $600 al mes
+
+* Sector Old Studio:
+  apartamento sencillo 1 hab 1 baño 42 m2
+  edificio antiguo pero seguro, ambiente agradable
+  excelente ubicación, $350 mensuales
+
+* Avenida Warner:
+  casa hermosa de 3 hab 2 baños 150 m2
+  sala amplia, buena ventilación, circuito cerrado
+  cerca de comercios y transporte, $720 mensuales
+
+* Colonia Bunny Park:
+  apartamento muy cómodo, 2 hab 1 baño 70 m2
+  segundo nivel, zona residencial, agua 24 hrs (de bozo)
+  ambiente familiar, $510 al mes
+
+* Camino del Lago:
+  casa sencilla y fresca, 2 habitaciones 1 baño 95 m2
+  sin garaje, buena iluminación natural
+  agua permanente, $470 mensuales
+
+* Barrio Central Toons:
+  apartamento hermoso 3 hab 2 baños 90 m2
+  buena iluminación, edificio con circuito cerrado
+  zona segura, $690 mensuales
+
+* Loma del Pato:
+  casa familiar amplia, 4 hab 2 baños 180 m2
+  patio grande, zona tranquila y fresca
+  agua 24 hrs, $880 mensuales
+
+#VENTA DE CASAS
+* Centro de Toontown:
+  apartamento hermoso 2 hab 1 baño 68 m2
+  balcón frontal, edificio antiguo bien conservado
+  excelente ubicación, $66,000
+
+* Barrio Carrot Hills:
+  casa cómoda de 3 habitaciones 2 baños 140 m2
+  patio trasero y corredor, zona tranquila
+  circuito cerrado, $112,000
+
+* Sector Old Studio:
+  apartamento pequeño 1 hab 1 baño 45 m2
+  ideal inversión, edificio seguro
+  excelente ubicación, $53,000
+
+* Avenida Warner:
+  casa amplia y hermosa, 4 hab 3 baños 200 m2
+  construcción sólida, sala grande
+  zona segura, $158,000
+
+* Colonia Bunny Park:
+  apartamento cómodo 2 hab 1 baño 72 m2
+  vista a la ciudad, ambiente residencial
+  agua 24 hrs, $73,000
+
+* Camino del Lago:
+  casa de 3 hab 1 baño 110 m2
+  necesita reparaciones, zona tranquila
+  precio de oportunidad, $80,000
+
+* Barrio Central Toons:
+  apartamento moderno y hermoso, 3 hab 2 baños 95 m2
+  área social, circuito cerrado
+  excelente ubicación, $123,000
+
+* Loma del Pato:
+  casa grande y cómoda, 5 habitaciones 3 baños 260 m2
+  terreno amplio, zona fresca y segura
+  ideal familia grande, $215,000

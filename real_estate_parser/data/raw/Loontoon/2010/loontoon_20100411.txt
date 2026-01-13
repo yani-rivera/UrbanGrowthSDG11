@@ -1,0 +1,19 @@
+#ALQUILER DE CASAS
+* Centro de Loontoon, apartamento 1 hab 1 baño, 48 m2, ideal soltero, edificio tranquilo, $360 mensuales
+* Barrio Carrot Hills, casa de 2 habitaciones, 1 baño, 110 m2, patio frontal, zona silenciosa, $590 al mes
+* Avenida Warner, apartamento 2 hab 1 baño, 70 m2, balcón pequeño, cerca de comercios, $520 mensuales
+* Sector Old Studio, casa de 3 hab 2 baños, 145 m2, sala amplia, buena ventilación, $730 mensuales
+* Colonia Bunny Park, apartamento 3 hab 2 baños, 88 m2, segundo nivel, ambiente familiar, $680 al mes
+* Camino del Lago, casa sencilla de 2 habitaciones, 1 baño, 90 m2, sin garaje, $460 mensuales
+* Barrio Central Toons, apartamento 2 hab 1 baño, 62 m2, edificio antiguo pero seguro, $490 mensuales
+* Loma del Pato, casa familiar de 4 hab 2 baños, 175 m2, patio amplio, $890 mensuales
+
+#VENTA DE CASAS
+* Centro de Loontoon, apartamento 1 hab 1 baño, 50 m2, ideal inversión, precio $52,000
+* Barrio Carrot Hills, casa de 3 habitaciones 2 baños, 135 m2, patio trasero, $118,000
+* Avenida Warner, apartamento 2 hab 1 baño, 75 m2, balcón frontal, $78,000
+* Sector Old Studio, casa amplia de 4 hab 3 baños, 210 m2, construcción sólida, $162,000
+* Colonia Bunny Park, apartamento 3 hab 2 baños, 92 m2, área social, $128,000
+* Camino del Lago, casa de 3 hab 1 baño, 120 m2, necesita mejoras, precio $85,000
+* Barrio Central Toons, apartamento moderno 2 hab 2 baños, 80 m2, excelente ubicación, $105,000
+* Loma del Pato, casa grande de 5 habitaciones, 3 baños, 260 m2, terreno amplio, $215,000

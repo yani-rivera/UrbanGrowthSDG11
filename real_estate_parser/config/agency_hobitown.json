@@ -1,7 +1,7 @@
-{"agency": "Acme",
-  "nemonic":"ACM",
+{"agency": "Hobitown",
+  "nemonic":"HBTWN",
   "preprocessing_needed": true,
-  "listing_marker": "before_colon",
+  "listing_marker": "CUE:DOT",
   "listing_marker_tochange":null,
   "auto_masquerade_numdot": false,
   "sanitize": true,
@@ -87,6 +87,7 @@
     { "pattern": "ALQUILER DE CASAS", "transaction": "Rent", "type": "House", "category": "ALQUILER DE CASAS" },
     { "pattern": "VENTA DE APARTAMENTOS", "transaction": "Sale", "type": "Apartment", "category": "VENTA DE APARTAMENTOS" },
     { "pattern": "VENTA DE CASAS", "transaction": "Sale", "type": "House", "category": "VENTA DE CASAS" },
-    { "pattern": "VENTA DE TERRENOS", "transaction": "Sale", "type": "Land", "category": "VENTA DE TERRENOS" }
+    { "pattern": "VENTA DE TERRENOS", "transaction": "Sale", "type": "Land", "category": "VENTA DE TERRENOS" },
+    { "pattern": "VENTA DE BODEGAS", "transaction": "Sale", "type": "Comercial", "category": "VENTA DE BODEGAS" }
   ]
 }

@@ -1,0 +1,19 @@
+#ALQUILER DE CASAS
+* Centro de Hobitown, apartamento 2 hab 1 baño, 65 m2, balcón pequeño, sin garaje, ambiente tranquilo, $480 mensuales
+* Barrio Bolsón Verde, casa de 2 habitaciones, 1 baño, 120 m2, patio frontal, ideal familia pequeña, $600 al mes
+* Sector Mercado Antiguo, apartamento 1 hab 1 baño, 42 m2, edificio viejo pero seguro, $350 mensuales
+* Avenida del Río, casa de 3 hab 2 baños, 150 m2, sala amplia, buena ventilación, $720 mensuales
+* Colonia Colina Hobbit, apartamento 2 hab 1 baño, 70 m2, segundo nivel, zona residencial, $510 al mes
+* Camino del Molino, casa sencilla de 2 habitaciones, 1 baño, 95 m2, sin garaje, $470 mensuales
+* Barrio Pradera Sur, apartamento 3 hab 2 baños, 90 m2, buena iluminación natural, $690 mensuales
+* Sendero del Roble, casa familiar de 4 hab 2 baños, 180 m2, patio amplio, $880 mensuales
+
+#VENTA DE CASAS
+* Centro de Hobitown, apartamento 2 hab 1 baño, 68 m2, balcón frontal, edificio antiguo bien conservado, precio $66,000
+* Barrio Bolsón Verde, casa de 3 habitaciones 2 baños, 140 m2, patio trasero y corredor, $112,000
+* Sector Mercado Antiguo, apartamento 1 hab 1 baño, 45 m2, ideal inversión, precio $53,000
+* Avenida del Río, casa amplia de 4 hab 3 baños, 200 m2, construcción sólida, $158,000
+* Colonia Colina Hobbit, apartamento 2 hab 1 baño, 72 m2, vista a la ciudad, $73,000
+* Camino del Molino, casa de 3 hab 1 baño, 110 m2, necesita reparaciones, precio $80,000
+* Barrio Pradera Sur, apartamento moderno 3 hab 2 baños, 95 m2, área social, $123,000
+* Sendero del Roble, casa grande de 5 habitaciones, 3 baños, 260 m2, terreno amplio, $205,000

@@ -1,0 +1,19 @@
+#ALQUILER DE CASAS
+* Centro de OZ, apartamento 2 hab 1 baño, balcón privado, sin garaje, muy acogedor y seguro, $500 mensuales
+* Barrio Esmeralda, casa pequeña de 2 habitaciones, 1 baño, patio frontal, ambiente tranquilo, $620 al mes
+* Zona Mercado Viejo, apartamento 1 hab 1 baño, ideal estudiante, edificio antiguo, $380 mensuales
+* Avenida Central, casa de 3 hab 2 baños, sala amplia, cerca de comercios y transporte, $750 mensuales
+* Colonia Torre del Reloj, apartamento 2 hab 1 baño, segundo nivel, zona residencial, $520 al mes
+* Sector Norte, casa sencilla de 2 habitaciones, 1 baño, sin garaje, $480 mensuales
+* Barrio Jardines de OZ, apartamento 3 hab 2 baños, buena iluminación, $680 mensuales
+* Camino Real, casa familiar de 4 hab 2 baños, patio amplio, $900 mensuales
+
+#VENTA DE CASAS
+* Centro de OZ, apartamento 2 hab 1 baño, balcón frontal, edificio antiguo bien conservado, precio $68,000
+* Barrio Esmeralda, casa de 3 habitaciones 2 baños, patio trasero y corredor, $115,000
+* Zona Mercado Viejo, apartamento 1 hab 1 baño, ideal inversión, precio $55,000
+* Avenida Central, casa amplia de 4 hab 3 baños, construcción sólida, $160,000
+* Colonia Torre del Reloj, apartamento 2 hab 1 baño, vista a la ciudad, $75,000
+* Sector Norte, casa de 3 hab 1 baño, necesita reparaciones, precio $82,000
+* Barrio Jardines de OZ, apartamento moderno 3 hab 2 baños, área social, $125,000
+* Camino Real, casa grande de 5 habitaciones, 3 baños, terreno amplio, $210,000
