@@ -63,7 +63,7 @@ Each source is preserved for traceability using:
 All listings are converted into a **canonical, one‑line, machine‑parsable format** using the following conventions:
 
 * Neighborhood name precedes the listing, followed by a colon (`:`)
-* All other attributes are separated by semicolons (`;`)
+* All other attributes are separated by semicolons (`;`), free text after neighborhood ":" is also parsed.
 * Text is normalized to English for analytical fields
 
 **Example:**
