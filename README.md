@@ -1,4 +1,15 @@
-# SDG‑11 Urban Housing Dataset Parser
+# UrbanGrowthSDG11 – A City-Agnostic Pipeline for Harmonized Housing Listings Data
+
+
+
+[![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226144.svg)](https://doi.org/10.5281/zenodo.18226144)
+[![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226606.svg)](https://doi.org/10.5281/zenodo.18226606)
+
+![Example of raw real-estate web listing](HouseSalesWebPage.png)
+
+*Figure 1. Distribution of residential house sale prices by benchmark year, shown for quality control and outlier validation purposes.*
+
+
 
 ## 1. Project Overview
 
@@ -24,7 +35,7 @@ Urban housing research and planning in low‑ and middle‑income countries are 
 
 The dataset is structured around four benchmark years:
 
-xxxx, each year is a folder under each agency
+ each year is a folder under each agency
 
 For each year, listings are sampled at monthly or near‑monthly intervals to capture market conditions while maintaining feasibility and consistency.
 
