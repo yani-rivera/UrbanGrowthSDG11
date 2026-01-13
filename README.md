@@ -194,11 +194,9 @@ The project is currently in the final stages of:
 
 Future work includes expanded automation and cross‑city replication.
 
-## 14. How to use this code
+## 14.  How to Navigate This Repository
 
 ## Documentation Index
-
-## How to Navigate This Repository
 
 - **Pipeline overview** → `real_estate_parser/Doc/process_index.md`
 - **Synthetic data & execution** → `real_estate_parser/Doc/data_index.md`
