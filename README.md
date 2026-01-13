@@ -200,8 +200,8 @@ Future work includes expanded automation and cross‑city replication.
 
 ## How to Navigate This Repository
 
-- **Pipeline overview** → `real_estate_parser/doc/process_index.md`
-- **Synthetic data & execution** → `real_estate_parser/doc/data_index.md`
-- **Step-by-step scripts** → `real_estate_parser/documentation/`
+- **Pipeline overview** → `real_estate_parser/Doc/process_index.md`
+- **Synthetic data & execution** → `real_estate_parser/Doc/data_index.md`
+- **Step-by-step scripts** → `real_estate_parser/Doc/`
 
 
