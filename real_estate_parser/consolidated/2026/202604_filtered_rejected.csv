@@ -1,0 +1,1 @@
+﻿Listing_uid,Listing ID,title,neighborhood,bedrooms,bathrooms,area,area_unit,area_m2,AT,AT_unit,price,currency,transaction,property_type,agency,date,notes,source_type,ingestion_id,pipeline_version,source_file,source_agency,neighborhood_clean,neighborhood_clean_norm,property_type_original,property_type_new,property_type_reason,property_type_changed,_merge,rejection_cause

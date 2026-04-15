@@ -1,41 +1,51 @@
 ﻿ogc_fid,sector,cod_col,name,NEIGHBORHOOD,alias,AliasType,GISID,uid
-1,5,OZ-CEN,Centro de OZ,Centro de OZ,Centro de OZ,Default,1OZ-CEN00,OZ-CEN-GIS
-2,5,OZ-EME,Barrio Esmeralda,Barrio Esmeralda,Barrio Esmeralda,Default,2OZ-EME00,OZ-EME-GIS
-3,5,OZ-MER,Zona Mercado Viejo,Zona Mercado Viejo,Zona Mercado Viejo,Default,3OZ-MER00,OZ-MER-GIS
-4,5,OZ-AVE,Avenida Central,Avenida Central,Avenida Central,Default,4OZ-AVE00,OZ-AVE-GIS
-5,5,OZ-TR,Colonia Torre del Reloj,Colonia Torre del Reloj,Colonia Torre del Reloj,Default,5OZ-TR00,OZ-TR-GIS
-6,5,OZ-NOR,Sector Norte,Sector Norte,Sector Norte,Default,6OZ-NOR00,OZ-NOR-GIS
-7,5,OZ-JAR,Barrio Jardines de OZ,Barrio Jardines de OZ,Barrio Jardines de OZ,Default,7OZ-JAR00,OZ-JAR-GIS
-8,5,OZ-CAM,Camino Real,Camino Real,Camino Real,Default,8OZ-CAM00,OZ-CAM-GIS
-9,5,OZ-GH,Green Hills,Green Hills,Green Hills,Default,9OZ-GH00,OZ-GH-GIS
-10,5,OZ-WR,West Road,West Road,West Road,Default,10OZ-WR00,OZ-WR-GIS
-11,5,OZ-EE,East Emerald,East Emerald,East Emerald,Default,11OZ-EE00,OZ-EE-GIS
-12,5,OZ-SIL,Silver District,Silver District,Silver District,Default,12OZ-SIL00,OZ-SIL-GIS
-13,1,OZ-OH,Old Harbor,Old Harbor,Old Harbor,Default,13OZ-OH00,OZ-OH-GIS
-14,1,OZ-CT,Clock Tower,Clock Tower,Clock Tower,Default,14OZ-CT00,OZ-CT-GIS
-15,1,OZ-RU,Ruby Avenue,Ruby Avenue,Ruby Avenue,Default,15OZ-RU00,OZ-RU-GIS
-16,1,OZ-MUN,Munchkin District,Munchkin District,Munchkin District,Default,16OZ-MUN00,OZ-MUN-GIS
-17,3,HBT-CEN,Centro de Hobitown,Centro de Hobitown,Centro de Hobitown,Default,17HBT-CEN00,HBT-CEN-GIS
-18,3,HBT-BV,Barrio Bolsón Verde,Barrio Bolsón Verde,Barrio Bolsón Verde,Default,18HBT-BV00,HBT-BV-GIS
-19,3,HBT-MA,Sector Mercado Antiguo,Sector Mercado Antiguo,Sector Mercado Antiguo,Default,19HBT-MA00,HBT-MA-GIS
-20,3,HBT-RIO,Avenida del Río,Avenida del Río,Avenida del Río,Default,20HBT-RIO00,HBT-RIO-GIS
-21,3,HBT-CH,Colonia Colina Hobbit,Colonia Colina Hobbit,Colonia Colina Hobbit,Default,21HBT-CH00,HBT-CH-GIS
-22,3,HBT-MOL,Camino del Molino,Camino del Molino,Camino del Molino,Default,22HBT-MOL00,HBT-MOL-GIS
-23,4,HBT-PS,Barrio Pradera Sur,Barrio Pradera Sur,Barrio Pradera Sur,Default,23HBT-PS00,HBT-PS-GIS
-24,4,HBT-SR,Sendero del Roble,Sendero del Roble,Sendero del Roble,Default,24HBT-SR00,HBT-SR-GIS
-25,4,HBT-CP,Coral Lane,Coral Lane,Coral Lane,Default,25HBT-CP00,HBT-CP-GIS
-26,4,HBT-TI,Tide Avenue,Tide Avenue,Tide Avenue,Default,26HBT-TI00,HBT-TI-GIS
-27,4,HBT-PR,Pearl Road,Pearl Road,Pearl Road,Default,27HBT-PR00,HBT-PR-GIS
-28,4,HBT-AN,Anchor Way,Anchor Way,Anchor Way,Default,28HBT-AN00,HBT-AN-GIS
-29,4,HBT-WA,Wave Court,Wave Court,Wave Court,Default,29HBT-WA00,HBT-WA-GIS
-30,4,HBT-LD,Lagoon Drive,Lagoon Drive,Lagoon Drive,Default,30HBT-LD00,HBT-LD-GIS
-31,4,HBT-RC,Reef Circle,Reef Circle,Reef Circle,Default,31HBT-RC00,HBT-RC-GIS
-32,4,HBT-HP,Horizon Point,Horizon Point,Horizon Point,Default,32HBT-HP00,HBT-HP-GIS
-33,5,LTN-CEN,Centro de Loontoon,Centro de Loontoon,Centro de Loontoon,Default,33LTN-CEN00,LTN-CEN-GIS
-34,5,LTN-CH,Barrio Carrot Hills,Barrio Carrot Hills,Barrio Carrot Hills,Default,34LTN-CH00,LTN-CH-GIS
-35,5,LTN-AW,Avenida Warner,Avenida Warner,Avenida Warner,Default,35LTN-AW00,LTN-AW-GIS
-36,5,LTN-OS,Sector Old Studio,Sector Old Studio,Sector Old Studio,Default,36LTN-OS00,LTN-OS-GIS
-37,5,LTN-BP,Colonia Bunny Park,Colonia Bunny Park,Colonia Bunny Park,Default,37LTN-BP00,LTN-BP-GIS
-38,5,LTN-CL,Camino del Lago,Camino del Lago,Camino del Lago,Default,38LTN-CL00,LTN-CL-GIS
-39,5,LTN-CT,Barrio Central Toons,Barrio Central Toons,Barrio Central Toons,Default,39LTN-CT00,LTN-CT-GIS
-40,5,LTN-LP,Loma del Pato,Loma del Pato,Loma del Pato,Default,40LTN-LP00,LTN-LP-GIS
+1,5,OZ-CEN,Mar de Cristal,Mar de Cristal,Mar de Cristal,Default,1OZ-CEN00,OZ-CEN-GIS
+2,5,OZ-EME,PocketMoney,PocketMoney,PocketMoney,Default,2OZ-EME00,OZ-EME-GIS
+3,5,OZ-MER,Puerto Escondido,Puerto Escondido,Puerto Escondido,Default,3OZ-MER00,OZ-MER-GIS
+4,5,OZ-AVE,Emerald City,Emerald City,Emerald City,Default,4OZ-AVE00,OZ-AVE-GIS
+5,5,OZ-TR,North Wind,North Wind,North Wind,Default,5OZ-TR00,OZ-TR-GIS
+6,5,OZ-NOR,La Fortaleza,La Fortaleza,La Fortaleza,Default,6OZ-NOR00,OZ-NOR-GIS
+7,5,OZ-JAR,Light of the Forest,Light of the Forest,Light of the Forest,Default,7OZ-JAR00,OZ-JAR-GIS
+8,5,OZ-CAM,Golden Dawn,Golden Dawn,Golden Dawn,Default,8OZ-CAM00,OZ-CAM-GIS
+9,5,OZ-GH,Secret Garden,Secret Garden,Secret Garden,Default,9OZ-GH00,OZ-GH-GIS
+10,5,OZ-WR,Tranquil River,Tranquil River,Tranquil River,Default,10OZ-WR00,OZ-WR-GIS
+11,5,OZ-EE,Viento del Norte,Viento del Norte,Viento del Norte,Default,11OZ-EE00,OZ-EE-GIS
+12,5,OZ-SIL,Magic Mountains,Magic Mountains,Magic Mountains,Default,12OZ-SIL00,OZ-SIL-GIS
+13,1,OZ-OH,Lago Sereno,Lago Sereno,Lago Sereno,Default,13OZ-OH00,OZ-OH-GIS
+14,1,OZ-CT,R√≠o Tranquilo,R√≠o Tranquilo,R√≠o Tranquilo,Default,14OZ-CT00,OZ-CT-GIS
+15,1,OZ-RU,Isla del Sol,Isla del Sol,Isla del Sol,Default,15OZ-RU00,OZ-RU-GIS
+16,1,OZ-MUN,Luz del Bosque,Luz del Bosque,Luz del Bosque,Default,16OZ-MUN00,OZ-MUN-GIS
+17,3,HBT-CEN,Middletown,Middletown,Middletown,Default,17HBT-CEN00,HBT-CEN-GIS
+18,3,HBT-BV,Enchanted Forest,Enchanted Forest,Enchanted Forest,Default,18HBT-BV00,HBT-BV-GIS
+19,3,HBT-MA,Crystal Sea,Crystal Sea,Crystal Sea,Default,19HBT-MA00,HBT-MA-GIS
+20,3,HBT-RIO,Residencial Chessboard,Residencial Chessboard,Residencial Chessboard,Default,20HBT-RIO00,HBT-RIO-GIS
+21,3,HBT-CH,Monta√±as M√°gicas,Monta√±as M√°gicas,Monta√±as M√°gicas,Default,21HBT-CH00,HBT-CH-GIS
+22,3,HBT-MOL,Ciudad Esmeralda,Ciudad Esmeralda,Ciudad Esmeralda,Default,22HBT-MOL00,HBT-MOL-GIS
+23,4,HBT-PS,Hidden Harbor,Hidden Harbor,Hidden Harbor,Default,23HBT-PS00,HBT-PS-GIS
+24,4,HBT-SR,The Fortress,The Fortress,The Fortress,Default,24HBT-SR00,HBT-SR-GIS
+25,4,HBT-CP,Square Circle,Square Circle,Square Circle,Default,25HBT-CP00,HBT-CP-GIS
+26,4,HBT-TI,Amanecer Dorado,Amanecer Dorado,Amanecer Dorado,Default,26HBT-TI00,HBT-TI-GIS
+27,4,HBT-PR,Cascada Azul,Cascada Azul,Cascada Azul,Default,27HBT-PR00,HBT-PR-GIS
+28,4,HBT-AN,Roca Azul,Roca Azul,Roca Azul,Default,28HBT-AN00,HBT-AN-GIS
+29,4,HBT-WA,Nuncajamas,Nuncajamas,Nuncajamas,Default,29HBT-WA00,HBT-WA-GIS
+30,4,HBT-LD,Sun Island,Sun Island,Sun Island,Default,30HBT-LD00,HBT-LD-GIS
+31,4,HBT-RC,Clear Sky,Clear Sky,Clear Sky,Default,31HBT-RC00,HBT-RC-GIS
+32,4,HBT-HP,Golden Hills,Golden Hills,Golden Hills,Default,32HBT-HP00,HBT-HP-GIS
+33,5,LTN-CEN,Cielo Claro,Cielo Claro,Cielo Claro,Default,33LTN-CEN00,LTN-CEN-GIS
+34,5,LTN-CH,Celestial Summit,Celestial Summit,Celestial Summit,Default,34LTN-CH00,LTN-CH-GIS
+35,5,LTN-AW,Serene Lake,Serene Lake,Serene Lake,Default,35LTN-AW00,LTN-AW-GIS
+36,5,LTN-OS,Bosque Encantado,Bosque Encantado,Bosque Encantado,Default,36LTN-OS00,LTN-OS-GIS
+37,5,LTN-BP,Jard√≠n Secreto,Jard√≠n Secreto,Jard√≠n Secreto,Default,37LTN-BP00,LTN-BP-GIS
+38,5,LTN-CL,Blue Waterfall,Blue Waterfall,Blue Waterfall,Default,38LTN-CL00,LTN-CL-GIS
+39,5,LTN-CT,Blue Rock,Blue Rock,Blue Rock,Default,39LTN-CT00,LTN-CT-GIS
+40,5,LTN-LP1,Valle de la Luna,Valle de la Luna,Valle de la Luna,Default,40LTN-LP00,LTN-LP-GIS1
+41,5,LTN-LP2,AguasPabajo,AguasPabajo,AguasPabajo,Default,40LTN-LP01,LTN-LP-GIS2
+42,5,LTN-LP3,Colinas Doradas,Colinas Doradas,Colinas Doradas,Default,40LTN-LP02,LTN-LP-GIS3
+43,5,LTN-LP4,FinArociris,FinArociris,FinArociris,Default,40LTN-LP03,LTN-LP-GIS4
+44,5,LTN-LP5,Villa Sombrero,Villa Sombrero,Villa Sombrero,Default,40LTN-LP04,LTN-LP-GIS5
+45,5,LTN-LP6,Cumbre Celeste,Cumbre Celeste,Cumbre Celeste,Default,40LTN-LP05,LTN-LP-GIS6
+46,5,LTN-LP7,Uppertown,Uppertown,Uppertown,Default,40LTN-LP06,LTN-LP-GIS7
+47,5,LTN-LP8,Fog Town,Fog Town,Fog Town,Default,40LTN-LP07,LTN-LP-GIS8
+48,5,LTN-LP9,Moon Valley,Moon Valley,Moon Valley,Default,40LTN-LP08,LTN-LP-GIS9
+49,5,LTN-LP10,ChickenTown,ChickenTown,ChickenTown,Default,40LTN-LP09,LTN-LP-GIS10
+50,5,LTN-LP11,Pueblo de Niebla,Pueblo de Niebla,Pueblo de Niebla,Default,40LTN-LP10,LTN-LP-GIS11
