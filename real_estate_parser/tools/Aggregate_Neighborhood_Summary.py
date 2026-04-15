@@ -32,7 +32,14 @@ def main():
     args = parse_args()
 
     df = pd.read_csv(args.input, encoding="utf-8-sig")
-
+    print(df)
+    # --- FIX: ensure year_month exists ---
+    if "year_month" not in df.columns:
+        if "date" in df.columns:
+            df["date"] = pd.to_datetime(df["date"], errors="coerce")
+            df["year_month"] = df["date"].dt.to_period("M").astype(str)
+        else:
+            raise RuntimeError("Missing both 'year_month' and 'date' columns")
     required_cols = {
         "neighborhood_label",
         "transaction",
@@ -43,6 +50,7 @@ def main():
         "property_type_new",
         "price_usd"
     }
+ 
 
     if not required_cols.issubset(df.columns):
         missing = required_cols - set(df.columns)
