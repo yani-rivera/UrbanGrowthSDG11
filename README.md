@@ -190,16 +190,18 @@ This dataset supports:
 Core Python libraries:
 - pandas
 - numpy
-- geopandas
-- shapely
-- pyogrio / fiona
+- re
+- os, system
+- json
+- unicodedata
+- typing
+
 - beautifulsoup4
 - requests
 
 Other tools:
 - textutil (macOS) or equivalent tools for document conversion
 
-See `requirements.txt` for full dependency list.
 
 ## 14. Project Status
 
