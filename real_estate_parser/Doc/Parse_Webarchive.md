@@ -8,7 +8,6 @@ This conversion was performed using the macOS native `textutil` utility:
 ```bash
 textutil -convert html <agency>.webarchive -output <agency>_<date>.html
 
-
 ## Step 2: HTML to Text Extraction
 
 The HTML files generated from `.webarchive` conversion were processed using a custom Python script to extract clean textual content for parsing.
