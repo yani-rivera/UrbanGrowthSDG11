@@ -1,20 +1,20 @@
+# Webarchive Processing Workflow
 
-## Step 1: Webarchive to Text Conversion
+This section describes the preprocessing steps used to transform archived web pages (`.webarchive`) into standardized plain-text files for downstream parsing.
 
-Archived web pages in `.webarchive` format were converted into HTML and text files prior to parsing.
+---
+
+Webarchive to HTML Conversion
+
+Archived web pages in `.webarchive` format were converted into HTML files prior to parsing.
 
 This conversion was performed using the macOS native `textutil` utility:
 
 ```bash
 textutil -convert html <agency>.webarchive -output <agency>_<date>.html
 
-## Step 2: HTML to Text Extraction
+HTML TO TEXT Conversion
 
-The HTML files generated from `.webarchive` conversion were processed using a custom Python script to extract clean textual content for parsing.
-
-Command:
-
-```bash
 python scripts/html_to_text_webarchive.py \
   --input <agency>_<date>.html \
   --output <agency>_<date>.txt \
