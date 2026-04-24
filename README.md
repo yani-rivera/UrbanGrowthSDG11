@@ -185,8 +185,25 @@ This dataset supports:
 * Open data and methodological research
 
 ---
+## 13. Software Requirements
 
-## 13. Project Status
+Core Python libraries:
+- pandas
+- numpy
+- re
+- os, system
+- json
+- unicodedata
+- typing
+
+- beautifulsoup4
+- requests
+
+Other tools:
+- textutil (macOS) or equivalent tools for document conversion
+
+
+## 14. Project Status
 
 The project is currently in the final stages of:
 
@@ -196,7 +213,7 @@ The project is currently in the final stages of:
 
 Future work includes expanded automation and cross‑city replication.
 
-## 14.  How to Navigate This Repository
+## 15.  How to Navigate This Repository
 
 ## Documentation Index
 
