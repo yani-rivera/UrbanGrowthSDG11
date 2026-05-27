@@ -246,18 +246,25 @@ def apply_strategy(text: str, strategy: str, cfg: Optional[dict] = None) -> str:
 
 
     if strategy == "uppercase":
-        #print("apply uppercase strategy on:",text)
-        tokens = text.strip().split()
-        uppercase_tokens: List[str] = []
-        for tok in tokens:
-            # Remove trailing punctuation before the check
-            clean_tok = tok.rstrip(".,:;!?")
-            if clean_tok and clean_tok.isupper():
-                uppercase_tokens.append(clean_tok)
-            else:
-                break
-        temtext= " ".join(uppercase_tokens)
-        #print("after uppercase==>",temtext)
+
+        if ":" in text:
+            temtext = text.split(":", 1)[0].strip()
+
+        else:
+            tokens = text.strip().split()
+
+            uppercase_tokens = []
+
+            for tok in tokens:
+
+                clean_tok = tok.rstrip(".,;!?")
+
+                if clean_tok and clean_tok.isupper():
+                    uppercase_tokens.append(clean_tok)
+                else:
+                    break
+
+            temtext = " ".join(uppercase_tokens)
 
     elif strategy == "first_comma":
         #print("retrun before coomma:",_cut_before_first_of(text, [","]))
