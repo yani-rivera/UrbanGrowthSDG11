@@ -12,6 +12,15 @@
 
 # SDG11_ORCHESTRATOR_V3
 
+<p align="center">
+  <img src="OrchestratorV3.png"
+       alt="SDG11_ORCHESTRATOR_V3 Framework Architecture"
+       width="1200">
+</p>
+
+<p align="center">
+<i>Figure 1. SDG11_ORCHESTRATOR_V3 framework architecture showing multi-source text acquisition, canonical text harmonization, orchestrated processing modules, continuous human-in-the-loop review, and harmonized neighborhood-level outputs.</i>
+</p>
 A configuration-driven workflow framework for constructing harmonized, reproducible, neighborhood-level housing datasets from heterogeneous historical sources.
 
 The framework integrates multiple acquisition pathways, canonical text processing, rule-based extraction, quality control, spatial harmonization, and aggregation into a unified and auditable workflow.
