@@ -1,224 +1,178 @@
-# UrbanGrowthSDG11 – A City-Agnostic Pipeline for Harmonized Housing Listings Data
+# UrbanGrowthSDG11 – A City-Agnostic Framework for Harmonized Housing Listings Data
 
 ## Dataset
 
 [![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226144.svg)](https://doi.org/10.5281/zenodo.18778210)
 
-## Code Zenodo Link
+## Software
+
 [![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226606.svg)](https://doi.org/10.5281/zenodo.18226606)
 
-![Example of raw real-estate web listing](HouseSalesWebPage.png)
+---
 
-*Figure 1. Distribution of residential house sale prices by benchmark year, shown for quality control and outlier validation purposes.*
+# SDG11_ORCHESTRATOR_V3
 
+A configuration-driven workflow framework for constructing harmonized, reproducible, neighborhood-level housing datasets from heterogeneous historical sources.
 
+The framework integrates multiple acquisition pathways, canonical text processing, rule-based extraction, quality control, spatial harmonization, and aggregation into a unified and auditable workflow.
 
-## 1. Project Overview
-
-This project documents the construction of a historical, spatially explicit real‑estate listings dataset for Tegucigalpa, Honduras, aligned with **Sustainable Development Goal 11 (Sustainable Cities and Communities)**. The dataset focuses on residential properties (houses and apartments) and reconstructs housing market signals for selected benchmark years.
-
-The core challenge addressed is the absence of a centralized, long‑term registry of residential real‑estate listings. To overcome this, the project applies a **data archaeology** approach, combining manual extraction, semi‑automated parsing, and rigorous data validation.
+The architecture was designed for data-scarce environments where housing information is fragmented across newspapers, archived webpages, agency websites, and property portals.
 
 ---
 
-## 2. Research Motivation
+## Framework Overview
 
-Urban housing research and planning in low‑ and middle‑income countries are often constrained by:
+The SDG11_ORCHESTRATOR_V3 coordinates all processing modules through external configuration files, enabling:
 
-* Fragmented historical data sources
-* Lack of spatially explicit housing market information
-* Inconsistent terminology and formats across time
+- Modular execution
+- Version-controlled workflows
+- Resume capability
+- Intermediate QA generation
+- Human-in-the-loop review
+- Transparent audit trails
+- Reproducible outputs
 
-
-
----
-
-## 3. Temporal Scope
-
-The dataset is structured around four benchmark years:
-
- each year is a folder under each agency
-
-For each year, listings are sampled at monthly or near‑monthly intervals to capture market conditions while maintaining feasibility and consistency.
+The orchestrator manages the complete processing pipeline while preserving intermediate outputs for validation and review.
 
 ---
 
-## 4. Data Sources
+## Architecture
 
-Listings were collected from heterogeneous sources, including:
+### Data Acquisition
 
-* Printed and digitized newspapers (PDFs, scans)
-* Archived web pages (via Web Archive)
-* Real‑estate agency websites
-* Online property portals
+Two independent acquisition pipelines converge into a common canonical text representation.
 
-Each source is preserved for traceability using:
+#### Newspaper Pipeline
 
-* Original URLs or archive links
-* Source filenames
-* Ingestion identifiers
-
----
-
-## 5. Canonical Data Format
-
-All listings are converted into a **canonical, one‑line, machine‑parsable format** using the following conventions:
-
-* Neighborhood name precedes the listing, followed by a colon (`:`)
-* All other attributes are separated by semicolons (`;`), free text after neighborhood ":" is also parsed.
-* Text is normalized to English for analytical fields
-
-**Example:**
-
+```text
+PDF Newspapers
+      ↓
+Copy & Paste
+      ↓
+TXT
 ```
+
+#### Web / Archive Pipeline
+
+```text
+Internet Archive Snapshot (WebArchive)
+      ↓
+textutil
+      ↓
+HTML
+      ↓
+BeautifulSoup
+      ↓
+TXT
+```
+
+---
+
+### Canonical Text Layer
+
+All sources are converted into a standardized UTF-8 text representation.
+
+Example:
+
+```text
 LOMAS DEL NUNCAJAMAS: Apartment; SALE; 3 beds; 2 baths; 120 m2; USD 185000;
 ```
 
-This format ensures long‑term stability and reproducibility across years and sources.
+The canonical representation provides a stable and source-independent input format for all downstream modules.
 
 ---
 
-## 6. Core Variables
+## Orchestrated Processing Pipeline
 
-The standardized dataset includes (where available):
+The framework executes the following modules in sequence:
 
-* `transaction_final` (SALE / RENT)
-* `property_type_new` (Apartment / House)
-* `price_usd`
-* `area_m2` (constructed area)
-* `lot_size_m2` (terrain area, when applicable)
-* `beds`
-* `baths`
-* `neighborhood_label`
-* `neighborhood_uid`
-* `GISID`
-* `year_month`
-
-Supplementary metadata fields preserve provenance and processing context.
-
----
-
-## 7. Data Standardization
-
-Standardization steps include:
-
-* Currency normalization to USD
-* Area unit conversion (e.g., varas² → m²)
-* Harmonization of transaction terms (VENTA / SALE, ALQUILER / RENT)
-* Property type normalization and exclusion of non‑residential types
-
-All transformations are rule‑based and documented to ensure transparency.
+```text
+1. Parsing & Extraction
+2. Merge Datasets
+3. Human-in-the-Loop QC
+4. Deduplication
+5. Word Filter
+6. Standardization
+7. UID Assignment
+8. GIS Matching
+9. Price Conversion
+10. Area Conversion
+11. Validation
+12. Neighborhood Aggregation
+```
 
 ---
 
-## 8. Data Validation and Quality Control (QC)
+## Human-in-the-Loop Design
 
-Data quality control is treated as an explicit methodological phase.
+Human review is not limited to a single stage.
 
-### 8.1 Validation Stages
+Every module generates:
 
-Listings are evaluated through multiple filters:
+- Intermediate outputs
+- QA artifacts
+- Audit information
+- Validation reports
 
-1. Missing or invalid prices
-2. Excluded property types
-3. Missing or ambiguous neighborhood/location
-4. Missing spatial identifiers (GIS linkage)
+Review can occur after any processing stage before continuing to the next step.
 
-Listings are **flagged, not deleted**, preserving transparency and auditability.
-
-### 8.2 Outlier Detection
-
-After standardization, numerical fields are evaluated using:
-
-* Descriptive statistics
-* Box plots
-* Unsupervised anomaly detection (e.g., Isolation Forest, LOF)
-
-Outliers are retained with flags rather than removed.
+This design prioritizes transparency, traceability, and reproducibility over black-box automation.
 
 ---
 
-## 9. Spatial Integration
+## Core Principles
 
-Neighborhoods are represented as polygons and linked to listings via:
+### Multiple Acquisition Methods
 
-* Cleaned neighborhood labels
-* Unique neighborhood identifiers
+Supports historical newspapers, archived webpages, agency websites, and property portals.
 
-Spatial outputs are stored in **GeoPackage (GPKG)** format to support:
+### Canonical Text Representation
 
-* Multi‑year joins
-* Efficient querying
-* Reproducible GIS workflows
+All inputs converge to a common UTF-8 representation independent of source format.
 
----
+### Human-in-the-Loop Validation
 
-## 10. Outputs
+Manual review can be performed throughout the workflow.
 
-The project produces:
+### Configuration-Driven Execution
 
-* Cleaned CSV tables
-* GeoPackage layers (by year and transaction type)
-* Summary statistics tables (min, max, mean, median, stdev, counts)
-* Maps and figures for publication
+Pipeline behavior is controlled through external JSON configuration files rather than hard-coded workflows.
 
-All outputs are versioned and reproducible.
+### Reproducible Processing
 
----
+All transformations are deterministic, documented, and version controlled.
 
-## 11. Reproducibility and Ethics
+### Open Science
 
-* No personally identifiable information is included
-* Original sources are cited and preserved
-* Scripts are version‑controlled
-* All assumptions and thresholds are documented
+Outputs are designed for publication, replication, and long-term preservation.
 
 ---
 
-## 12. Intended Use
+## Final Outputs
 
-This dataset supports:
+The framework produces:
 
-* Urban housing market analysis
-* SDG‑11 indicators and proxies
-* Comparative temporal analysis
-* Open data and methodological research
+- Cleaned CSV tables
+- GeoPackage (GPKG) layers
+- Neighborhood-level indicators
+- Summary statistics
+- Publication-ready maps
+- Reproducible research datasets
+
+Outputs are suitable for:
+
+- SDG 11 monitoring
+- Urban housing research
+- Spatial analysis
+- Longitudinal housing market studies
+- Cross-city comparative applications
 
 ---
-## 13. Software Requirements
 
-Core Python libraries:
-- pandas
-- numpy
-- re
-- os, system
-- json
-- unicodedata
-- typing
+## Intended Use
 
-- beautifulsoup4
-- requests
+UrbanGrowthSDG11 was developed to support the reconstruction of historical housing markets in data-scarce environments and to provide a reusable framework for housing-data harmonization across cities and countries.
 
-Other tools:
-- textutil (macOS) or equivalent tools for document conversion
-
-
-## 14. Project Status
-
-The project is currently in the final stages of:
-
-* Data validation
-* Spatial aggregation
-* Figure and table preparation for publication
-
-Future work includes expanded automation and cross‑city replication.
-
-## 15.  How to Navigate This Repository
-
-## Documentation Index
-
-- **Pipeline overview** → `real_estate_parser/Doc/process_index.md`
-- **Synthetic data & execution** → `real_estate_parser/Doc/data_index.md`
-- **Step-by-step scripts** → `real_estate_parser/Doc/`
+The framework emphasizes transparency, auditability, reproducibility, and methodological transferability.
 
 
