@@ -8,6 +8,8 @@ The objective is not simply to assign a property type, but to evaluate whether t
 
 The module operates as a quality-control and classification refinement layer within the SDG-11 framework.
 
+Uses property_semantic_config.json
+
 ---
 
 # Position Within the SDG-11 Pipeline
