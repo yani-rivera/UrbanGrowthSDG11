@@ -14,7 +14,7 @@ The framework was developed as part of the SDG-11 (Sustainable Cities and Commun
 
 ## Framework Overview
 
-![SDG-11 Framework](docs/images/OrchestratorV3)
+![SDG-11 Framework](docs/images/OrchestratorV3.png)
 
 # Why This Project Exists
 
