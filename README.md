@@ -6,11 +6,11 @@
 
 ## Software
 
-[![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226606.svg)](https://doi.org/10.5281/zenodo.18226606)
+[![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20404150.svg)](https://doi.org/10.5281/zenodo.20404150)
 
 ---
 
-# SDG11_ORCHESTRATOR_V3
+ 
 
 <p align="center">
   <img src="OrchestratorV3.png"
