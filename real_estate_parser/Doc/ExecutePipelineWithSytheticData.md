@@ -16,7 +16,7 @@ To ensure full reproducibility while respecting data access constraints:
   * Inspect intermediate outputs
   * Understand expected input/output schemas
 
-> ⚠️ Note: Original data sources are not redistributed. The synthetic data preserves schema and behavior, enabling users to apply the pipeline to their own datasets.
+> ⚠️ Note:  The synthetic data preserves schema and behavior, enabling users to apply the pipeline to their own datasets.
 
 ---
 
