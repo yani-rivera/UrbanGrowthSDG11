@@ -1,187 +1,336 @@
-# UrbanGrowthSDG11 – A City-Agnostic Framework for Harmonized Housing Listings Data
+# SDG-11 Housing Data Reconstruction Framework
 
-## Dataset
+A reproducible, configuration-driven framework for reconstructing historical and contemporary real-estate datasets from heterogeneous sources, including newspaper advertisements, OCR archives, web listings, and agency publications.
 
-[![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226144.svg)](https://doi.org/10.5281/zenodo.18778210)
-
-## Software
-
-[![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20404150.svg)](https://doi.org/10.5281/zenodo.20404150)
+The framework was developed as part of the SDG-11 (Sustainable Cities and Communities) research program focused on housing affordability, urban development, neighborhood dynamics, and long-term housing-market monitoring in data-scarce environments.
 
 ---
 
- 
+# Why This Project Exists
 
-<p align="center">
-  <img src="OrchestratorV3.png"
-       alt="SDG11_ORCHESTRATOR_V3 Framework Architecture"
-       width="1200">
-</p>
+In many countries, historical housing-market data are fragmented, inaccessible, or entirely unavailable.
 
-<p align="center">
-<i>Figure 1. SDG11_ORCHESTRATOR_V3 framework architecture showing multi-source text acquisition, canonical text harmonization, orchestrated processing modules, continuous human-in-the-loop review, and harmonized neighborhood-level outputs.</i>
-</p>
-A configuration-driven workflow framework for constructing harmonized, reproducible, neighborhood-level housing datasets from heterogeneous historical sources.
+Researchers frequently encounter:
 
-The framework integrates multiple acquisition pathways, canonical text processing, rule-based extraction, quality control, spatial harmonization, and aggregation into a unified and auditable workflow.
+* Scanned newspaper advertisements
+* OCR-derived text
+* Archived websites
+* Inconsistent agency formats
+* Missing structured datasets
 
-The architecture was designed for data-scarce environments where housing information is fragmented across newspapers, archived webpages, agency websites, and property portals.
+As a result, longitudinal housing-market analysis becomes difficult or impossible.
 
----
-
-## Framework Overview
-
-The SDG11_ORCHESTRATOR_V3 coordinates all processing modules through external configuration files, enabling:
-
-- Modular execution
-- Version-controlled workflows
-- Resume capability
-- Intermediate QA generation
-- Human-in-the-loop review
-- Transparent audit trails
-- Reproducible outputs
-
-The orchestrator manages the complete processing pipeline while preserving intermediate outputs for validation and review.
+This framework addresses that challenge by providing a transparent and reproducible workflow for transforming unstructured real-estate advertisements into standardized analytical datasets.
 
 ---
 
-## Architecture
+# Key Features
 
-### Data Acquisition
+## Historical Reconstruction
 
-Two independent acquisition pipelines converge into a common canonical text representation.
+Supports extraction from:
 
-#### Newspaper Pipeline
+* Newspaper advertisements
+* OCR text archives
+* Historical classified sections
+
+## Modern Listing Processing
+
+Supports:
+
+* Web-derived listings
+* Agency exports
+* Structured CSV workflows
+
+## Configuration-Driven Architecture
+
+New agencies and formats can be incorporated through configuration files rather than source-code modifications.
+
+Examples:
+
+* Agency configurations
+* Property vocabularies
+* Price semantic rules
+* Neighborhood normalization rules
+* Transaction validation rules
+
+## Human-in-the-Loop Quality Control
+
+Includes:
+
+* Automated QC reports
+* Outlier review workflows
+* Classification audits
+* Rejection tracking
+
+## Reproducibility
+
+All major transformations preserve:
+
+* Original values
+* Derived values
+* Processing metadata
+* Validation decisions
+* Provenance information
+
+---
+
+# Framework Architecture
 
 ```text
-PDF Newspapers
-      ↓
-Copy & Paste
-      ↓
-TXT
+Raw Sources
+─────────────────────────────────
+Newspapers
+OCR Text
+Archived Websites
+Modern Listings
+
+                ↓
+
+Preprocessing
+─────────────────────────────────
+ForceBullet
+SplitByCue
+Agency Preprocessors
+
+                ↓
+
+Parsing
+─────────────────────────────────
+Agency Parser
+Record Parser
+Price Extractor
+Area Extractor
+Property Extraction
+Neighborhood Extraction
+
+                ↓
+
+Quality Control
+─────────────────────────────────
+QC Reports
+Property Type Validation
+Transaction Validation
+
+                ↓
+
+Consolidation
+─────────────────────────────────
+Merge Output CSVs
+Deduplication
+Dataset Scope Filtering
+
+                ↓
+
+Standardization
+─────────────────────────────────
+UID Assignment
+Neighborhood Cleaning
+Word Filtering
+Catalog Matching
+Area Standardization
+Price Standardization
+
+                ↓
+
+Aggregation
+─────────────────────────────────
+Neighborhood Indicators
+Monthly Summaries
+Housing Metrics
+
+                ↓
+
+Research Outputs
+─────────────────────────────────
+Datasets
+Maps
+Indicators
+Publications
 ```
 
-#### Web / Archive Pipeline
+---
+
+# Main Components
+
+## Parsing Layer
+
+Transforms raw advertisements into structured records.
+
+Modules include:
+
+* AgencyCoreParser
+* Record Parser
+* Parser Utilities
+* Price Extractor
+* Area Extractor
+
+---
+
+## Quality-Control Layer
+
+Validates extracted information and generates audit reports.
+
+Modules include:
+
+* QC Report Generator
+* Property Type Validation
+* Transaction Validation
+
+---
+
+## Consolidation Layer
+
+Combines agency outputs into unified analytical datasets.
+
+Modules include:
+
+* Merge Output CSVs
+* Deduplication
+* Scope Filtering
+
+---
+
+## Standardization Layer
+
+Creates comparable and analysis-ready variables.
+
+Modules include:
+
+* UID Generation
+* Neighborhood Cleaning
+* Catalog Matching
+* Area Standardization
+* Price Standardization
+
+---
+
+# Data Philosophy
+
+The framework follows a simple principle:
+
+> Preserve observed data. Create derived analytical variables separately.
+
+Examples:
+
+| Observed      | Derived           |
+| ------------- | ----------------- |
+| price         | price_usd         |
+| AT            | area_m2_std       |
+| neighborhood  | neighborhood_uid  |
+| property_type | property_type_new |
+| transaction   | transaction_final |
+
+This approach maximizes transparency and reproducibility.
+
+---
+
+# Quality Assurance
+
+The framework includes multiple validation stages:
+
+## Parsing QC
+
+* Missing-field detection
+* Multi-offer detection
+
+## Semantic QC
+
+* Property-type validation
+* Transaction validation
+
+## Dataset QC
+
+* Scope filtering
+* Deduplication auditing
+* Rejection tracking
+
+## Manual Review
+
+Flagged records are preserved for human inspection rather than automatically discarded.
+
+---
+
+# Project Structure
 
 ```text
-Internet Archive Snapshot (WebArchive)
-      ↓
-textutil
-      ↓
-HTML
-      ↓
-BeautifulSoup
-      ↓
-TXT
+config/
+│
+├── agencies/
+├── price_semantic_config.json
+├── property_semantic_config.json
+├── typewords.yaml
+├── agency_mnemonics.csv
+├── outside_metro.txt
+├── exclude_types.csv
+└── remove_words.txt
+
+scripts/
+│
+├── AgencyCoreParser_v1.py
+├── SDG11_ORCHESTRATOR_V3.py
+├── record_parser.py
+├── parser_utils.py
+└── ...
+
+tools/
+│
+├── merge_output_csvs.py
+├── MergeDeduplicate.py
+├── AddUid.py
+├── StdPrice.py
+├── clean_neighborhoods.py
+├── word_filter.py
+├── terrain_area_to_at.py
+├── match_cleaned_to_catalog.py
+└── ...
+
+notebooks/
+│
+└── QC_Boxplot_Review.ipynb
+
+docs/
+│
+├── architecture.md
+├── data_dictionary.md
+├── configuration_guide.md
+└── ...
 ```
 
 ---
 
-### Canonical Text Layer
+# Research Applications
 
-All sources are converted into a standardized UTF-8 text representation.
+The framework supports studies related to:
 
-Example:
-
-```text
-LOMAS DEL NUNCAJAMAS: Apartment; SALE; 3 beds; 2 baths; 120 m2; USD 185000;
-```
-
-The canonical representation provides a stable and source-independent input format for all downstream modules.
-
----
-
-## Orchestrated Processing Pipeline
-
-The framework executes the following modules in sequence:
-
-```text
-1. Parsing & Extraction
-2. Merge Datasets
-3. Human-in-the-Loop QC
-4. Deduplication
-5. Word Filter
-6. Standardization
-7. UID Assignment
-8. GIS Matching
-9. Price Conversion
-10. Area Conversion
-11. Validation
-12. Neighborhood Aggregation
-```
+* Housing affordability
+* Real-estate market dynamics
+* Urban growth
+* Neighborhood change
+* Housing accessibility
+* Longitudinal housing reconstruction
+* Sustainable Development Goal 11 (SDG-11)
 
 ---
 
-## Human-in-the-Loop Design
+# Design Principles
 
-Human review is not limited to a single stage.
-
-Every module generates:
-
-- Intermediate outputs
-- QA artifacts
-- Audit information
-- Validation reports
-
-Review can occur after any processing stage before continuing to the next step.
-
-This design prioritizes transparency, traceability, and reproducibility over black-box automation.
+* Reproducible
+* Configuration-driven
+* Auditable
+* Human-review friendly
+* Transparent
+* Extensible
+* Open-science oriented
 
 ---
 
-## Core Principles
+# Citation
 
-### Multiple Acquisition Methods
-
-Supports historical newspapers, archived webpages, agency websites, and property portals.
-
-### Canonical Text Representation
-
-All inputs converge to a common UTF-8 representation independent of source format.
-
-### Human-in-the-Loop Validation
-
-Manual review can be performed throughout the workflow.
-
-### Configuration-Driven Execution
-
-Pipeline behavior is controlled through external JSON configuration files rather than hard-coded workflows.
-
-### Reproducible Processing
-
-All transformations are deterministic, documented, and version controlled.
-
-### Open Science
-
-Outputs are designed for publication, replication, and long-term preservation.
+If you use this framework in academic research, please cite the associated dataset, documentation, and publications when available.
 
 ---
 
-## Final Outputs
+# Acknowledgements
 
-The framework produces:
-
-- Cleaned CSV tables
-- GeoPackage (GPKG) layers
-- Neighborhood-level indicators
-- Summary statistics
-- Publication-ready maps
-- Reproducible research datasets
-
-Outputs are suitable for:
-
-- SDG 11 monitoring
-- Urban housing research
-- Spatial analysis
-- Longitudinal housing market studies
-- Cross-city comparative applications
-
----
-
-## Intended Use
-
-UrbanGrowthSDG11 was developed to support the reconstruction of historical housing markets in data-scarce environments and to provide a reusable framework for housing-data harmonization across cities and countries.
-
-The framework emphasizes transparency, auditability, reproducibility, and methodological transferability.
-
-
+This framework was developed as part of an ongoing effort to reconstruct housing-market information in data-scarce environments and to support open, reproducible urban research aligned with Sustainable Development Goal 11 (Sustainable Cities and Communities).
