@@ -2,7 +2,7 @@
 
 
 [![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226605.svg)](https://doi.org/10.5281/zenodo.18226605)
-[![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226143.svg)](https://doi.org/10.5281/zenodo.18226
+[![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226143.svg)](https://doi.org/10.5281/zenodo.18226)
 
 A reproducible, configuration-driven framework for reconstructing historical and contemporary real-estate datasets from heterogeneous sources, including newspaper advertisements, OCR archives, web listings, and agency publications.
 
