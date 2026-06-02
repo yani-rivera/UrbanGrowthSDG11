@@ -1,0 +1,2 @@
+﻿run_id,run_date,step,agency,agency_folder,mnemonic,year,month,input_file,input_path,config_file,output_file_expected,status,return_code,error_message,metrics_json
+20260601_120936,2026-06-01 12:09:36,uid,,,,2026,ALL,merged_2026_flt.csv,consolidated/2026/merged_2026_flt.csv,config/agency_mnemonics.csv,consolidated/2026/merged_2026_uid.csv,SUCCESS,0,,[done] 46 rows → consolidated/2026/merged_2026_uid.csv  (added 'Listing_uid' as first column)

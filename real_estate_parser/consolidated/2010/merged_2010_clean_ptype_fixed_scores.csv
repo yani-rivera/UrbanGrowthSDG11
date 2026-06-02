@@ -1,0 +1,49 @@
+﻿Listing_uid,original_type,winner,reason,score_house,score_apartment,score_commercial,score_land,max_score,winner_margin,tie_flag,top_categories,changed,text_sample
+hbtw-20100312-0001,House,Apartment,POINTS:Apartment(22),13,22,-6,-15,22,9,FALSE,Apartment,TRUE,"centro de hobitown, apartamento 2 hab 1 bano, 65 m2, balcon centro de hobitown, apartamento 2 hab 1 "
+hbtw-20100312-0002,House,House,POINTS:House(29),29,8,-3,-5,29,21,FALSE,House,FALSE,"barrio bolson verde, casa de 2 habitaciones, 1 bano, 120 m2, barrio bolson verde, casa de 2 habitaci"
+hbtw-20100312-0003,House,Apartment,POINTS:Apartment(28),7,28,7,-15,28,21,FALSE,Apartment,TRUE,"sector mercado antiguo, apartamento 1 hab 1 bano, 42 m2, edi sector mercado antiguo, apartamento 1 h"
+hbtw-20100312-0004,House,House,POINTS:House(34),34,3,-3,-5,34,31,FALSE,House,FALSE,"avenida del rio, casa de 3 hab 2 banos, 150 m2, sala amplia, avenida del rio, casa de 3 hab 2 banos,"
+hbtw-20100312-0005,House,House,POINTS:House(17),17,13,-3,-15,17,4,FALSE,House,FALSE,"colonia colina hobbit, apartamento 2 hab 1 bano, 70 m2, segu colonia colina hobbit, apartamento 2 ha"
+hbtw-20100312-0006,House,House,POINTS:House(27),27,8,-3,-5,27,19,FALSE,House,FALSE,"camino del molino, casa sencilla de 2 habitaciones, 1 bano, camino del molino, casa sencilla de 2 ha"
+hbtw-20100312-0007,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,"barrio pradera sur, apartamento 3 hab 2 banos, 90 m2, buena barrio pradera sur, apartamento 3 hab 2 "
+hbtw-20100312-0008,House,House,POINTS:House(24),24,18,-3,-5,24,6,FALSE,House,FALSE,"sendero del roble, casa familiar de 4 hab 2 banos, 180 m2, p sendero del roble, casa familiar de 4 h"
+hbtw-20100312-0009,House,Apartment,POINTS:Apartment(32),8,32,4,-15,32,24,FALSE,Apartment,TRUE,"centro de hobitown, apartamento 2 hab 1 bano, 68 m2, balcon centro de hobitown, apartamento 2 hab 1 "
+hbtw-20100312-0010,House,House,POINTS:House(29),29,8,-3,-5,29,21,FALSE,House,FALSE,"barrio bolson verde, casa de 3 habitaciones 2 banos, 140 m2, barrio bolson verde, casa de 3 habitaci"
+hbtw-20100312-0011,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,"sector mercado antiguo, apartamento 1 hab 1 bano, 45 m2, ide sector mercado antiguo, apartamento 1 h"
+hbtw-20100312-0012,House,House,POINTS:House(32),32,3,-3,-10,32,29,FALSE,House,FALSE,"avenida del rio, casa amplia de 4 hab 3 banos, 200 m2, const avenida del rio, casa amplia de 4 hab 3"
+hbtw-20100312-0013,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,"colonia colina hobbit, apartamento 2 hab 1 bano, 72 m2, vist colonia colina hobbit, apartamento 2 ha"
+hbtw-20100312-0014,House,House,POINTS:House(27),27,8,-3,-5,27,19,FALSE,House,FALSE,"camino del molino, casa de 3 hab 1 bano, 110 m2, necesita re camino del molino, casa de 3 hab 1 bano"
+hbtw-20100312-0015,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,"barrio pradera sur, apartamento moderno 3 hab 2 banos, 95 m2 barrio pradera sur, apartamento moderno"
+hbtw-20100312-0016,House,House,POINTS:House(22),22,12,-3,5,22,10,FALSE,House,FALSE,"sendero del roble, casa grande de 5 habitaciones, 3 banos, 2 sendero del roble, casa grande de 5 hab"
+lntn-20100411-0001,House,Apartment,POINTS:Apartment(28),7,28,7,-15,28,21,FALSE,Apartment,TRUE,"centro de loontoon: apartamento 1 hab 1 bano, 48 m2, ideal s centro de loontoon: apartamento 1 hab 1"
+lntn-20100411-0002,House,House,POINTS:House(29),29,8,-3,-5,29,21,FALSE,House,FALSE,"barrio carrot hills: casa de 2 habitaciones, 1 bano, 110 m2, barrio carrot hills: casa de 2 habitaci"
+lntn-20100411-0003,House,Apartment,POINTS:Apartment(22),13,22,-6,-15,22,9,FALSE,Apartment,TRUE,"avenida warner: apartamento 2 hab 1 bano, 70 m2, balcon pequ avenida warner: apartamento 2 hab 1 ban"
+lntn-20100411-0004,House,House,POINTS:House(34),34,3,-3,-5,34,31,FALSE,House,FALSE,"sector old studio: casa de 3 hab 2 banos, 145 m2, sala ampli sector old studio: casa de 3 hab 2 bano"
+lntn-20100411-0005,House,House,POINTS:House(34),34,13,-3,-20,34,21,FALSE,House,FALSE,"colonia bunny park: apartamento 3 hab 2 banos, 88 m2, segund colonia bunny park: apartamento 3 hab 2"
+lntn-20100411-0006,House,House,POINTS:House(27),27,8,-3,-5,27,19,FALSE,House,FALSE,"camino del lago: casa sencilla de 2 habitaciones, 1 bano, 90 camino del lago: casa sencilla de 2 hab"
+lntn-20100411-0007,House,Apartment,POINTS:Apartment(28),7,28,7,-15,28,21,FALSE,Apartment,TRUE,"barrio central toons: apartamento 2 hab 1 bano, 62 m2, edifi barrio central toons: apartamento 2 hab"
+lntn-20100411-0008,House,House,POINTS:House(24),24,18,-3,-5,24,6,FALSE,House,FALSE,"loma del pato: casa familiar de 4 hab 2 banos, 175 m2, patio loma del pato: casa familiar de 4 hab 2"
+lntn-20100411-0009,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,"centro de loontoon: apartamento 1 hab 1 bano, 50 m2, ideal i centro de loontoon: apartamento 1 hab 1"
+lntn-20100411-0010,House,House,POINTS:House(29),29,8,-3,-5,29,21,FALSE,House,FALSE,"barrio carrot hills: casa de 3 habitaciones 2 banos, 135 m2, barrio carrot hills: casa de 3 habitaci"
+lntn-20100411-0011,House,Apartment,POINTS:Apartment(22),13,22,-6,-15,22,9,FALSE,Apartment,TRUE,"avenida warner: apartamento 2 hab 1 bano, 75 m2, balcon fron avenida warner: apartamento 2 hab 1 ban"
+lntn-20100411-0012,House,House,POINTS:House(32),32,3,-3,-10,32,29,FALSE,House,FALSE,"sector old studio: casa amplia de 4 hab 3 banos, 210 m2, con sector old studio: casa amplia de 4 hab"
+lntn-20100411-0013,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,"colonia bunny park: apartamento 3 hab 2 banos, 92 m2, area s colonia bunny park: apartamento 3 hab 2"
+lntn-20100411-0014,House,House,POINTS:House(27),27,8,-3,-5,27,19,FALSE,House,FALSE,"camino del lago: casa de 3 hab 1 bano, 120 m2, necesita mejo camino del lago: casa de 3 hab 1 bano, "
+lntn-20100411-0015,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,"barrio central toons: apartamento moderno 2 hab 2 banos, 80 barrio central toons: apartamento modern"
+lntn-20100411-0016,House,House,POINTS:House(22),22,12,-3,5,22,10,FALSE,House,FALSE,"loma del pato: casa grande de 5 habitaciones, 3 banos, 260 m loma del pato: casa grande de 5 habitac"
+lntn-20100511-0001,House,Apartment,POINTS:Apartment(32),8,32,4,-15,32,24,FALSE,Apartment,TRUE,"centro de toontown: apartamento hermoso y muy comodo, 2 hab centro de toontown: apartamento hermoso "
+lntn-20100511-0002,House,House,POINTS:House(29),29,8,-3,-5,29,21,FALSE,House,FALSE,barrio carrot hills: casa comoda de 2 habitaciones 1 bano 12 barrio carrot hills: casa comoda de 2 h
+lntn-20100511-0003,House,Apartment,POINTS:Apartment(28),7,28,7,-15,28,21,FALSE,Apartment,TRUE,sector old studio: apartamento sencillo 1 hab 1 bano 42 m2 e sector old studio: apartamento sencillo
+lntn-20100511-0004,House,House,POINTS:House(34),34,3,-3,-5,34,31,FALSE,House,FALSE,avenida warner: casa hermosa de 3 hab 2 banos 150 m2 sala am avenida warner: casa hermosa de 3 hab 2
+lntn-20100511-0005,House,House,POINTS:House(34),34,13,-3,-20,34,21,FALSE,House,FALSE,"colonia bunny park: apartamento muy comodo, 2 hab 1 bano 70 colonia bunny park: apartamento muy como"
+lntn-20100511-0006,House,House,POINTS:House(27),27,8,-3,-5,27,19,FALSE,House,FALSE,"camino del lago: casa sencilla y fresca, 2 habitaciones 1 ba camino del lago: casa sencilla y fresca"
+lntn-20100511-0007,House,Apartment,POINTS:Apartment(28),7,28,7,-15,28,21,FALSE,Apartment,TRUE,barrio central toons: apartamento hermoso 3 hab 2 banos 90 m barrio central toons: apartamento hermo
+lntn-20100511-0008,House,House,POINTS:House(34),34,3,-3,-5,34,31,FALSE,House,FALSE,"loma del pato: casa familiar amplia, 4 hab 2 banos 180 m2 pa loma del pato: casa familiar amplia, 4 "
+lntn-20100511-0009,House,Apartment,POINTS:Apartment(32),8,32,4,-15,32,24,FALSE,Apartment,TRUE,centro de toontown: apartamento hermoso 2 hab 1 bano 68 m2 b centro de toontown: apartamento hermoso
+lntn-20100511-0010,House,House,POINTS:House(29),29,8,-3,-5,29,21,FALSE,House,FALSE,barrio carrot hills: casa comoda de 3 habitaciones 2 banos 1 barrio carrot hills: casa comoda de 3 h
+lntn-20100511-0011,House,Apartment,POINTS:Apartment(28),7,28,7,-15,28,21,FALSE,Apartment,TRUE,sector old studio: apartamento pequeno 1 hab 1 bano 45 m2 id sector old studio: apartamento pequeno 
+lntn-20100511-0012,House,House,POINTS:House(34),34,3,-3,-10,34,31,FALSE,House,FALSE,"avenida warner: casa amplia y hermosa, 4 hab 3 banos 200 m2 avenida warner: casa amplia y hermosa, 4"
+lntn-20100511-0013,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,colonia bunny park: apartamento comodo 2 hab 1 bano 72 m2 vi colonia bunny park: apartamento comodo 
+lntn-20100511-0014,House,House,POINTS:House(27),27,8,-3,-5,27,19,FALSE,House,FALSE,camino del lago: casa de 3 hab 1 bano 110 m2 necesita repara camino del lago: casa de 3 hab 1 bano 1
+lntn-20100511-0015,House,Apartment,POINTS:Apartment(18),12,18,-3,-15,18,6,FALSE,Apartment,TRUE,"barrio central toons: apartamento moderno y hermoso, 3 hab 2 barrio central toons: apartamento moder"
+lntn-20100511-0016,House,House,POINTS:House(22),22,12,-3,5,22,10,FALSE,House,FALSE,"loma del pato: casa grande y comoda, 5 habitaciones 3 banos loma del pato: casa grande y comoda, 5 h"

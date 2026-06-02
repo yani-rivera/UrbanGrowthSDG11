@@ -1,0 +1,27 @@
+﻿run_id,run_date,step,agency,agency_folder,mnemonic,year,month,input_file,input_path,config_file,output_file_expected,status,return_code,error_message,metrics_json
+20260601_125008,2026-06-01 12:50:08,parse,Acme,Acme,ACM,2010,ALL,acme_20100115.txt,data/raw/Acme/2010/acme_20100115.txt,config/agencies/agency_acme.json,output/acme/2010/ACM_20100115.csv,SUCCESS,0,,
+20260601_125008,2026-06-01 12:50:08,parse,Hobitown,Hobitown,HBTWN,2010,ALL,hobitown_20100312.txt,data/raw/Hobitown/2010/hobitown_20100312.txt,config/agencies/agency_hobitown.json,output/hobitown/2010/HBTWN_20100312.csv,SUCCESS,0,,
+20260601_125008,2026-06-01 12:50:08,parse,Loontoon,Loontoon,LNTN,2010,ALL,loontoon_20100411.txt,data/raw/Loontoon/2010/loontoon_20100411.txt,config/agencies/agency_loontoon.json,output/loontoon/2010/LNTN_20100411.csv,SUCCESS,0,,
+20260601_125008,2026-06-01 12:50:08,parse,Loontoon,Loontoon,LNTN,2010,ALL,loontoon_20100511.txt,data/raw/Loontoon/2010/loontoon_20100511.txt,config/agencies/agency_loontoon.json,output/loontoon/2010/LNTN_20100511.csv,SUCCESS,0,,
+20260601_125008,2026-06-01 12:50:08,merge,,,,2010,ALL,,output,,consolidated/2010/merged_2010.csv,SUCCESS,0,,"[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/2010/*.csv -> 3 hit(s)
+[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/*.csv -> 0 hit(s)
+[DEBUG] total candidate CSVs: 3
+[DEBUG] KEEP: Hobitown_20100312.csv  token=20100312
+[DEBUG] KEEP: Loontoon_20100411.csv  token=20100411
+[DEBUG] KEEP: Loontoon_20100511.csv  token=20100511
+✅ Merged 3 file(s) for [ALL] @ [2010] → 48 rows into /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/consolidated/2010/merged_2010.csv
+   Dedupe key: ['agency', 'ingestion_id', 'Listing ID']"
+20260601_125008,2026-06-01 12:50:08,deduplicate,,,,2010,ALL,merged_2010.csv,consolidated/2010/merged_2010.csv,,consolidated/2010/merged_2010_c.csv,SUCCESS,0,,"[OK] Deduplication completed
+  Canonical records : 48
+  Duplicate records : 0
+[OUT] consolidated/2010/merged_2010_c.csv
+[OUT] consolidated/2010/merged_2010_duplicates.csv"
+20260601_125008,2026-06-01 12:50:08,word_filter,,,,2010,ALL,merged_2010_c.csv,consolidated/2010/merged_2010_c.csv,config/remove_words.txt,consolidated/2010/merged_2010_flt.csv,SUCCESS,0,,"=== Word Cleaner Summary ===
+Input file     : consolidated/2010/merged_2010_c.csv
+Output file    : consolidated/2010/merged_2010_flt.csv
+Column cleaned : neighborhood
+Words file     : config/remove_words.txt
+Rows total     : 48
+Rows modified  : 16
+[OK] Done."
+20260601_125008,2026-06-01 12:50:08,uid_precheck,,,,2010,ALL,merged_2010_flt.csv,consolidated/2010/merged_2010_flt.csv,config/agency_mnemonics.csv,consolidated/2010/merged_2010_uid.csv,PRECHECK_FAILED,,Missing mnemonics: loontoon,

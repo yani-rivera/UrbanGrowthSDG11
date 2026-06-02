@@ -1,0 +1,69 @@
+{
+  "bedroom_terms": [
+    "hab",
+    "habit.",
+    "habs",
+    "habs.",
+    "habitacion",
+    "habitaciones",
+    "dorm",
+    "dormitorio",
+    "dormitorios",
+    "recamara",
+    "recámaras",
+    "recamaras",
+    "alcoba",
+    "alcobas",
+    "bedroom",
+    "bedrooms",
+    "bed",
+    "beds"
+  ],
+
+  "bedroom_shorthand": [
+    "H",
+    "h"
+  ],
+
+  "bathroom_terms": [
+    "baño",
+    "baños",
+    "bano",
+    "banos",
+    "ba",
+    "bathroom",
+    "bathrooms",
+    "bath",
+    "baths"
+  ],
+
+  "bathroom_shorthand": [
+    "B",
+    "b"
+  ],
+
+  "half_bath_terms": [
+    "medio",
+    "1/2",
+    "½"
+  ],
+
+  "number_words_0_5": {
+    "cero": "0",
+    "uno": "1",
+    "una": "1",
+    "un": "1",
+    "dos": "2",
+    "tres": "3",
+    "cuatro": "4",
+    "cinco": "5"
+  },
+
+  "property_attribute_rules": {
+    "allow_slash_bed_bath": true,
+    "enable_word_first_bedbath": true,
+    "max_bedrooms": 5,
+    "max_bathrooms": 10,
+    "allow_half_bath": true
+  }
+}

@@ -1,7 +1,7 @@
 {"agency": "Acme",
   "nemonic":"ACM",
   "preprocessing_needed": true,
-  "listing_marker": "before_colon",
+  "listing_marker": "before_coma",
   "listing_marker_tochange":null,
   "auto_masquerade_numdot": false,
   "sanitize": true,

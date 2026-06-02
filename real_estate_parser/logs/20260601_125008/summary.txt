@@ -1,0 +1,22 @@
+﻿
+============================================================
+STEP: MERGE
+============================================================
+[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/2010/*.csv -> 3 hit(s)
+[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/*.csv -> 0 hit(s)
+[DEBUG] total candidate CSVs: 3
+[DEBUG] KEEP: Hobitown_20100312.csv  token=20100312
+[DEBUG] KEEP: Loontoon_20100411.csv  token=20100411
+[DEBUG] KEEP: Loontoon_20100511.csv  token=20100511
+✅ Merged 3 file(s) for [ALL] @ [2010] → 48 rows into /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/consolidated/2010/merged_2010.csv
+   Dedupe key: ['agency', 'ingestion_id', 'Listing ID']
+
+============================================================
+STEP: DEDUPLICATE
+============================================================
+{'stdout': '[OK] Deduplication completed\n  Canonical records : 48\n  Duplicate records : 0\n[OUT] consolidated/2010/merged_2010_c.csv\n[OUT] consolidated/2010/merged_2010_duplicates.csv'}
+
+============================================================
+STEP: WORD_FILTER
+============================================================
+{'stdout': '=== Word Cleaner Summary ===\nInput file     : consolidated/2010/merged_2010_c.csv\nOutput file    : consolidated/2010/merged_2010_flt.csv\nColumn cleaned : neighborhood\nWords file     : config/remove_words.txt\nRows total     : 48\nRows modified  : 16\n[OK] Done.'}

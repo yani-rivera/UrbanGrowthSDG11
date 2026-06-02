@@ -53,66 +53,35 @@ import subprocess
 import sys
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
+import pandas as pd
 
 
-VERSION = "SDG11_ORCHESTRATOR_V3"
+# =============================================================================
+# GLOBALS
+# =============================================================================
 
-LOG_COLUMNS = [
-    "run_id",
-    "run_date",
-    "step",
-    "agency",
-    "agency_folder",
-    "mnemonic",
-    "year",
-    "month",
-    "input_file",
-    "input_path",
-    "config_file",
-    "output_file_expected",
-    "status",
-    "return_code",
-    "error_message",
-]
 
-AGGREGATION_TASKS = [
+def get_version(cfg):
+    return cfg.get("orchestrator", {}).get(
+        "version",
+        "SDG11_ORCHESTRATOR_UNKNOWN"
+    )
 
-    {
-        "name": "neighborhood",
-        "script": "tools/Aggregate_2010_Neighborhood_Summary.py",
-        "output": "neighborhood_{year}monthly.csv",
-        "needs_year": False,
-    },
 
-    {
-        "name": "bedrooms",
-        "script": "tools/Aggregate_Neighborhood_Summary_ByYear_Bedrooms.py",
-        "output": "neighborhood_monthly_bedrooms_price.csv",
-        "needs_year": True,
-    },
+def get_log_columns(cfg):
 
-    {
-        "name": "area",
-        "script": "tools/Aggregate_Neighborhood_Summary_ByYear_Area.py",
-        "output": "neighborhood_{year}_monthly_area.csv",
-        "needs_year": True,
-    },
+    print(cfg)
+    return cfg.get("logging", {}).get("columns", [])
 
-    {
-        "name": "area_beds",
-        "script": (
-            "tools/"
-            "Aggregate_Neighborhood_"
-            "Summary_ByYear_AreaBeds_Flexible.py"
-        ),
-        "output": "neighborhood_{year}_monthly_area_beds.csv",
-        "needs_year": True,
-    },
-]
 
+def get_aggregation_tasks(cfg):
+    return cfg.get("aggregation_tasks", [])
 # =============================================================================
 # Basic Helpers
 # =============================================================================
+
+
+
 
 def load_json(path: str) -> dict:
     with open(path, "r", encoding="utf-8") as f:
@@ -128,7 +97,7 @@ def month_to_str(month: Optional[str]) -> Optional[str]:
         return None
     return f"{int(month):02d}"
 
-import pandas as pd
+
 
 
 def check_missing_mnemonics(
@@ -170,6 +139,14 @@ def check_missing_mnemonics(
 
     return missing
 
+
+def store_step_metrics(
+    ctx,
+    step_name,
+    metrics,
+):
+    ctx["step_metrics"][step_name] = metrics
+    append_step_summary( ctx["summary_file"], step_name,metrics)
 
 # =============================================================================
 # Discovery EXPECTED
@@ -371,91 +348,6 @@ def expected_stdprice_output(
         f"{base}_STDPrice.csv"
     )
 
-def step_price_standardize(ctx: Dict[str, Any]) -> None:
-
-    args = ctx["args"]
-
-    print("\n==============================================")
-    print("STEP: PRICE STANDARDIZATION")
-    print("==============================================")
-
-    gis_input, _, _ = expected_gis_match_outputs(
-        consolidated_root=args.consolidated_root,
-        year=args.year,
-        month=args.month,
-    )
-
-    # Your command uses *_valid.csv
-    gis_input = gis_input.replace(
-        "_with_gis.csv",
-        "_with_gis_valid.csv"
-    )
-
-    output_file = expected_stdprice_output(
-        consolidated_root=args.consolidated_root,
-        year=args.year,
-        month=args.month,
-    )
-
-    fx_file = "FXrate/fx_HNL_USD.csv"
-
-    print(f"Input  : {gis_input}")
-    print(f"FX     : {fx_file}")
-    print(f"Output : {output_file}")
-
-    if not os.path.exists(gis_input):
-        print("❌ Valid GIS file not found")
-        return
-
-    if args.dry_run:
-
-        status = "DRY_RUN"
-        return_code = 0
-        error_message = ""
-
-    else:
-
-        result = run_stdprice_subprocess(
-            script=args.stdprice_script,
-            input_file=gis_input,
-            fx_file=fx_file,
-            output_file=output_file,
-        )
-
-        return_code = result.returncode
-
-        if result.stdout:
-            print(result.stdout)
-
-        if return_code == 0:
-            status = "SUCCESS"
-            error_message = ""
-            print("✅ Price standardization completed")
-        else:
-            status = "FAILED"
-            error_message = result.stderr.strip()
-            print(error_message)
-
-    append_log(
-        ctx["log_file"],
-        {
-            "run_id": ctx["run_id"],
-            "run_date": ctx["run_date"],
-            "step": "price_standardize",
-            "agency": "",
-            "agency_folder": "",
-            "mnemonic": "",
-            "year": args.year,
-            "month": args.month or "ALL",
-            "input_file": os.path.basename(gis_input),
-            "input_path": gis_input,
-            "config_file": fx_file,
-            "output_file_expected": output_file,
-            "status": status,
-            "return_code": return_code,
-            "error_message": error_message,
-        },
-    )
 
 def expected_transaction_output(
     consolidated_root: str,
@@ -732,7 +624,7 @@ def build_missing_config_report_file(run_id: str) -> str:
 
 def append_log(log_file: str, row: dict) -> None:
     log_dir = os.path.dirname(log_file)
-
+    print ("LOG COLUMNS IN APPEND LOG",LOG_COLUMNS)
     if log_dir:
         os.makedirs(log_dir, exist_ok=True)
 
@@ -877,41 +769,76 @@ def print_missing_config_summary(
     if report_file:
         print(f"\nMissing config CSV  : {report_file}")
 
+def append_step_summary(
+    summary_file: str,
+    step_name: str,
+    content: str,
+) -> None:
+
+    summary_dir = os.path.dirname(summary_file)
+
+    if summary_dir:
+        os.makedirs(
+            summary_dir,
+            exist_ok=True
+        )
+
+    with open(
+        summary_file,
+        "a",
+        encoding="utf-8-sig"
+    ) as f:
+
+        f.write("\n")
+        f.write("=" * 60 + "\n")
+        f.write(f"STEP: {step_name.upper()}\n")
+        f.write("=" * 60 + "\n")
+
+        if content:
+            f.write(str(content))
+            f.write("\n")
 
 def print_execution_summary(ctx: Dict[str, Any]) -> None:
     args = ctx["args"]
 
-    print("\n==============================================")
-    print("EXECUTION SUMMARY")
-    print("==============================================")
-    print(f"Run ID              : {ctx['run_id']}")
-    print(f"Steps               : {' '.join(args.steps)}")
-    print(f"Agencies processed  : {ctx['total_agencies']}")
-    print(f"Missing config      : {ctx['total_missing_config']}")
-
-    if ctx["missing_config_details"]:
-        report_file = build_missing_config_report_file(ctx["run_id"])
-        write_missing_config_report(
+    if ("parse" in args.steps):
+        print("\n==============================================")
+        print("EXECUTION SUMMARY")
+        print("==============================================")
+        print(f"Run ID              : {ctx['run_id']}")
+        print(f"Steps               : {' '.join(args.steps)}")
+        print(f"Agencies processed  : {ctx['total_agencies']}")
+        print(f"Missing config      : {ctx['total_missing_config']}")
+        if ctx["missing_config_details"]:
+            report_file = build_missing_config_report_file(
+                ctx["run_id"]
+            )
+            write_missing_config_report(
             report_file,
             ctx["missing_config_details"],
-        )
-        print_missing_config_summary(
+                                        )
+            print_missing_config_summary(
             ctx["missing_config_details"],
             report_file=report_file,
         )
 
-    print(f"Missing files       : {ctx['total_missing_files']}")
-    print(f"Files processed     : {ctx['total_files']}")
+            print(f"Missing files       : {ctx['total_missing_files']}")
+            print(f"Files processed     : {ctx['total_files']}")
+    
+    if "merge" in args.steps:
+        print(f"Merge status        : {ctx['merge_status']}")
+
 
     if args.dry_run:
         print("Mode                : DRY RUN")
-    else:
-        print(f"Parse successful    : {ctx['total_parse_success']}")
-        print(f"Parse failed        : {ctx['total_parse_failed']}")
-        print(f"Merge status        : {ctx['merge_status']}")
+    # else:
+    #     print(f"Parse successful    : {ctx['total_parse_success']}")
+    #     print(f"Parse failed        : {ctx['total_parse_failed']}")
+    #     print(f"Merge status        : {ctx['merge_status']}")
 
+    print(f"==============================================")
     print(f"Log file            : {ctx['log_file']}")
-    print("==============================================\n")
+
 
 
 # =============================================================================
@@ -1161,13 +1088,17 @@ def run_filter_subprocess(
     )
 
 def run_gis_match_subprocess(
-    script: str,
-    listings_file: str,
-    merged_file: str,
-    matched_file: str,
-    unmatched_file: str,
-) -> subprocess.CompletedProcess:
+    script,
+    listings_file,
+    merged_file,
+    matched_file,
+    unmatched_file,
+    ctx,
+):
 
+    orch_cfg = ctx["cfg_orchestrator"]
+
+    catalog_file = (orch_cfg["catalogs"]["catalog_neighborhood"])
     cmd = [
         sys.executable,
         script,
@@ -1176,7 +1107,7 @@ def run_gis_match_subprocess(
         "--listings_col",
         "neighborhood_clean_norm",
         "--catalog_csv",
-        "Catalog/standard_neighborhood_catalog.csv",
+        catalog_file,
         "--out_merged",
         merged_file,
         "--out_matched",
@@ -1220,17 +1151,16 @@ def run_stdprice_subprocess(
     input_file: str,
     fx_file: str,
     output_file: str,
+    fx_mode: str,
 ) -> subprocess.CompletedProcess:
 
     cmd = [
-        sys.executable,
+        "python",
         script,
-        "--input",
-        input_file,
-        "--fx",
-        fx_file,
-        "--output",
-        output_file,
+        "--input", input_file,
+        "--fx", fx_file,
+        "--output", output_file,
+        "--fx-mode", fx_mode,
     ]
 
     print("\n[DEBUG] StdPrice command:")
@@ -1386,7 +1316,10 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="SDG11_ORCHESTRATOR_V3"
     )
-
+    parser.add_argument(
+        "--orchestrator-config",
+        default="config/orchestrator_config.json"
+    )
     parser.add_argument("--agency", required=False)
     parser.add_argument("--all-agencies", action="store_true")
 
@@ -1429,6 +1362,18 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--output-root",
         default="output",
+    )
+
+    parser.add_argument(
+        "--fx-mode",
+        choices=["daily", "monthly_avg"],
+        default="monthly_avg",
+        help="FX methodology"
+    )
+    parser.add_argument(
+        "--fx-file",
+        default="FXrate/fx_mean_HNL_USD.csv",
+        help="Path to FX reference CSV"
     )
 
     parser.add_argument(
@@ -1516,10 +1461,49 @@ def parse_arguments() -> argparse.Namespace:
 
     return args
 
+def build_summary_file(run_id: str) -> str:
+
+    run_dir = os.path.join(
+        "logs",
+        run_id
+    )
+
+    os.makedirs(
+        run_dir,
+        exist_ok=True
+    )
+
+    return os.path.join(
+        run_dir,
+        "summary.txt"
+    )
 
 def initialize_context(args: argparse.Namespace) -> Dict[str, Any]:
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    cfg_orchestrator = load_json(
+    args.orchestrator_config
+    )
+    ###
+    print("CONFIG FILE:", args.orchestrator_config)
+    print("LOGGING SECTION:")
+    print(cfg_orchestrator.get("logging"))
+
+    print("LOG_COLUMNS:")
+    print(get_log_columns(cfg_orchestrator))
+
+    ####
+    global VERSION
+    global LOG_COLUMNS
+    global AGGREGATION_TASKS
+
+    VERSION = get_version(cfg_orchestrator)
+    LOG_COLUMNS = get_log_columns(cfg_orchestrator)
+    AGGREGATION_TASKS = get_aggregation_tasks(cfg_orchestrator)
+
+
+
 
     log_file = build_log_file(
         run_id=run_id,
@@ -1527,13 +1511,20 @@ def initialize_context(args: argparse.Namespace) -> Dict[str, Any]:
         year=args.year,
         month=args.month,
     )
+    summary_file = build_summary_file(
+    run_id=run_id
+    )
 
     return {
+        "cfg_orchestrator": cfg_orchestrator,
+        "version": VERSION,
+        "log_columns": LOG_COLUMNS,
+        "aggregation_tasks": AGGREGATION_TASKS,
         "args": args,
         "run_id": run_id,
         "run_date": run_date,
         "log_file": log_file,
-
+        "summary_file": summary_file,
         "agency_folders": [],
         "discovery_details": [],
         "missing_config_details": [],
@@ -1777,8 +1768,11 @@ def process_single_file(
         )
 
         return_code = result.returncode
+        metrics_json = ""
+
 
         if return_code == 0:
+
             status = "SUCCESS"
             error_message = ""
             ctx["total_parse_success"] += 1
@@ -1807,6 +1801,7 @@ def process_single_file(
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -1845,7 +1840,19 @@ def step_merge(ctx: Dict[str, Any]) -> None:
             consolidated_root=args.consolidated_root,
         )
 
+        metrics_json = ""
         if result.stdout:
+            metrics_json = result.stdout.strip()
+
+        if result.stdout:
+            store_step_metrics(
+                            ctx,
+                            "merge",
+                            
+                            result.stdout.strip()
+                            
+                        )
+
             print(result.stdout)
 
         merge_return_code = result.returncode
@@ -1882,6 +1889,7 @@ def step_merge(ctx: Dict[str, Any]) -> None:
             "status": merge_status,
             "return_code": merge_return_code,
             "error_message": merge_error,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -1930,11 +1938,21 @@ def step_deduplicate(ctx: Dict[str, Any]) -> None:
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "deduplicate",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
             status = "SUCCESS"
             error_message = ""
             print("✅ Deduplication completed")
@@ -1962,6 +1980,7 @@ def step_deduplicate(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -2014,11 +2033,22 @@ def step_word_filter(ctx: Dict[str, Any]) -> None:
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "word_filter",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
+
             status = "SUCCESS"
             error_message = ""
             print("✅ Word filtering completed")
@@ -2046,6 +2076,7 @@ def step_word_filter(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -2070,7 +2101,13 @@ def step_uid(ctx: Dict[str, Any]) -> None:
         month=args.month,
     )
 
-    mnemonics_file = "config/agency_mnemonics.csv"
+
+    orch_cfg = ctx["cfg_orchestrator"]
+
+    mnemonics_file = (
+        orch_cfg["configs"]["mnemonics_file"]
+    )
+    
 
     print(f"Input     : {filtered_input}")
     print(f"Output    : {uid_output}")
@@ -2150,11 +2187,23 @@ def step_uid(ctx: Dict[str, Any]) -> None:
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
+
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "uid",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
+
             status = "SUCCESS"
             error_message = ""
             print("✅ UID assignment completed")
@@ -2182,6 +2231,7 @@ def step_uid(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -2229,11 +2279,22 @@ def step_clean_neighborhoods(ctx: Dict[str, Any]) -> None:
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "clean_neighborhoods",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
+
             status = "SUCCESS"
             error_message = ""
             print("✅ Neighborhood normalization completed")
@@ -2261,6 +2322,7 @@ def step_clean_neighborhoods(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -2312,11 +2374,23 @@ def step_ptype_fix(ctx: Dict[str, Any]) -> None:
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
+    
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "ptype_fix",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
+
             status = "SUCCESS"
             error_message = ""
             print("✅ Property classification completed")
@@ -2325,6 +2399,7 @@ def step_ptype_fix(ctx: Dict[str, Any]) -> None:
             error_message = result.stderr.strip()
             print("❌ Property classification failed")
             print(error_message)
+
 
     append_log(
         ctx["log_file"],
@@ -2344,6 +2419,7 @@ def step_ptype_fix(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -2395,11 +2471,23 @@ def step_filter_records(ctx: Dict[str, Any]) -> None:
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
+
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "filter_records",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
+
             status = "SUCCESS"
             error_message = ""
             print("✅ Filtering completed")
@@ -2427,6 +2515,7 @@ def step_filter_records(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -2477,14 +2566,26 @@ def step_gis_match(ctx: Dict[str, Any]) -> None:
             merged_file=merged_file,
             matched_file=matched_file,
             unmatched_file=unmatched_file,
+            ctx=ctx,
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "gis_match",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
+
             status = "SUCCESS"
             error_message = ""
             print("✅ GIS matching completed")
@@ -2512,6 +2613,8 @@ def step_gis_match(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
+
         },
     )
 
@@ -2549,11 +2652,22 @@ def step_unmatched_check(ctx: Dict[str, Any]) -> None:
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "unmatched_check",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
+
             status = "SUCCESS"
             error_message = ""
             print("✅ Unmatched QA completed")
@@ -2580,8 +2694,109 @@ def step_unmatched_check(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
+
+def step_price_standardize(ctx: Dict[str, Any]) -> None:
+
+    args = ctx["args"]
+
+    print("\n==============================================")
+    print("STEP: PRICE STANDARDIZATION")
+    print("==============================================")
+
+    gis_input, _, _ = expected_gis_match_outputs(
+        consolidated_root=args.consolidated_root,
+        year=args.year,
+        month=args.month,
+    )
+
+    # Your command uses *_valid.csv
+    gis_input = gis_input.replace(
+        "_with_gis.csv",
+        "_with_gis_valid.csv"
+    )
+
+    output_file = expected_stdprice_output(
+        consolidated_root=args.consolidated_root,
+        year=args.year,
+        month=args.month,
+    )
+
+    #fx_file = "FXrate/fx_HNL_USD.csv"
+    fx_file = fx_file = args.fx_file
+
+    print(f"Input  : {gis_input}")
+    print(f"FX     : {fx_file}")
+    print(f"Output : {output_file}")
+
+    if not os.path.exists(gis_input):
+        print("❌ Valid GIS file not found")
+        return
+
+    if args.dry_run:
+
+        status = "DRY_RUN"
+        return_code = 0
+        error_message = ""
+
+    else:
+
+        result = run_stdprice_subprocess(
+            script=args.stdprice_script,
+            input_file=gis_input,
+            fx_file=fx_file,
+            output_file=output_file,
+            fx_mode=args.fx_mode,
+        )
+
+        return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
+
+        if result.stdout:
+            print(result.stdout)
+
+        if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "price_standardize",
+                            
+                            result.stdout.strip()
+                            
+                        )
+            status = "SUCCESS"
+            error_message = ""
+            print("✅ Price standardization completed")
+        else:
+            status = "FAILED"
+            error_message = result.stderr.strip()
+            print(error_message)
+
+    append_log(
+        ctx["log_file"],
+        {
+            "run_id": ctx["run_id"],
+            "run_date": ctx["run_date"],
+            "step": "price_standardize",
+            "agency": "",
+            "agency_folder": "",
+            "mnemonic": "",
+            "year": args.year,
+            "month": args.month or "ALL",
+            "input_file": os.path.basename(gis_input),
+            "input_path": gis_input,
+            "config_file": fx_file,
+            "output_file_expected": output_file,
+            "status": status,
+            "return_code": return_code,
+            "error_message": error_message,
+            "metrics_json": metrics_json,
+        },
+    )
+
 
 def step_transaction_validate(ctx: Dict[str, Any]) -> None:
 
@@ -2631,7 +2846,22 @@ def step_transaction_validate(ctx: Dict[str, Any]) -> None:
         if result.stdout:
             print(result.stdout)
 
+        metrics_json = ""
+
+        if result.stdout:
+            #print(result.stdout)
+            metrics_json = result.stdout.strip()
+    
+   
+
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "transaction_validate",
+                            
+                            result.stdout.strip()
+                            
+                        )
             status = "SUCCESS"
             error_message = ""
             print("✅ Transaction validation completed")
@@ -2640,7 +2870,7 @@ def step_transaction_validate(ctx: Dict[str, Any]) -> None:
             error_message = result.stderr.strip()
             print("❌ Transaction validation failed")
             print(error_message)
-
+    
     append_log(
         ctx["log_file"],
         {
@@ -2659,6 +2889,7 @@ def step_transaction_validate(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
         },
     )
 
@@ -2706,11 +2937,22 @@ def step_area_standardize(ctx: Dict[str, Any]) -> None:
         )
 
         return_code = result.returncode
+        metrics_json = ""
+        if result.stdout:
+            metrics_json = result.stdout.strip()
 
         if result.stdout:
             print(result.stdout)
 
         if return_code == 0:
+            store_step_metrics(
+                            ctx,
+                            "area_standardize",
+                            {
+                                "stdout": result.stdout.strip()
+                            }
+                        )
+
             status = "SUCCESS"
             error_message = ""
             print("✅ Area standardization completed")
@@ -2738,6 +2980,8 @@ def step_area_standardize(ctx: Dict[str, Any]) -> None:
             "status": status,
             "return_code": return_code,
             "error_message": error_message,
+            "metrics_json": metrics_json,
+
         },
     )
 
@@ -2832,7 +3076,7 @@ def execute_requested_steps(ctx: Dict[str, Any]) -> None:
 def main() -> None:
     args = parse_arguments()
     ctx = initialize_context(args)
-
+    ctx["step_metrics"] = {}
     print_header(ctx)
 
     step_discovery(ctx)

@@ -13,24 +13,54 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from modules.price_extractor import extract_price
 from modules.area_extractor import extract_area as _extract_area_new
 
+# NEW
+from modules.currency_utils import (
+    clean_text_for_price,
+    normalize_currency_spacing,
+    strip_per_unit_prices,
+    contains_currency,
+    extract_currency_only,
+    extract_currency_and_price,
+)
 
 
 #==================END IMPORTS
 
- 
-_BED_WORDS = r"(?:hab(?:itaciones)?|habit\.?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?|BEDROOMS)"
 
+# =========================================================
+# PROPERTY SEMANTIC VOCABULARY
+# =========================================================
+_BED_WORDS = r"(?:hab(?:itaciones)?|habit\.?|habs?\.?|dorm(?:itorios)?|recá?maras?|alcobas?|BEDROOMS)"
+BATH_WORD = r"(?:bañ(?:o|os)|ban(?:o|os)|ba|bathrooms?)"
+NUM_WORDS = {"uno":1,"una":1,"dos":2,"tres":3,"cuatro":4,"cinco":5,"seis":6,"siete":7,"ocho":8,"nueve":9,"diez":10}
+
+_NUM_WORDS_0_5 = {
+    "cero": "0",
+    "uno": "1", "una": "1", "un": "1",
+    "dos": "2",
+    "tres": "3",
+    "cuatro": "4",
+    "cinco": "5",
+}
+
+# =========================================================
+# NORMALIZATION HELPERS
+# =========================================================
+_NUM_WORDS_RX = re.compile(r"\b(?:cero|uno|una|un|dos|tres|cuatro|cinco)\b", re.IGNORECASE)
+
+
+# =========================================================
+# BEDROOM REGEX
+# =========================================================
 BED_RX_KV = re.compile(
     r"\b(?:beds?|bedrooms?)\s*[:=]\s*(\d{1,2})\b",
     re.IGNORECASE
 )
 
-
 BED_RX_EQUALS = re.compile(
     r"\b(?:beds?|bedrooms?)\s*=\s*(\d{1,2})\b",
     re.IGNORECASE
 )
-
 
 BED_RX_1 = re.compile(
     rf"(?:\((\d{{1,2}})\)|\b(\d{{1,2}}))\s*{_BED_WORDS}(?!\w)",
@@ -42,29 +72,9 @@ BED_RX_WORD_FIRST = re.compile(
     rf"\b{_BED_WORDS}\s*[:\-]?\s*(\d{{1,2}})\b",
     re.IGNORECASE
 )
-#----------
-_NUM_WORDS_0_5 = {
-    "cero": "0",
-    "uno": "1", "una": "1", "un": "1",
-    "dos": "2",
-    "tres": "3",
-    "cuatro": "4",
-    "cinco": "5",
-}
-_NUM_WORDS_RX = re.compile(r"\b(?:cero|uno|una|un|dos|tres|cuatro|cinco)\b", re.IGNORECASE)
-
-def _normalize_small_numbers_0_5(s: str) -> str:
-    # replace standalone number-words with digits; keeps accents untouched elsewhere
-    return _NUM_WORDS_RX.sub(lambda m: _NUM_WORDS_0_5[m.group(0).lower()], s)
-
-#---------
-
-
-# bathrooms: decimals/½, words + shorthand B
-#BATH_WORD = r"ba(?:ños|nos|ño|no)s?"
-BATH_WORD = r"(?:bañ(?:o|os)|ban(?:o|os)|ba|bathrooms?)"
-
-
+# =========================================================
+# BATHROOM REGEX
+# =========================================================
 BATH_RX_WORD_NUM = re.compile(
     rf"\b{BATH_WORD}\s*(\d{{1,2}}(?:[.,]\d)?)\b",
     re.I
@@ -75,7 +85,6 @@ BATH_RX_NUM_WORD = re.compile(
     re.I
 )
 
-
 BATH_RX = re.compile(rf"\b(\d{{1,2}}(?:[.,]\d)?)\s*{BATH_WORD}", re.I)
 
 
@@ -85,9 +94,6 @@ BATH_RX_MEDIO = re.compile(
 BATH_RX_B = re.compile(
     r"\b(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\s*[Bb]\b", re.I)
 
-# optional "3/2" shorthand: assume beds/baths if enabled
-SLASH_RX = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\b")
-
 # inverse baths
 
 BATH_RX_WORD_FIRST = re.compile(
@@ -96,12 +102,17 @@ BATH_RX_WORD_FIRST = re.compile(
 )
 
 
+# =========================================================
+# COMPOSITE PROPERTY REGEX
+# =========================================================
+
+
+# optional "3/2" shorthand: assume beds/baths if enabled
+SLASH_RX = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2}(?:[.,]\d)?|\d\s*1/2|½)\b")
+
+
 ####------Price regex
-_UNIT_PRICE_RE = re.compile(
-    r'(US\$|\$|L\.?)\s?\d+(?:[\.,]\d+)?\s?(?:x\s*)?(?:vrs²|vrs2|vr2|m²|m2|mt2)\b',
-    re.IGNORECASE
-)
-_CURR_TIGHT_RE = re.compile(r'(US\$|\$|L\.?)(\d)')   # "US$45000" -> "US$ 45000"
+
 _SPACE_COLLAPSE_RE = re.compile(r'\s+')
 
 ###########
@@ -112,34 +123,18 @@ AREA_RX = re.compile(
     re.IGNORECASE,
 )
 
-# PRICE must have a currency; take the LAST one on the line
-PRICE_RX = re.compile(
-    r'(US\$|\$|LPS?\.?|L\.|USD|HNL)\s*'
-    r'(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)',
-    re.IGNORECASE,
-)
 
 
+####
 
-def normalize_currency_spacing(text: str) -> str:
-    """Ensure a space between currency token and digits."""
-    if text is None:
-        return ""
-    s = str(text)
-    return _CURR_TIGHT_RE.sub(r'\1 \2', s)
-    #return text
 
-def strip_per_unit_prices(text: str) -> str:
-    """Remove per-unit amounts like 'US$ 4.00 vrs²' or '$ 10 m2'; keep totals."""
-    if text is None:
-        return ""
-    s = str(text)
-    s = _UNIT_PRICE_RE.sub('', s)
-    return _SPACE_COLLAPSE_RE.sub(' ', s).strip()
+###=====
+def _normalize_small_numbers_0_5(s: str) -> str:
+    # replace standalone number-words with digits; keeps accents untouched elsewhere
+    return _NUM_WORDS_RX.sub(lambda m: _NUM_WORDS_0_5[m.group(0).lower()], s)
 
-def clean_text_for_price(text: str) -> str:
-    """Convenience pipeline before price extraction."""
-    return normalize_currency_spacing(strip_per_unit_prices(text))
+#---------
+
 
 
 def normalize_ocr_text(text):
@@ -204,48 +199,9 @@ def detect_transaction(text, config):
 def clean_listing_line(line):
     return re.sub(r'\s+', ' ', line).strip()
 
-NUM_WORDS = {"uno":1,"una":1,"dos":2,"tres":3,"cuatro":4,"cinco":5,"seis":6,"siete":7,"ocho":8,"nueve":9,"diez":10}
-
-# def _word_to_int(s): return NUM_WORDS.get(s.strip().lower(), None)
 
 
-""" def extract_bedrooms(text: str, config: dict | None = None):
-    # CHANGED: normalize only 0–5 words; do NOT strip accents
-    t = _normalize_small_numbers_0_5(text or "")
 
-    # 1) explicit words
-    m = BED_RX_1.search(t)
-    if m:
-        n_str = m.group(1) or m.group(2)
-        if n_str is None:
-            return None
-        n = int(n_str)
-        return n if 0 <= n <= 5 else None
-
-    # 2) shorthand "3H"
-    m = BED_RX_2.search(t)
-    if m:
-        n = int(m.group(1))
-        return n if 0 <= n <= 5 else None
-
-    # 3) word-first "Dormitorios 3"
-    if not config or config.get("enable_word_first_bedbath", False):
-        m = BED_RX_WORD_FIRST.search(t)
-        if m:
-            n = int(m.group(1))
-            return n if 0 <= n <= 5 else None
-
-    #return None
-
-
-    # 4) "3/2" pattern (config-gated; on by default)
-    allow_slash = True if not config else bool(config.get("allow_slash_bed_bath", True))
-    if allow_slash:
-        m = SLASH_RX.search(t)
-        if m:
-            return int(m.group(1))
-    return None
- """
 
 
 def extract_bedrooms(text: str, config: dict | None = None):

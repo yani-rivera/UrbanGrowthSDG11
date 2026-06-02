@@ -1,0 +1,60 @@
+﻿run_id,run_date,step,agency,agency_folder,mnemonic,year,month,input_file,input_path,config_file,output_file_expected,status,return_code,error_message,metrics_json
+20260601_122715,2026-06-01 12:27:15,parse,Casamagica,Casamagica,CSMGC,2026,ALL,casamagica_20260415.txt,data/raw/Casamagica/2026/casamagica_20260415.txt,config/agencies/agency_casamagica.json,output/casamagica/2026/CSMGC_20260415.csv,SUCCESS,0,,
+20260601_122715,2026-06-01 12:27:15,merge,,,,2026,ALL,,output,,consolidated/2026/merged_2026.csv,SUCCESS,0,,"[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/2026/*.csv -> 1 hit(s)
+[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/*.csv -> 0 hit(s)
+[DEBUG] total candidate CSVs: 1
+[DEBUG] KEEP: casamagica_20260415.csv  token=20260415
+✅ Merged 1 file(s) for [ALL] @ [2026] → 46 rows into /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/consolidated/2026/merged_2026.csv
+   Dedupe key: ['agency', 'ingestion_id', 'Listing ID']"
+20260601_122715,2026-06-01 12:27:15,deduplicate,,,,2026,ALL,merged_2026.csv,consolidated/2026/merged_2026.csv,,consolidated/2026/merged_2026_c.csv,SUCCESS,0,,"[OK] Deduplication completed
+  Canonical records : 46
+  Duplicate records : 0
+[OUT] consolidated/2026/merged_2026_c.csv
+[OUT] consolidated/2026/merged_2026_duplicates.csv"
+20260601_122715,2026-06-01 12:27:15,word_filter,,,,2026,ALL,merged_2026_c.csv,consolidated/2026/merged_2026_c.csv,config/remove_words.txt,consolidated/2026/merged_2026_flt.csv,SUCCESS,0,,"=== Word Cleaner Summary ===
+Input file     : consolidated/2026/merged_2026_c.csv
+Output file    : consolidated/2026/merged_2026_flt.csv
+Column cleaned : neighborhood
+Words file     : config/remove_words.txt
+Rows total     : 46
+Rows modified  : 0
+[OK] Done."
+20260601_122715,2026-06-01 12:27:15,uid,,,,2026,ALL,merged_2026_flt.csv,consolidated/2026/merged_2026_flt.csv,config/agency_mnemonics.csv,consolidated/2026/merged_2026_uid.csv,SUCCESS,0,,[done] 46 rows → consolidated/2026/merged_2026_uid.csv  (added 'Listing_uid' as first column)
+20260601_122715,2026-06-01 12:27:15,clean_neighborhoods,,,,2026,ALL,merged_2026_uid.csv,consolidated/2026/merged_2026_uid.csv,,consolidated/2026/merged_2026_clean.csv,SUCCESS,0,,"============================================================
+FILE: consolidated/2026/merged_2026_uid.csv
+ENCODING: utf-8-sig
+DELIMITER: ,
+FIELDS: ['Listing_uid', 'Listing ID', 'title', 'neighborhood', 'bedrooms', 'bathrooms', 'area', 'area_unit', 'area_m2', 'AT']
+============================================================"
+20260601_122715,2026-06-01 12:27:15,ptype_fix,,,,2026,ALL,merged_2026_clean.csv,consolidated/2026/merged_2026_clean.csv,,consolidated/2026/merged_2026_clean_ptype_fixed.csv,SUCCESS,0,,[OK] v8 completed
+20260601_122715,2026-06-01 12:27:15,filter_records,,,,2026,ALL,merged_2026_clean_ptype_fixed.csv,consolidated/2026/merged_2026_clean_ptype_fixed.csv,,consolidated/2026/merged_2026_filtered.csv,SUCCESS,0,,"Differential columns: ['Listing_uid', 'Listing ID_x', 'title_x', 'neighborhood_x', 'bedrooms_x', 'bathrooms_x', 'area_x', 'area_unit_x', 'area_m2_x', 'AT_x', 'AT_unit_x', 'price_x', 'currency_x', 'transaction_x', 'property_type_x', 'agency_x', 'date_x', 'notes_x', 'source_type_x', 'ingestion_id_x', 'pipeline_version_x', 'source_file_x', 'source_agency_x', 'year_month_x', 'dedup_key_x', 'dedup_group_id_x', 'dedup_role_x', 'neighborhood_clean_x', 'neighborhood_clean_norm_x', 'property_type_original_x', 'property_type_new_x', 'property_type_reason_x', 'property_type_changed_x', 'Listing ID_y', 'title_y', 'neighborhood_y', 'bedrooms_y', 'bathrooms_y', 'area_y', 'area_unit_y', 'area_m2_y', 'AT_y', 'AT_unit_y', 'price_y', 'currency_y', 'transaction_y', 'property_type_y', 'agency_y', 'date_y', 'notes_y', 'source_type_y', 'ingestion_id_y', 'pipeline_version_y', 'source_file_y', 'source_agency_y', 'year_month_y', 'dedup_key_y', 'dedup_group_id_y', 'dedup_role_y', 'neighborhood_clean_y', 'neighborhood_clean_norm_y', 'property_type_original_y', 'property_type_new_y', 'property_type_reason_y', 'property_type_changed_y', '_merge', 'rejection_cause']
+
+Summary:
+  Initial rows: 46
+  Dropped due to null/non-numeric price: 0
+  Dropped due to property_type exclusions: 0
+  Dropped due to neighborhood exclusions: 0
+  Final rows: 46"
+20260601_122715,2026-06-01 12:27:15,gis_match,,,,2026,ALL,merged_2026_filtered.csv,consolidated/2026/merged_2026_filtered.csv,Catalog/standard_neighborhood_catalog.csv,consolidated/2026/merged_2026_with_gis.csv,SUCCESS,0,,
+20260601_122715,2026-06-01 12:27:15,unmatched_check,,,,2026,ALL,merged_2026_with_gis.csv,consolidated/2026/merged_2026_with_gis.csv,,,SUCCESS,0,,"[OK] Matched records written to   : consolidated/2026/merged_2026_with_gis_valid.csv
+[OK] Unmatched records written to: consolidated/2026/merged_2026_with_gis_rejectedUnmatched.csv
+[OK] Counts → matched: 40 | rejected: 6"
+20260601_122715,2026-06-01 12:27:15,price_standardize,,,,2026,ALL,merged_2026_with_gis_valid.csv,consolidated/2026/merged_2026_with_gis_valid.csv,FXrate/fx_mean_HNL_USD.csv,consolidated/2026/merged_2026_STDPrice.csv,SUCCESS,0,,"[OK] FX standardization completed
+FX mode: monthly_avg
+Currency counts:
+currency
+USD    40
+Name: count, dtype: int64
+[OUT] consolidated/2026/merged_2026_STDPrice.csv
+Rows written: 40"
+20260601_122715,2026-06-01 12:27:15,transaction_validate,,,,2026,ALL,merged_2026_STDPrice.csv,consolidated/2026/merged_2026_STDPrice.csv,,consolidated/2026/merged_2026_STDPrice_t.csv,SUCCESS,0,,"[OK] Transaction resolution complete
+transaction_flag
+OK_DECLARED    40
+Name: count, dtype: int64
+{'OK_DECLARED': 40}"
+20260601_122715,2026-06-01 12:27:15,area_standardize,,,,2026,ALL,merged_2026_STDPrice_t.csv,consolidated/2026/merged_2026_STDPrice_t.csv,,consolidated/2026/merged_2026_STDPrice_AreaM2.csv,SUCCESS,0,,"[OK] Terrain area standardization completed
+area_std_method
+None    40
+Name: count, dtype: int64
+[OUT] consolidated/2026/merged_2026_STDPrice_AreaM2.csv
+Rows written: 40"

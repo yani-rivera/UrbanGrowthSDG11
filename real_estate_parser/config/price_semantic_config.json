@@ -1,0 +1,135 @@
+﻿{
+    "currency_aliases": {
+        "$": "USD",
+        "US$": "USD",
+        "USD": "USD",
+        "L": "HNL",
+        "L.": "HNL",
+        "LPS": "HNL",
+        "LPS.": "HNL",
+        "$.": "USD",
+        "Lps": "HNL",
+        "Lps.": "HNL",
+        "Lps,": "HNL",
+        "lps": "HNL",
+        "U$": "USD",
+        "$:": "USD",
+        "usd": "USD",
+        "US": "USD",
+        "US$.": "USD",
+        "usd:": "USD",
+        "USD$": "USD",
+        "USA$": "USD",
+        "USA": "USD",
+        "HNL": "HNL",
+        "l.": "HNL",
+        "AS$": "USD"
+    },
+    "price_magnitude_aliases": {
+        "k": 1000,
+        "mil": 1000,
+        "m": 1000000,
+        "mm": 1000000,
+        "millón": 1000000,
+        "millon": 1000000,
+        "millones": 1000000
+    },
+    "price_locale_rules": {
+        "decimal_max_digits": 2,
+        "allow_mixed_separators": true,
+        "allow_suffix_currency": true,
+        "allow_prefix_currency": true
+    },
+
+  "mask_vocabulary": {
+
+    "area_units": [
+      "m2",
+      "m²",
+      "mts2",
+      "v2",
+      "vrs²",
+      "varas cuadradas"
+    ],
+
+    "levels": [
+      "niv",
+      "niv.",
+      "nivel",
+      "niveles"
+    ],
+
+    "parking": [
+      "garage",
+      "garaje",
+      "cochera",
+      "parqueo"
+    ],
+
+    "beds": [
+      "hab",
+      "habitaciones"
+    ],
+
+    "baths": [
+      "baños",
+      "baths",
+      "bths"
+    ],
+
+    "labels": [
+      "ID",
+      "Ref",
+      "Código",
+      "Code",
+      "Price"
+    ]
+  },
+"transaction_rules": {
+
+  "valid_property_types": [
+    "HOUSE",
+    "APARTMENT"
+  ],
+
+  "minimum_price": {
+    "APARTMENT": 50,
+    "HOUSE": 60
+  },
+
+  "transaction_boundaries": {
+    "APARTMENT": {
+      "rent_max": 10000,
+      "sale_min": 15000
+    },
+
+    "HOUSE": {
+      "rent_max": 20000,
+      "sale_min": 15000
+    }
+  },
+
+  "sale_tokens": [
+    "venta",
+    "en venta",
+    "se vende",
+    "sale",
+    "for sale"
+  ],
+
+  "rent_tokens": [
+    "alquiler",
+    "renta",
+    "se alquila",
+    "rent",
+    "for rent"
+  ],
+
+  "ambiguous_patterns": [
+    "venta\\s+o\\s+renta",
+    "renta\\s+o\\s+venta",
+    "alquiler\\s+o\\s+venta"
+  ]
+}
+
+}

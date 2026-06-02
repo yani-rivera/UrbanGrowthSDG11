@@ -19,8 +19,7 @@ from modules.parser_utils import (
     extract_bedrooms,
     extract_bathrooms,
     extract_area,
-    extract_property_type,
-    clean_text_for_price)
+    extract_property_type)
 
 
 # Neighborhood extractor

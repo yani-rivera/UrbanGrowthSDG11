@@ -1,7 +1,7 @@
 {"agency": "Hobitown",
   "nemonic":"HBTWN",
   "preprocessing_needed": true,
-  "listing_marker": "CUE:DOT",
+  "listing_marker": "*",
   "listing_marker_tochange":null,
   "auto_masquerade_numdot": false,
   "sanitize": true,
@@ -15,10 +15,10 @@
   "require_price_before":false,
 
    "neighborhood_rule": {
-    "strategy_order": ["delimiter"],
+    "strategy_order": ["before_comma"],
     "prefix_tokens": ["col.", "colonia", "res.", "resid.", "residencial", "urb.", "bo.", "barrio", "ave.", "av.","Lps."],    
     "max_token_span": 25,
-     "strategy": "before_dot"    
+    "strategy": "first_comma"    
   },
 
     "neighborhood_flow": {"flow_type": "simple"},

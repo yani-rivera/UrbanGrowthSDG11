@@ -1,0 +1,23 @@
+﻿run_id,run_date,step,agency,agency_folder,mnemonic,year,month,input_file,input_path,config_file,output_file_expected,status,return_code,error_message,metrics_json
+20260601_121826,2026-06-01 12:18:26,parse,Casamagica,Casamagica,CSMGC,2026,ALL,casamagica_20260415.txt,data/raw/Casamagica/2026/casamagica_20260415.txt,config/agencies/agency_casamagica.json,output/casamagica/2026/CSMGC_20260415.csv,SUCCESS,0,,
+20260601_121826,2026-06-01 12:18:26,merge,,,,2026,ALL,,output,,consolidated/2026/merged_2026.csv,SUCCESS,0,,"[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/2026/*.csv -> 1 hit(s)
+[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/*.csv -> 0 hit(s)
+[DEBUG] total candidate CSVs: 1
+[DEBUG] KEEP: casamagica_20260415.csv  token=20260415
+✅ Merged 1 file(s) for [ALL] @ [2026] → 46 rows into /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/consolidated/2026/merged_2026.csv
+   Dedupe key: ['agency', 'ingestion_id', 'Listing ID']"
+20260601_121826,2026-06-01 12:18:26,deduplicate,,,,2026,ALL,merged_2026.csv,consolidated/2026/merged_2026.csv,,consolidated/2026/merged_2026_c.csv,SUCCESS,0,,"[OK] Deduplication completed
+  Canonical records : 46
+  Duplicate records : 0
+[OUT] consolidated/2026/merged_2026_c.csv
+[OUT] consolidated/2026/merged_2026_duplicates.csv"
+20260601_121826,2026-06-01 12:18:26,word_filter,,,,2026,ALL,merged_2026_c.csv,consolidated/2026/merged_2026_c.csv,config/remove_words.txt,consolidated/2026/merged_2026_flt.csv,SUCCESS,0,,"=== Word Cleaner Summary ===
+Input file     : consolidated/2026/merged_2026_c.csv
+Output file    : consolidated/2026/merged_2026_flt.csv
+Column cleaned : neighborhood
+Words file     : config/remove_words.txt
+Rows total     : 46
+Rows modified  : 0
+[OK] Done."
+20260601_121826,2026-06-01 12:18:26,uid,,,,2026,ALL,merged_2026_flt.csv,consolidated/2026/merged_2026_flt.csv,config/agency_mnemonics.csv,consolidated/2026/merged_2026_uid.csv,SUCCESS,0,,[done] 46 rows → consolidated/2026/merged_2026_uid.csv  (added 'Listing_uid' as first column)
+20260601_121826,2026-06-01 12:18:26,clean_neighborhoods,,,,2026,ALL,merged_2026_uid.csv,consolidated/2026/merged_2026_uid.csv,,consolidated/2026/merged_2026_clean.csv,FAILED,1,"Column 'neighborhood' not found. Available: ['Listin', '_uid,Listin', ' ID,title,nei', 'hborhood,bedrooms,bathrooms,area,area_unit,area_m2,AT,AT_unit,price,currency,transaction,property_type,a', 'ency,date,notes,source_type,in', 'estion_id,pipeline_version,source_file,source_a', 'ency,year_month,dedup_key,dedup_', 'roup_id,dedup_role']",

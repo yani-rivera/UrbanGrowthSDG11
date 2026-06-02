@@ -8,7 +8,8 @@ import argparse, csv, json, os, re, hashlib
 
 
 ###############
-from modules.parser_utils import clean_text_for_price,extract_price
+from modules.parser_utils import extract_price
+from modules.currency_utils import clean_text_for_price
 from modules.agency_preprocess import configure_preprocess, preprocess_listings
 from modules.record_parser import parse_record, detect_section_context
 from scripts.helpers import infer_agency, infer_date, format_listing_row, FIELDNAMES, DEFAULT_PIPELINE_VERSION,build_release_row
@@ -99,7 +100,7 @@ def main(file, config_path, output_dir):
         # 
         # --- price: strip per-unit & normalize currency spacing, then prefer higher ---
    
-        clean_for_price = clean_text_for_price(text_for_parse)
+        clean_for_price = clean_text_for_price(text_for_parse,cfg)
         try_amount, try_curr = extract_price(clean_for_price, cfg)
         cur_amount = parsed.get("price") or ""
          

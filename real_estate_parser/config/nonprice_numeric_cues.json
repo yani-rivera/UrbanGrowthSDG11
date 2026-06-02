@@ -1,0 +1,47 @@
+{
+
+  "mask_vocabulary": {
+
+    "area_units": [
+      "m2",
+      "m²",
+      "mts2",
+      "v2",
+      "vrs²",
+      "varas cuadradas"
+    ],
+
+    "levels": [
+      "niv",
+      "niv.",
+      "nivel",
+      "niveles"
+    ],
+
+    "parking": [
+      "garage",
+      "garaje",
+      "cochera",
+      "parqueo"
+    ],
+
+    "beds": [
+      "hab",
+      "habitaciones"
+    ],
+
+    "baths": [
+      "baños",
+      "baths",
+      "bths"
+    ],
+
+    "labels": [
+      "ID",
+      "Ref",
+      "Código",
+      "Code",
+      "Price"
+    ]
+  }
+}

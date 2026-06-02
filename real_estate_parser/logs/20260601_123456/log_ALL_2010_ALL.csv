@@ -1,0 +1,27 @@
+﻿run_id,run_date,step,agency,agency_folder,mnemonic,year,month,input_file,input_path,config_file,output_file_expected,status,return_code,error_message,metrics_json
+20260601_123456,2026-06-01 12:34:56,transaction_validate,,,,2010,ALL,merged_2010_STDPrice.csv,consolidated/2010/merged_2010_STDPrice.csv,,consolidated/2010/merged_2010_STDPrice_t.csv,FAILED,1,"Traceback (most recent call last):
+  File ""/Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/L1clean/ValidateTransaction.py"", line 212, in <module>
+    main()
+    ~~~~^^
+  File ""/Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/L1clean/ValidateTransaction.py"", line 190, in main
+    result.columns = [
+    ^^^^^^^^^^^^^^
+  File ""/opt/anaconda3/lib/python3.13/site-packages/pandas/core/generic.py"", line 6220, in __setattr__
+    return object.__setattr__(self, name, value)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File ""pandas/_libs/properties.pyx"", line 69, in pandas._libs.properties.AxisProperty.__set__
+  File ""/opt/anaconda3/lib/python3.13/site-packages/pandas/core/generic.py"", line 766, in _set_axis
+    self._mgr.set_axis(axis, labels)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File ""/opt/anaconda3/lib/python3.13/site-packages/pandas/core/internals/managers.py"", line 273, in set_axis
+    self._validate_set_axis(axis, new_labels)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File ""/opt/anaconda3/lib/python3.13/site-packages/pandas/core/internals/managers.py"", line 288, in _validate_set_axis
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Length mismatch: Expected axis has 42 elements, new values have 5 elements","============================================================
+RESULT SHAPE: (0, 42)
+CURRENT COLUMNS:
+['Listing_uid', 'Listing ID', 'title', 'neighborhood', 'bedrooms', 'bathrooms', 'area', 'area_unit', 'area_m2', 'AT', 'AT_unit', 'price', 'currency', 'transaction', 'property_type', 'agency', 'date', 'notes', 'source_type', 'ingestion_id', 'pipeline_version', 'source_file', 'source_agency', 'year_month', 'dedup_key', 'dedup_group_id', 'dedup_role', 'neighborhood_clean', 'neighborhood_clean_norm', 'property_type_original', 'property_type_new', 'property_type_reason', 'property_type_changed', 'neighborhood_input_valid', 'neighborhood_uid', 'GISID', 'neighborhood_label', 'matched', 'rate', 'price_usd', 'fx_rate_used', 'fx_method']
+============================================================"

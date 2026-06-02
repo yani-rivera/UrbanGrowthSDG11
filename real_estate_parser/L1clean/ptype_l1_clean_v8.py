@@ -25,6 +25,21 @@ import argparse
 import re
 import unicodedata
 import pandas as pd
+import yaml
+import re
+
+
+
+# -----------------------
+#  regex constructor
+# ------------------
+
+def build_regex(words):
+    escaped = [re.escape(w) for w in words]
+    return re.compile(
+        r"\b(" + "|".join(escaped) + r")\b",
+        re.I
+    )
 
 # -----------------------
 # Normalization
@@ -38,25 +53,81 @@ def normalize_text(text: str) -> str:
     t = t.lower()
     return re.sub(r"\s+", " ", t).strip()
 
+
+
 # -----------------------
 # Keyword patterns
 # -----------------------
 
+with open("config/typewords.yaml", "r", encoding="utf-8") as f:
+    CFG = yaml.safe_load(f)
+
 # RESIDENCIAL
 
-HOUSE_KW = re.compile(
-    r"\b(casa(s)?|residencia(s)?|familiar(es)?|vivienda(s)?)\b",
+HOUSE_KW = build_regex(
+    CFG["residential"]["house"]["terms"]
+)
+
+APT_KW = build_regex(
+    CFG["residential"]["apartment"]["terms"]
+)
+
+BEDROOM_KW = build_regex(
+    CFG["residential"]["bedrooms"]["terms"]
+)
+
+RESIDENTIAL_ROOMS_KW = build_regex(
+    CFG["residential"]["rooms"]["terms"]
+)
+
+AMENITY_KW = build_regex(
+    CFG["residential"]["amenities"]["terms"]
+)
+
+CONSTRUCTION_KW = build_regex(
+    CFG["residential"]["construction"]["terms"]
+)
+
+
+HOUSEADJ=APTADJ_KW=build_regex(
+    CFG["residential"]["house_adj"]["terms"]
+)
+
+APTADJ_KW=build_regex(
+    CFG["residential"]["apartment_adj"]["terms"]
+)
+
+# REGEX 
+#======
+
+BEDROOM_COUNT_RE = re.compile(
+    CFG["patterns"]["bedroom_count"]["regex"],
     re.I
 )
 
+ZERO_BEDROOMS_KW = re.compile(
+    CFG["patterns"]["zero_bedrooms"]["regex"],
+    re.I
+)
 
-APT_KW = re.compile(
-    r"\b(apartamento|apartamentos|departamento|apto|aptos|condominio|penthouse)\b",
+PRICE_PER_M2_KW = re.compile(
+    CFG["patterns"]["price_per_m2"]["regex"],
+    re.I
+)
+
+AREA_M2_KW = re.compile(
+    r"\b\d+(?:[.,]\d+)?\s*"
+    r"(?:m(?:²|2)|mts?2?|"
+    r"metros?\s+cuadrados?)\b",
     re.I,
 )
 
-BEDROOM_KW = re.compile(
-    r"\b(habitacion(?:es)?|recamara(?:s)?|dormitorio(?:s)?|alcoba(?:s)?|\d+\s*hab)\b",
+AREA_VARAS_KW = re.compile(
+    r"\b\d+(?:[.,]\d+)?\s*"
+    r"(?:"
+    r"vara(?:s)?(?:\s+cuadrada(?:s)?)?|"
+    r"v(?:rs)?\s*[²2]"
+    r")\b",
     re.I,
 )
 
@@ -68,65 +139,74 @@ ZERO_BEDROOMS_KW = re.compile(
 )
 
 
-RESIDENTIAL_ROOMS_KW = re.compile(
-    r"\b(sala|comedor|cocina|terraza|familiar|oficina|lavanderia|patio|jardin|piscina|estudio|amueblado)\b",
-    re.I,
-)
-
-
-AMENITY_KW = re.compile(
-    r"\b(balcon|piscina|gimnasio|areas?\s+comunes?|walk\s*closet|cuarto\s+de\s+empleada)\b",
-    re.I,
-)
-
-CONSTRUCTION_KW = re.compile(
-    r"\b(construccion|construida|construido|area\s+construida|edificado|edificada)\b",
-    re.I,
-)
-PRICE_PER_M2_KW = re.compile(
-    r"\$\s*\d+(?:[.,]\d+)?\s*(?:x|por)\s*m(?:2|²)",
-    re.I
-)
-# inside classify_structure(), after text normalization
-
 
 # LAND
 
-LAND_KW = re.compile(r"\b(terreno|lote|solar|parcela|finca|lotes|manzanas|topografía)\b", re.I)
-AREA_KW = re.compile(r"\b(m2|mts2|mts|metros|m²|vrs2|vrs²|varas)\b", re.I)
-LAND_VARAS_UNIT = re.compile(
-    r"\b("
-    r"v(?:rs)?\s*[²2]|"                 # v2, v², vrs2, vrs²
-    r"vara(?:s)?\s*(?:cuadrada(?:s)?|[²2])"
-    r")\b",
-    re.I,
-)
-UNIT_PRICE_POR_VARAS = re.compile(
-    r"\b\d+(?:[.,]\d+)?\s*(?:por|\/)\s*"
-    r"(?:v(?:rs)?\s*[²2]|vara(?:s)?\s*(?:cuadrada(?:s)?|[²2]))\b",
-    re.I,
+
+LAND_KW = build_regex(CFG["land"]["terms"])
+
+AREA_KW = build_regex(CFG["area_units"]["terms"])
+
+LAND_VARAS_UNIT = build_regex(
+    CFG["patterns"]["land_price_patterns"]["vara_units"]
 )
 
+vara_patterns = CFG["land_varas_units"]["patterns"]
+vara_expr = "|".join(
+    CFG["patterns"]["land_price_patterns"]["vara_units"]
+)
+
+LAND_UNIT_PRICE_KW = re.compile(
+    rf"""
+    (?:
+        \b\d+(?:[.,]\d+)?\s*(?:por|/|x|×)\s*(?:{vara_expr})
+        |
+        \b\d+(?:[.,]\d+)?\s*(?:{vara_expr})
+        \s*(?:a|x|×)\s*(?:\$|L\.?)?\s*\d+(?:[.,]\d+)?
+    )
+    """,
+    re.I | re.X,
+)
 
 
 
 #COMERCIAL
 
-COMM_UNIT_KW = re.compile(
-    r"\b("
-    r"local(?:es)?(?:\s+comercial(?:es)?)?|"
-    r"sal[oó]n(?:es)?|"
-    r"oficina(?:s)?(?:\s+m[eé]dica(?:s)?)?|"
-    r"colegio(?:s)?|"
-    r"hotel(?:es)?|"
-    r"cl[ií]nica(?:s)?|"
-    r"galer[ií]a(?:s)?|"
-    r"nave(?:s)?\s+industrial(?:es)?|"
-    r"plaza(?:s)?\s+comercial(?:es)?|"
-    r"kiosk[oó]s?|kiosc[oó]s?"
-    r")\b",
-    re.I,
+
+
+COMM_UNIT_KW = build_regex(
+    CFG["commercial"]["units"]["terms"]
 )
+
+BODEGA_KW = build_regex(
+    CFG["commercial"]["warehouse"]["terms"]
+)
+
+CORPORATE_KW = build_regex(
+    CFG["commercial"]["corporate"]["terms"]
+)
+
+COMM_USE_ADJ_KW = build_regex(
+    CFG["commercial"]["use"]["terms"]
+)
+
+COMM_USE_KW = build_regex(
+    CFG["commercial"]["use_phrases"]["terms"]
+)
+
+COMM_AMENITY_KW = build_regex(
+    CFG["commercial"]["amenities"]["terms"]
+)
+
+PARTIAL_KW = build_regex(
+    CFG["commercial"]["partial"]["terms"]
+)
+
+PLANTEL_KW = build_regex(
+    CFG["commercial"]["plantel"]["terms"]
+)
+
+
 
 DIM_X_MTS = re.compile(
     r"\b\d{1,3}\s*[x×]\s*\d{1,3}\s*m(?:t|ts|trs)?\b",
@@ -141,78 +221,6 @@ UNIT_PRICE_X = re.compile(
     re.I,
 )
 
-
-
-
-
-
-
-PLANTEL_KW = re.compile(r"\bplantel\b", re.I)
-
-BODEGA_KW = re.compile(
-    r"(?<!\w)(ofi[-\s]?bodega(?:s)?|bodega(?:s)?)(?!\w)",
-    re.I
-)
-
-
-
-CORPORATE_KW = re.compile(
-    r"""
-    \b(
-        corporativo(?:s)? |
-        edificio(?:s)?\s+corporativo(?:s)? |
-        edificio(?:s)?\s+comercial(?:es)? |
-        por\s+metro\s+cuadrado
-    )\b
-    """,
-    re.IGNORECASE | re.VERBOSE
-)
-
-
-COMM_USE_ADJ_KW = re.compile(
-    r"\b(comercial|coworking|co-working)\b",
-    re.I,
-)
-
-
-COMM_USE_KW = re.compile(
-    r"\b("
-    r"(ideal|excelente|apto)\s+para\s+"
-    r"(oficina|oficinas|clinica(?:s)?|"
-    r"negocio(?:s)?|comercio|comercial|corporativo)"
-    r")\b",
-    re.I,
-)
-
-
-COMM_AMENITY_KW = re.compile(
-    r"\b("
-    # Vertical / access
-    r"ascensor(?:es)?|elevador(?:es)?|"
-    r"tarjeta\s+electronica|control\s+de\s+acceso|"
-    r"recepcion|lobby|"
-    
-    # Security / operations
-    r"seguridad|vigilancia|cctv|camara(?:s)?|"
-    
-    # Office infrastructure
-    r"aire\s+acondicionado(?:\s+central)?|"
-    r"conexion\s+de\s+aire\s+acondicionado|"
-    r"fibra\s+optica|red\s+de\s+datos|"
-    r"planta\s+electrica|generador|"
-    
-    # Parking (commercial context)
-    r"parqueo(?:s)?\s+(?:asignado(?:s)?|techado(?:s)?|privado(?:s)?)|"
-    r"estacionamiento(?:s)?"
-    r")\b",
-    re.I,
-)
-
-
-PARTIAL_KW = re.compile(
-    r"\b(obra\s+gris|media\s+construccion|sin\s+terminar)\b",
-    re.I,
-)
 
 
 
@@ -242,11 +250,14 @@ def classify_structure(row):
 
     # Weak prior
     if original in scores:
-        scores[original] += 3
+        scores[original] += 6
+
+    if original == 'Apartment':
+        scores[original] += 5
   
     if PRICE_PER_M2_KW.search(text):
         scores["House"] -= 5
-        scores["Apartment"] -= 5
+        scores["Apartment"] -= 2
         scores["Commercial"] += 3
         scores["Land"] += 2
 
@@ -255,34 +266,45 @@ def classify_structure(row):
         scores["Apartment"] = 0
 
     # Apartment
-    if APT_KW.search(text): scores["Apartment"] += 8
+    if APT_KW.search(text): scores["Apartment"] += 10
+    if APTADJ_KW.search(text): scores["Apartment"] += 10
     if BEDROOM_KW.search(text): scores["Apartment"] += 2
-    if AMENITY_KW.search(text): scores["Apartment"] += 3
+    if AMENITY_KW.search(text): scores["Apartment"] += 4
     if AREA_KW.search(text): scores["Apartment"] += 3
+    if AREA_M2_KW.search(text): scores["Apartment"] += 3
 
     #Penalty Apartment
-    if LAND_KW.search(text): scores["Apartment"] -= 5
-    if DIM_X_MTS.search(text): scores["Apartment"] -= 5
+    if LAND_KW.search(text): scores["Apartment"] -= 6
+    if DIM_X_MTS.search(text): scores["Apartment"] -= 3
+    if APT_KW.search(text) and COMM_USE_ADJ_KW.search(text):scores["Apartment"] -= 15
+    if AREA_VARAS_KW.search(text): scores["Apartment"] -= 10
+    if HOUSEADJ.search(text): scores["Apartment"] -= 5
+    
+   
 
     # House
-    if HOUSE_KW.search(text): scores["House"] += 8
-    if BEDROOM_KW.search(text): scores["House"] += 5
+    if HOUSE_KW.search(text): scores["House"] += 10
+    if BEDROOM_KW.search(text): scores["House"] += 6
     if RESIDENTIAL_ROOMS_KW.search(text): scores["House"] += 2
     if AMENITY_KW.search(text): scores["House"] += 1
-    if AREA_KW.search(text) and HOUSE_KW.search(text): scores["House"] += 5
+    if (AREA_KW.search(text) or AREA_M2_KW.search(text)) and HOUSE_KW.search(text): scores["House"]  += 5
+    if HOUSEADJ.search(text): scores["House"] += 5
+    
    
     #PENALTY HOUSE
-    if HOUSE_KW.search(text) and COMM_USE_ADJ_KW.search(text):
-        scores["House"] -= 8
+    if HOUSE_KW.search(text) and COMM_USE_ADJ_KW.search(text):scores["House"] -= 15
     if ZERO_BEDROOMS_KW.search(text): scores["House"] -= 5
     if BODEGA_KW.search(text): scores["House"] -= 5
     if UNIT_PRICE_X.search(text): scores["House"] -= 5
     if DIM_X_MTS.search(text): scores["House"] -= 5
-    if UNIT_PRICE_POR_VARAS.search(text): scores["House"] -= 5
+    if LAND_UNIT_PRICE_KW.search(text): scores["House"] -= 5
+    if APTADJ_KW.search(text): scores["House"] -= 5
+ 
+    
 
     # Commercial
     if COMM_USE_KW.search(text): scores["Commercial"] += 5
-    if COMM_UNIT_KW.search(text): scores["Commercial"] += 8
+    if COMM_UNIT_KW.search(text): scores["Commercial"] += 10
     if CORPORATE_KW.search(text): scores["Commercial"] += 2
     if COMM_AMENITY_KW.search(text): scores["Commercial"] += 2
     if AMENITY_KW.search(text): scores["Commercial"] -= 3
@@ -302,25 +324,58 @@ def classify_structure(row):
         if ZERO_BEDROOMS_KW.search(text): scores["Commercial"] += 8
 
     # Land
-    if CONSTRUCTION_KW.search(text): scores["Land"] -= 2
-    if LAND_KW.search(text): scores["Land"] += 5
-    if AREA_KW.search(text) and not HOUSE_KW.search(text): scores["Land"] += 3
-    if LAND_VARAS_UNIT.search(text) and not HOUSE_KW.search(text): scores["Land"] += 5
-    if UNIT_PRICE_POR_VARAS.search(text): scores["Land"] += 5
+    if CONSTRUCTION_KW.search(text): scores["Land"] -= 5
+    if LAND_KW.search(text): scores["Land"] += 10
+    if AREA_KW.search(text) and not HOUSE_KW.search(text): scores["Land"] += 5
+    if AREA_KW.search(text) :scores["Land"] += 10
+    if LAND_VARAS_UNIT.search(text):  scores["Land"] += 5
+    if LAND_UNIT_PRICE_KW.search(text): scores["Land"] += 10
+    if APT_KW.search(text): scores["Land"] -= 15
+    if BEDROOM_KW.search(text): scores["Land"] -= 15
+
     max_score = max(scores.values())
+
+    top_categories = [
+        k for k, v in scores.items()
+        if v == max_score
+    ]
+
+    tie_flag = len(top_categories) > 1
+
+    # sorted_scores = sorted(scores.values(), reverse=True)
+
+    # margin = (
+    #     sorted_scores[0] - sorted_scores[1]
+    #     if len(sorted_scores) > 1
+    #     else sorted_scores[0]
+    # )
+
     if max_score == 0:
         return original, "KEEP:NO_CUES", scores
 
-    winner = max(scores, key=scores.get)
-    # --- Commercial override: explicit contradiction ---
+    # HITL-friendly rule:
+    # if tie, keep original classification
 
+    if tie_flag:
+        return (
+            original,
+            f"KEEP:TIE({'|'.join(top_categories)})",
+            scores
+        )
 
+    winner = top_categories[0]
 
-    return winner, f"POINTS:{winner}({scores[winner]})", scores
+    return (
+        winner,
+        f"POINTS:{winner}({scores[winner]})",
+        scores
+    )
+
 
 # -----------------------
 # CSV pipeline
 # -----------------------
+
 
 def process_csv(input_csv, output_csv, scores_output=None):
     df = pd.read_csv(input_csv, encoding="utf-8-sig")
@@ -330,16 +385,66 @@ def process_csv(input_csv, output_csv, scores_output=None):
         final_type, reason, scores = classify_structure(row)
 
         if scores_output:
+
+            if scores:
+
+                max_score = max(scores.values())
+
+                top_categories = [
+                    k for k, v in scores.items()
+                    if v == max_score
+                ]
+
+                tie_flag = len(top_categories) > 1
+
+                sorted_scores = sorted(
+                    scores.values(),
+                    reverse=True
+                )
+
+                winner_margin = (
+                    sorted_scores[0] - sorted_scores[1]
+                    if len(sorted_scores) > 1
+                    else sorted_scores[0]
+                )
+
+            else:
+
+                max_score = 0
+                top_categories = []
+                tie_flag = False
+                winner_margin = 0
+
             debug_rows.append({
                 "Listing_uid": row.get("Listing_uid"),
+
                 "original_type": row.get("property_type"),
                 "winner": final_type,
+                "reason": reason,
+
                 "score_house": scores.get("House", 0),
                 "score_apartment": scores.get("Apartment", 0),
                 "score_commercial": scores.get("Commercial", 0),
                 "score_land": scores.get("Land", 0),
+
+                "max_score": max_score,
+                "winner_margin": winner_margin,
+
+                "tie_flag": "TRUE" if tie_flag else "FALSE",
+                "top_categories": "|".join(top_categories),
+
+                "changed": (
+                    "TRUE"
+                    if str(row.get("property_type", "")).strip().lower()
+                    != str(final_type).strip().lower()
+                    else "FALSE"
+                ),
+
                 "text_sample": normalize_text(
-                    " ".join(str(row.get(c, "")) for c in ["title","notes","description"])
+                    " ".join(
+                        str(row.get(c, ""))
+                        for c in ["title", "notes", "description"]
+                    )
                 )[:100],
             })
 
@@ -351,15 +456,20 @@ def process_csv(input_csv, output_csv, scores_output=None):
     df["property_type_original"] = df["property_type"]
     df["property_type_new"] = out["property_type_l1"]
     df["property_type_reason"] = out["property_type_reason"]
+
     df["property_type_changed"] = (
-        df["property_type_original"].str.lower()
-        != df["property_type_new"].str.lower()
+        df["property_type_original"].astype(str).str.lower()
+        != df["property_type_new"].astype(str).str.lower()
     ).map(lambda x: "TRUE" if x else "FALSE")
 
     df.to_csv(output_csv, index=False, encoding="utf-8-sig")
 
     if scores_output:
-        pd.DataFrame(debug_rows).to_csv(scores_output, index=False, encoding="utf-8-sig")
+        pd.DataFrame(debug_rows).to_csv(
+            scores_output,
+            index=False,
+            encoding="utf-8-sig"
+        )
 
 # -----------------------
 # CLI

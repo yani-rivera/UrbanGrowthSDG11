@@ -1,0 +1,76 @@
+﻿run_id,run_date,step,agency,agency_folder,mnemonic,year,month,input_file,input_path,config_file,output_file_expected,status,return_code,error_message,metrics_json
+20260601_124036,2026-06-01 12:40:36,parse,Acme,Acme,ACM,2010,ALL,acme_20100115.txt,data/raw/Acme/2010/acme_20100115.txt,config/agencies/agency_acme.json,output/acme/2010/ACM_20100115.csv,SUCCESS,0,,
+20260601_124036,2026-06-01 12:40:36,parse,Hobitown,Hobitown,HBTWN,2010,ALL,hobitown_20100312.txt,data/raw/Hobitown/2010/hobitown_20100312.txt,config/agencies/agency_hobitown.json,output/hobitown/2010/HBTWN_20100312.csv,SUCCESS,0,,
+20260601_124036,2026-06-01 12:40:36,parse,Loontoon,Loontoon,LNTN,2010,ALL,loontoon_20100411.txt,data/raw/Loontoon/2010/loontoon_20100411.txt,config/agencies/agency_loontoon.json,output/loontoon/2010/LNTN_20100411.csv,SUCCESS,0,,
+20260601_124036,2026-06-01 12:40:36,parse,Loontoon,Loontoon,LNTN,2010,ALL,loontoon_20100511.txt,data/raw/Loontoon/2010/loontoon_20100511.txt,config/agencies/agency_loontoon.json,output/loontoon/2010/LNTN_20100511.csv,SUCCESS,0,,
+20260601_124036,2026-06-01 12:40:36,merge,,,,2010,ALL,,output,,consolidated/2010/merged_2010.csv,SUCCESS,0,,"[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/2010/*.csv -> 1 hit(s)
+[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/*.csv -> 0 hit(s)
+[DEBUG] total candidate CSVs: 1
+[DEBUG] KEEP: Hobitown_20100312.csv  token=20100312
+✅ Merged 1 file(s) for [ALL] @ [2010] → 2 rows into /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/consolidated/2010/merged_2010.csv
+   Dedupe key: ['agency', 'ingestion_id', 'Listing ID']"
+20260601_124036,2026-06-01 12:40:36,deduplicate,,,,2010,ALL,merged_2010.csv,consolidated/2010/merged_2010.csv,,consolidated/2010/merged_2010_c.csv,SUCCESS,0,,"[OK] Deduplication completed
+  Canonical records : 2
+  Duplicate records : 0
+[OUT] consolidated/2010/merged_2010_c.csv
+[OUT] consolidated/2010/merged_2010_duplicates.csv"
+20260601_124036,2026-06-01 12:40:36,word_filter,,,,2010,ALL,merged_2010_c.csv,consolidated/2010/merged_2010_c.csv,config/remove_words.txt,consolidated/2010/merged_2010_flt.csv,SUCCESS,0,,"=== Word Cleaner Summary ===
+Input file     : consolidated/2010/merged_2010_c.csv
+Output file    : consolidated/2010/merged_2010_flt.csv
+Column cleaned : neighborhood
+Words file     : config/remove_words.txt
+Rows total     : 2
+Rows modified  : 2
+[OK] Done."
+20260601_124036,2026-06-01 12:40:36,uid,,,,2010,ALL,merged_2010_flt.csv,consolidated/2010/merged_2010_flt.csv,config/agency_mnemonics.csv,consolidated/2010/merged_2010_uid.csv,SUCCESS,0,,[done] 2 rows → consolidated/2010/merged_2010_uid.csv  (added 'Listing_uid' as first column)
+20260601_124036,2026-06-01 12:40:36,clean_neighborhoods,,,,2010,ALL,merged_2010_uid.csv,consolidated/2010/merged_2010_uid.csv,,consolidated/2010/merged_2010_clean.csv,SUCCESS,0,,"============================================================
+FILE: consolidated/2010/merged_2010_uid.csv
+ENCODING: utf-8-sig
+DELIMITER: ,
+FIELDS: ['Listing_uid', 'Listing ID', 'title', 'neighborhood', 'bedrooms', 'bathrooms', 'area', 'area_unit', 'area_m2', 'AT']
+============================================================"
+20260601_124036,2026-06-01 12:40:36,ptype_fix,,,,2010,ALL,merged_2010_clean.csv,consolidated/2010/merged_2010_clean.csv,,consolidated/2010/merged_2010_clean_ptype_fixed.csv,SUCCESS,0,,[OK] v8 completed
+20260601_124036,2026-06-01 12:40:36,filter_records,,,,2010,ALL,merged_2010_clean_ptype_fixed.csv,consolidated/2010/merged_2010_clean_ptype_fixed.csv,,consolidated/2010/merged_2010_filtered.csv,SUCCESS,0,,"Differential columns: ['Listing_uid', 'Listing ID_x', 'title_x', 'neighborhood_x', 'bedrooms_x', 'bathrooms_x', 'area_x', 'area_unit_x', 'area_m2_x', 'AT_x', 'AT_unit_x', 'price_x', 'currency_x', 'transaction_x', 'property_type_x', 'agency_x', 'date_x', 'notes_x', 'source_type_x', 'ingestion_id_x', 'pipeline_version_x', 'source_file_x', 'source_agency_x', 'year_month_x', 'dedup_key_x', 'dedup_group_id_x', 'dedup_role_x', 'neighborhood_clean_x', 'neighborhood_clean_norm_x', 'property_type_original_x', 'property_type_new_x', 'property_type_reason_x', 'property_type_changed_x', 'Listing ID_y', 'title_y', 'neighborhood_y', 'bedrooms_y', 'bathrooms_y', 'area_y', 'area_unit_y', 'area_m2_y', 'AT_y', 'AT_unit_y', 'price_y', 'currency_y', 'transaction_y', 'property_type_y', 'agency_y', 'date_y', 'notes_y', 'source_type_y', 'ingestion_id_y', 'pipeline_version_y', 'source_file_y', 'source_agency_y', 'year_month_y', 'dedup_key_y', 'dedup_group_id_y', 'dedup_role_y', 'neighborhood_clean_y', 'neighborhood_clean_norm_y', 'property_type_original_y', 'property_type_new_y', 'property_type_reason_y', 'property_type_changed_y', '_merge', 'rejection_cause']
+
+Summary:
+  Initial rows: 2
+  Dropped due to null/non-numeric price: 0
+  Dropped due to property_type exclusions: 0
+  Dropped due to neighborhood exclusions: 0
+  Final rows: 2"
+20260601_124036,2026-06-01 12:40:36,gis_match,,,,2010,ALL,merged_2010_filtered.csv,consolidated/2010/merged_2010_filtered.csv,Catalog/standard_neighborhood_catalog.csv,consolidated/2010/merged_2010_with_gis.csv,SUCCESS,0,,
+20260601_124036,2026-06-01 12:40:36,unmatched_check,,,,2010,ALL,merged_2010_with_gis.csv,consolidated/2010/merged_2010_with_gis.csv,,,SUCCESS,0,,"[OK] Matched records written to   : consolidated/2010/merged_2010_with_gis_valid.csv
+[OK] Unmatched records written to: consolidated/2010/merged_2010_with_gis_rejectedUnmatched.csv
+[OK] Counts → matched: 0 | rejected: 2"
+20260601_124036,2026-06-01 12:40:36,price_standardize,,,,2010,ALL,merged_2010_with_gis_valid.csv,consolidated/2010/merged_2010_with_gis_valid.csv,FXrate/fx_mean_HNL_USD.csv,consolidated/2010/merged_2010_STDPrice.csv,SUCCESS,0,,"[OK] FX standardization completed
+FX mode: monthly_avg
+Currency counts:
+Series([], Name: count, dtype: int64)
+[OUT] consolidated/2010/merged_2010_STDPrice.csv
+Rows written: 0"
+20260601_124036,2026-06-01 12:40:36,transaction_validate,,,,2010,ALL,merged_2010_STDPrice.csv,consolidated/2010/merged_2010_STDPrice.csv,,consolidated/2010/merged_2010_STDPrice_t.csv,FAILED,1,"Traceback (most recent call last):
+  File ""/Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/L1clean/ValidateTransaction.py"", line 212, in <module>
+    main()
+    ~~~~^^
+  File ""/Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/L1clean/ValidateTransaction.py"", line 190, in main
+    result.columns = [
+    ^^^^^^^^^^^^^^
+  File ""/opt/anaconda3/lib/python3.13/site-packages/pandas/core/generic.py"", line 6220, in __setattr__
+    return object.__setattr__(self, name, value)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File ""pandas/_libs/properties.pyx"", line 69, in pandas._libs.properties.AxisProperty.__set__
+  File ""/opt/anaconda3/lib/python3.13/site-packages/pandas/core/generic.py"", line 766, in _set_axis
+    self._mgr.set_axis(axis, labels)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File ""/opt/anaconda3/lib/python3.13/site-packages/pandas/core/internals/managers.py"", line 273, in set_axis
+    self._validate_set_axis(axis, new_labels)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File ""/opt/anaconda3/lib/python3.13/site-packages/pandas/core/internals/managers.py"", line 288, in _validate_set_axis
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Length mismatch: Expected axis has 42 elements, new values have 5 elements","============================================================
+RESULT SHAPE: (0, 42)
+CURRENT COLUMNS:
+['Listing_uid', 'Listing ID', 'title', 'neighborhood', 'bedrooms', 'bathrooms', 'area', 'area_unit', 'area_m2', 'AT', 'AT_unit', 'price', 'currency', 'transaction', 'property_type', 'agency', 'date', 'notes', 'source_type', 'ingestion_id', 'pipeline_version', 'source_file', 'source_agency', 'year_month', 'dedup_key', 'dedup_group_id', 'dedup_role', 'neighborhood_clean', 'neighborhood_clean_norm', 'property_type_original', 'property_type_new', 'property_type_reason', 'property_type_changed', 'neighborhood_input_valid', 'neighborhood_uid', 'GISID', 'neighborhood_label', 'matched', 'rate', 'price_usd', 'fx_rate_used', 'fx_method']
+============================================================"

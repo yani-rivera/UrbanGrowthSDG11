@@ -11,6 +11,9 @@ from __future__ import annotations
 import re
 import unicodedata
 from typing import Dict, List, Optional, Tuple
+from modules.currency_utils import (merge_currency_configs,compile_currency_regex)
+
+
 
 # -----------------------------
 # Helpers
@@ -193,14 +196,14 @@ def _collapse_spaces_in_digit_runs(s: str) -> str:
 
 
 
-def _normalize_leading_dot_after_currency(s: str, currency_prefixes: List[str]) -> str:
-    """Turn $.550.00 -> $550.00; L. .750 -> L.750 (allow spaces)."""
-    if not currency_prefixes:
-        return s
-    # Build a union that matches the literal aliases (escaped) that act as prefixes
-    pref = "|".join(sorted({re.escape(a) for a in currency_prefixes}, key=len, reverse=True))
-    # currency [spaces] . digit  => currency digit
-    return re.sub(rf"(?i)(?:{pref})\s*\.(?=\d)", lambda m: m.group(0).rstrip().rstrip('.')[:-1], s)
+# def _normalize_leading_dot_after_currency(s: str, currency_prefixes: List[str]) -> str:
+#     """Turn $.550.00 -> $550.00; L. .750 -> L.750 (allow spaces)."""
+#     if not currency_prefixes:
+#         return s
+#     # Build a union that matches the literal aliases (escaped) that act as prefixes
+#     pref = "|".join(sorted({re.escape(a) for a in currency_prefixes}, key=len, reverse=True))
+#     # currency [spaces] . digit  => currency digit
+#     return re.sub(rf"(?i)(?:{pref})\s*\.(?=\d)", lambda m: m.group(0).rstrip().rstrip('.')[:-1], s)
 
 
 def _to_float_num(raw: str, mag: Optional[str]) -> Optional[float]:
@@ -281,53 +284,99 @@ def _norm_currency(token: str, alias_map: Dict[str, str]) -> Optional[str]:
     lower = t.lower()
     return alias_map.get(lower)
 
-def _mask_nonprice_numbers(text: str, config: dict) -> str:
+
+
+def _mask_nonprice_numbers(
+    text: str,
+    config: dict
+) -> str:
     """
-    Replace numbers that are very likely not prices (areas, rooms, baths) with placeholders.
-    This prevents false positives during price extraction.
+    Replace numeric expressions that are
+    very likely NOT prices.
+
+    Prevents false positives during
+    price extraction.
     """
+
     s = text
 
-    # Mask areas like "594V2", "400M2", "980 v²"
-    s = re.sub(r"\b\d{2,5}\s*(v2|m2|mts2|m²|v²)\b", " ###AREA### ", s, flags=re.IGNORECASE)
+    npc = (
+        config.get("nonprice_numeric_cues")
+        or {}
+    )
 
-    # Mask bedroom/bath counts like "(3) hab", "(2) baños", etc.
-    s = re.sub(r"\(\d+\)\s*(hab|habitaciones?|baños?|baths?|recámaras?)", " ###ROOM### ", s, flags=re.IGNORECASE)
+    # --------------------------------------------------
+    # AREA UNITS
+    # --------------------------------------------------
 
-    # Mask simple bedroom/bath notations like "3hab", "2baños"
-    s = re.sub(r"\b\d+\s*(hab|habitaciones?|baños?|baths?|recámaras?)\b", " ###ROOM### ", s, flags=re.IGNORECASE)
+    area_units = npc.get(
+        "area_units",
+        []
+    )
+
+    if area_units:
+
+        area_pat = "|".join(
+            sorted(
+                map(re.escape, area_units),
+                key=len,
+                reverse=True
+            )
+        )
+
+        s = re.sub(
+            rf"\b\d{{2,5}}\s*(?:{area_pat})\b",
+            " ###AREA### ",
+            s,
+            flags=re.IGNORECASE
+        )
+
+    # --------------------------------------------------
+    # ROOM CUES
+    # --------------------------------------------------
+
+    room_terms = (
+        npc.get("beds", [])
+        + npc.get("baths", [])
+    )
+
+    if room_terms:
+
+        room_pat = "|".join(
+            sorted(
+                map(re.escape, room_terms),
+                key=len,
+                reverse=True
+            )
+        )
+
+        # (3) hab
+        s = re.sub(
+            rf"\(\d+\)\s*(?:{room_pat})",
+            " ###ROOM### ",
+            s,
+            flags=re.IGNORECASE
+        )
+
+        # 3 hab
+        s = re.sub(
+            rf"\b\d+\s*(?:{room_pat})\b",
+            " ###ROOM### ",
+            s,
+            flags=re.IGNORECASE
+        )
 
     return s
-
-
 
 # -----------------------------
 # Core compile helpers (config-driven)
 # -----------------------------
 
-def _compile_currency(alias_map: Dict[str, str]) -> Tuple[re.Pattern, List[str]]:
-    """Return a regex that matches any currency alias and a list of 'prefix-style' aliases for leading-dot fix."""
-    if not alias_map:
-        # never match
-        return re.compile(r"a^"), []
-    aliases = list(alias_map.keys())
-    # Build case-sensitive alternation preserving punctuation/spaces
-    # Also keep a list of tokens that commonly appear as prefixes for leading-dot normalization
-    prefix_like = []
-    escaped = []
-    for a in aliases:
-        ea = re.escape(a)
-        escaped.append(ea)
-        if any(sym in a for sym in ("$", "L", "US$", "U$", "HNL")):
-            prefix_like.append(a)
-    pat = "(?:" + "|".join(sorted(escaped, key=len, reverse=True)) + ")"
-    return re.compile(pat), prefix_like
 
 
 def _build_number_pattern() -> str:
     # thousands first; decimal tail ≤2; (?!00) prevents taking "1.5" from "1.500"
     return r"(?:\d{1,3}(?:[.,]\s?\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})(?!00)|\d+)"
-
 
 
 def _compile_price_patterns(cur_pat: re.Pattern) -> Tuple[re.Pattern, re.Pattern]:
@@ -347,72 +396,210 @@ def _compile_price_patterns(cur_pat: re.Pattern) -> Tuple[re.Pattern, re.Pattern
     return pfx, sfx
 
 
-def _compile_masks(cfg: dict) -> Dict[str, re.Pattern]:
+# Refactor to semantic config
+
+def _compile_nonprice_numeric_cues(
+    cfg: dict
+) -> Dict[str, re.Pattern]:
+
     masks = {}
-    mx = (cfg.get("masks_extras") or {})
-    # Areas (always on)
-    units = set(["m2", "m²", "mts2", "v2", "vrs2", "vrs²", "varas cuadradas"]) | set((cfg.get("masks", {}) or {}).get("areas", {}).get("units", []))
-    # with/without space
-    area_unit = r"(?:" + "|".join(sorted(map(re.escape, units), key=len, reverse=True)) + ")"
-    masks["area_spaced"] = re.compile(rf"\b\d+(?:[.,]\d+)?\s*{area_unit}\b", re.IGNORECASE)
-    masks["area_glued"] = re.compile(rf"\b\d+(?:[.,]\d+)?{area_unit}\b", re.IGNORECASE)
-    # Amenities minimal for this phase
-    levels = ["niv", "niv.", "nivel", "niveles"] + mx.get("levels", [])
-    parking = ["gje", "garage", "garaje", "garajes", "cochera", "cocheras", "parqueo", "parqueos"] + mx.get("parking", [])
-    masks["levels"] = re.compile(rf"\(?\d+\)?\s*(?:{ '|'.join(map(re.escape, levels)) })\b", re.IGNORECASE)
-    masks["parking_pre"] = re.compile(rf"\(?\d+\)?\s*(?:{ '|'.join(map(re.escape, parking)) })\b", re.IGNORECASE)
-    masks["parking_post"] = re.compile(rf"\b(?:{ '|'.join(map(re.escape, parking)) })\s*\.?\s*\(?\d+\)?\b", re.IGNORECASE)
-    # Beds/Baths are likely already handled upstream, but keep light coverage
-    masks["beds"] = re.compile(r"\(?\d+\)?\s*(?:hab(?:\.|itaciones)?)\b", re.IGNORECASE)
-    masks["baths"] = re.compile(r"\(?\d+\)?\s*(?:ba(?:ños)?|baths?|bths?)\b", re.IGNORECASE)
-    # Labels & years
-    labels = ["ID", "Ref", "Código", "Code", "Price"] + mx.get("labels", [])
-    masks["labels"] = re.compile(rf"\b(?:{ '|'.join(map(re.escape, labels)) })\s*[:=]\s*\d+\b", re.IGNORECASE)
-    masks["years"] = re.compile(r"\b(19\d{2}|20\d{2})\b")
+
+    npc = (
+        cfg.get("nonprice_numeric_cues")
+        or {}
+    )
+
+    mx = (
+        cfg.get("masks_extras")
+        or {}
+    )
+
+    # --------------------------------------------------
+    # AREA UNITS
+    # --------------------------------------------------
+
+    units = set(
+        npc.get("area_units", [])
+    ) | set(
+        mx.get("area_units", [])
+    )
+
+    area_unit = (
+        r"(?:"
+        + "|".join(
+            sorted(
+                map(re.escape, units),
+                key=len,
+                reverse=True
+            )
+        )
+        + ")"
+    )
+
+    masks["area_spaced"] = re.compile(
+        rf"\b\d+(?:[.,]\d+)?\s*{area_unit}\b",
+        re.IGNORECASE
+    )
+
+    masks["area_glued"] = re.compile(
+        rf"\b\d+(?:[.,]\d+)?{area_unit}\b",
+        re.IGNORECASE
+    )
+
+    # --------------------------------------------------
+    # LEVELS
+    # --------------------------------------------------
+
+    levels = (
+        npc.get("levels", [])
+        + mx.get("levels", [])
+    )
+
+    if levels:
+
+        lvl_pat = "|".join(
+            map(re.escape, levels)
+        )
+
+        masks["levels"] = re.compile(
+            rf"\(?\d+\)?\s*(?:{lvl_pat})\b",
+            re.IGNORECASE
+        )
+
+    # --------------------------------------------------
+    # PARKING
+    # --------------------------------------------------
+
+    parking = (
+        npc.get("parking", [])
+        + mx.get("parking", [])
+    )
+
+    if parking:
+
+        park_pat = "|".join(
+            map(re.escape, parking)
+        )
+
+        masks["parking_pre"] = re.compile(
+            rf"\(?\d+\)?\s*(?:{park_pat})\b",
+            re.IGNORECASE
+        )
+
+        masks["parking_post"] = re.compile(
+            rf"\b(?:{park_pat})\s*\.?\s*\(?\d+\)?\b",
+            re.IGNORECASE
+        )
+
+    # --------------------------------------------------
+    # BEDS
+    # --------------------------------------------------
+
+    beds = npc.get("beds", [])
+
+    if beds:
+
+        bed_pat = "|".join(
+            map(re.escape, beds)
+        )
+
+        masks["beds"] = re.compile(
+            rf"\(?\d+\)?\s*(?:{bed_pat})\b",
+            re.IGNORECASE
+        )
+
+    # --------------------------------------------------
+    # BATHS
+    # --------------------------------------------------
+
+    baths = npc.get("baths", [])
+
+    if baths:
+
+        bath_pat = "|".join(
+            map(re.escape, baths)
+        )
+
+        masks["baths"] = re.compile(
+            rf"\(?\d+\)?\s*(?:{bath_pat})\b",
+            re.IGNORECASE
+        )
+
+    # --------------------------------------------------
+    # LABELS
+    # --------------------------------------------------
+
+    labels = (
+        npc.get("labels", [])
+        + mx.get("labels", [])
+    )
+
+    if labels:
+
+        label_pat = "|".join(
+            map(re.escape, labels)
+        )
+
+        masks["labels"] = re.compile(
+            rf"\b(?:{label_pat})\s*[:=]\s*\d+\b",
+            re.IGNORECASE
+        )
+
+    # --------------------------------------------------
+    # YEARS
+    # --------------------------------------------------
+
+    masks["years"] = re.compile(
+        r"\b(19\d{2}|20\d{2})\b"
+    )
+
     return masks
 
+# end of new function
 
-def _apply_masks(text: str, masks: Dict[str, re.Pattern], glue_area_tails: bool, currency_pat: re.Pattern) -> str:
-    s = text
-    # Mask neighborhood exceptions if present in config (prevents currency confusion)
-    # Caller can pre-replace those; keep here noop for now.
-    # Area
-    changed = True
-    while changed:
-        changed = False
-        for key in ("area_spaced", "area_glued"):
-            if key == "area_glued" and not glue_area_tails:
-                continue
-            rx = masks[key]
-            new_s, n = rx.subn("<AREA>", s)
-            if n:
-                s = new_s
-                changed = True
-    # AREA/AREA cluster -> single placeholder so '/' can't trigger range
-    s = re.sub(r"<AREA>\s*/\s*<AREA>", "<AREA>", s)
-    # Amenities, labels, years
-    for k in ("levels", "parking_pre", "parking_post", "beds", "baths", "labels", "years"):
-        s = masks[k].sub("<META>", s)
-    # Parenthetical clusters containing no currency but areas/amenities only
-    def _paren_mask(m: re.Match) -> str:
-        g = m.group(0)
-        if currency_pat.search(g):
-            return g
-        if "<AREA>" in g or re.search(r"<(META)>", g):
-            return "<META>"
-        # quick heuristic: if it has only digits, separators, and amenity words → mask
-        if re.search(r"\d", g) and not currency_pat.search(g):
-            return "<META>"
-        return g
-    s = re.sub(r"\([^)]{1,120}\)", _paren_mask, s)
-    return s
+
+
+# def _apply_masks(text: str, masks: Dict[str, re.Pattern], glue_area_tails: bool, currency_pat: re.Pattern) -> str:
+#     s = text
+#     # Mask neighborhood exceptions if present in config (prevents currency confusion)
+#     # Caller can pre-replace those; keep here noop for now.
+#     # Area
+#     changed = True
+#     while changed:
+#         changed = False
+#         for key in ("area_spaced", "area_glued"):
+#             if key == "area_glued" and not glue_area_tails:
+#                 continue
+#             rx = masks[key]
+#             new_s, n = rx.subn("<AREA>", s)
+#             if n:
+#                 s = new_s
+#                 changed = True
+#     # AREA/AREA cluster -> single placeholder so '/' can't trigger range
+#     s = re.sub(r"<AREA>\s*/\s*<AREA>", "<AREA>", s)
+#     # Amenities, labels, years
+#     for k in ("levels", "parking_pre", "parking_post", "beds", "baths", "labels", "years"):
+#         s = masks[k].sub("<META>", s)
+#     # Parenthetical clusters containing no currency but areas/amenities only
+#     def _paren_mask(m: re.Match) -> str:
+#         g = m.group(0)
+#         if currency_pat.search(g):
+#             return g
+#         if "<AREA>" in g or re.search(r"<(META)>", g):
+#             return "<META>"
+#         # quick heuristic: if it has only digits, separators, and amenity words → mask
+#         if re.search(r"\d", g) and not currency_pat.search(g):
+#             return "<META>"
+#         return g
+#     s = re.sub(r"\([^)]{1,120}\)", _paren_mask, s)
+#     return s
 
 
 
 def extract_price(text: str, config: dict) -> Tuple[Optional[float], Optional[str]]:
     if not text:
         return (None, None)
-    
+    config = merge_currency_configs(config)
     # --- load config knobs ---
     aliases_map = (config.get("currency_aliases") or {})            # {alias -> ISO}
     pov         = (config.get("parsing_overrides") or {})
@@ -424,7 +611,7 @@ def extract_price(text: str, config: dict) -> Tuple[Optional[float], Optional[st
     first_only         = (pov.get("multi_price_policy") or "first_only").lower() == "first_only"
 
     # --- compile currency & price patterns ---
-    cur_pat, _prefix_like = _compile_currency(aliases_map)          # regex for aliases
+    cur_pat, _prefix_like = compile_currency_regex(aliases_map)          # regex for aliases
     pfx_pat, sfx_pat      = _compile_price_patterns(cur_pat)        # currency+number, number+currency
     # ---\
 
@@ -441,7 +628,8 @@ def extract_price(text: str, config: dict) -> Tuple[Optional[float], Optional[st
 
     # ---- masking (areas, beds/baths, etc.) ----
     s_masked = _mask_nonprice_numbers(s, config)
-    masks   = _compile_masks(config)
+    #masks   = _compile_masks(config)
+    masks = _compile_nonprice_numeric_cues(config)
 
     result = _scan_candidates(
         s_masked,

@@ -1,39 +1,60 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+# ValidateTransaction_v2.py
 import pandas as pd
 import re
-import argparse
+import argparse,json
 
 # ============================================================
 # CONFIG
 # ============================================================
 
-VALID_PROPERTY_TYPES = {"HOUSE", "APARTMENT"}
 
-MIN_PRICE = {
-    "APARTMENT": 50,
-    "HOUSE": 60,
-}
 
-PRICE_BANDS = {
-    "APARTMENT": {"rent_max": 10000, "sale_min": 15000},
-    "HOUSE": {"rent_max": 20000, "sale_min": 15000},
-}
+VALID_PROPERTY_TYPES = None
+MIN_PRICE = None
+PRICE_BANDS = None
+SALE_TOKENS = None
+RENT_TOKENS = None
+AMBIGUOUS_PATTERNS = None
 
-SALE_TOKENS = [
-    "venta", "en venta", "se vende", "sale", "for sale"
-]
 
-RENT_TOKENS = [
-    "alquiler", "renta", "se alquila", "rent", "for rent"
-]
+def load_semantic_config(path):
+    with open(path, "r", encoding="utf-8-sig") as f:
+        return json.load(f)
 
-AMBIGUOUS_PATTERNS = [
-    r"venta\s+o\s+renta",
-    r"renta\s+o\s+venta",
-    r"alquiler\s+o\s+venta",
-]
+
+
+def load_transaction_rules(config_path):
+
+    global VALID_PROPERTY_TYPES
+    global MIN_PRICE
+    global PRICE_BANDS
+    global SALE_TOKENS
+    global RENT_TOKENS
+    global AMBIGUOUS_PATTERNS
+
+    CONFIG = load_semantic_config(config_path)
+
+    if "transaction_rules" not in CONFIG:
+        raise ValueError(
+            "Missing transaction_rules section in config."
+        )
+
+    TRX = CONFIG["transaction_rules"]
+
+    VALID_PROPERTY_TYPES = set(TRX["valid_property_types"])
+    MIN_PRICE = TRX["minimum_price"]
+    PRICE_BANDS = TRX["transaction_boundaries"]
+    SALE_TOKENS = TRX["sale_tokens"]
+    RENT_TOKENS = TRX["rent_tokens"]
+
+    AMBIGUOUS_PATTERNS = [
+        re.compile(p, re.I)
+        for p in TRX["ambiguous_patterns"]
+    ]
+
+
 
 # ============================================================
 # HELPERS
@@ -144,9 +165,16 @@ def main():
     )
     ap.add_argument("--input", required=True, help="Input CSV")
     ap.add_argument("--output", required=True, help="Output CSV")
+    ap.add_argument(
+        "--config",
+        default="config/price_semantic_config.json"
+    )
     args = ap.parse_args()
 
     df = pd.read_csv(args.input, encoding="utf-8-sig")
+    load_transaction_rules(args.config)
+
+
 
     required = {"transaction", "price_usd", "property_type_new", "notes"}
     missing = required - set(df.columns)
@@ -154,7 +182,11 @@ def main():
         raise ValueError(f"Missing columns: {missing}")
 
     result = df.apply(validate_row, axis=1, result_type="expand")
-
+    print("=" * 60)
+    print("RESULT SHAPE:", result.shape)
+    print("CURRENT COLUMNS:")
+    print(list(result.columns))
+    print("=" * 60)
     result.columns = [
         "transaction_final",
         "transaction_flag",
@@ -168,6 +200,13 @@ def main():
 
     print("[OK] Transaction resolution complete")
     print(df["transaction_flag"].value_counts())
+    flag_counts = (
+    df["transaction_flag"]
+    .value_counts()
+    .to_dict()
+    )
+
+    print(flag_counts)
 
 if __name__ == "__main__":
     main()

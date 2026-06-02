@@ -1,0 +1,5 @@
+﻿run_id,run_date,step,agency,agency_folder,mnemonic,year,month,input_file,input_path,config_file,output_file_expected,status,return_code,error_message,metrics_json
+20260601_124515,2026-06-01 12:45:15,parse,Acme,Acme,ACM,2010,ALL,acme_20100115.txt,data/raw/Acme/2010/acme_20100115.txt,config/agencies/agency_acme.json,output/acme/2010/ACM_20100115.csv,SUCCESS,0,,
+20260601_124515,2026-06-01 12:45:15,parse,Hobitown,Hobitown,HBTWN,2010,ALL,hobitown_20100312.txt,data/raw/Hobitown/2010/hobitown_20100312.txt,config/agencies/agency_hobitown.json,output/hobitown/2010/HBTWN_20100312.csv,SUCCESS,0,,
+20260601_124515,2026-06-01 12:45:15,parse,Loontoon,Loontoon,LNTN,2010,ALL,loontoon_20100411.txt,data/raw/Loontoon/2010/loontoon_20100411.txt,config/agencies/agency_loontoon.json,output/loontoon/2010/LNTN_20100411.csv,SUCCESS,0,,
+20260601_124515,2026-06-01 12:45:15,parse,Loontoon,Loontoon,LNTN,2010,ALL,loontoon_20100511.txt,data/raw/Loontoon/2010/loontoon_20100511.txt,config/agencies/agency_loontoon.json,output/loontoon/2010/LNTN_20100511.csv,SUCCESS,0,,

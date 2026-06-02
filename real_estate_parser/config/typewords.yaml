@@ -1,0 +1,264 @@
+version: "1.0"
+
+residential:
+
+  house:
+    weight: 5
+    terms:
+      - casa
+      - casas
+      - residencia
+      - residencias
+      - familiar
+      - familiares
+      - vivienda
+      - viviendas
+      - townhouse
+      - condominio
+      - condominios
+
+  apartment:
+    weight: 5
+    terms:
+      - apartamento
+      - apartamentos
+      - apartament
+      - departamento
+      - departamentos
+      - apto
+      - aptos
+      - condominio
+      - condominios
+      - penthouse
+
+  bedrooms:
+    weight: 4
+    terms:
+      - habitacion
+      - hab
+      - ha
+      - habitaciones
+      - habit
+      - recamara
+      - recamaras
+      - dormitorio
+      - dormitorios
+      - alcoba
+      - alcobas
+      - cuartos
+      - cuarto
+
+  rooms:
+    weight: 2
+    terms:
+      - sala
+      - salas
+      - comedor
+      - comedo
+      - cocina
+      - terraza
+      - familiar
+      - oficina
+      - lavanderia
+      - patio
+      - estudio
+
+      
+
+  amenities:
+    weight: 2
+    terms:
+      - balcon
+      - piscina
+      - gimnasio
+      - areas comunes
+      - walk closet
+      - cuarto de empleada
+      - elevador
+      - area verde
+ 
+
+  apartment_adj:
+    weight: 2
+    terms:
+      - nuevo
+      - amueblado
+      - amplio
+      - edificio
+      - centrico
+      - preciosos
+      - equipado
+      - semiamueblado
+
+  house_adj:
+    weight: 2
+    terms:
+      - nivel
+      - niveles
+      - planta
+      - plantas
+      - amplia
+      - nueva
+      - moderna
+      - peatonal
+      - amueblada
+      - jardin
+      - salas
+   
+
+  construction:
+    weight: 1
+    terms:
+      - construccion
+      - construida
+      - construido
+      - area construida
+      - edificada
+      - edificado
+      - plantas
+      - finos acabados
+      
+      
+land:
+  weight: 5
+  terms:
+    - terreno
+    - lote
+    - lotes
+    - solar
+    - parcela
+    - finca
+    - manzana
+    - manzanas
+    - topografía
+
+area_units:
+  terms:
+    - m2
+    - mts2
+    - mts
+    - metros
+    - m²
+    - vrs2
+    - vrs²
+    - vara
+    - varas
+
+land_varas_units:
+  patterns:
+    - "v(?:rs)?\\s*[²2]"
+    - "vara(?:s)?\\s*(?:cuadrada(?:s)?|[²2])"
+
+
+commercial:
+
+  units:
+    weight: 5
+    terms:
+      - local comercial
+      - locales comerciales
+      - salon
+      - salones
+      - oficina
+      - oficinas
+      - oficina medica
+      - oficinas medicas
+      - colegio
+      - colegios
+      - edificio
+      - hotel
+      - hoteles
+      - clinica
+      - clinicas
+      - galeria
+      - galerias
+      - nave industrial
+      - naves industriales
+      - plaza comercial
+      - plazas comerciales
+      - kiosco
+      - kioscos
+
+  warehouse:
+    weight: 5
+    terms:
+      - bodega
+      - ofi-bodega
+
+  corporate:
+    weight: 5
+    terms:
+      - corporativo
+      - edificio corporativo
+      - edificio comercial
+
+  use:
+    weight: 3
+    terms:
+      - comercial
+      - coworking
+      - co-working
+
+  amenities:
+    weight: 2
+    terms:
+      - ascensor
+      - elevador
+      - lobby
+      - recepcion
+      - seguridad
+      - vigilancia
+      - fibra optica
+      - planta electrica
+      - estacionamiento
+      - parqueos
+      - parqueo
+
+
+  partial:
+    weight: 2
+    terms:
+      - obra gris
+      - media construccion
+      - sin terminar
+      
+  plantel:
+    weight: 5
+    terms:
+      - plantel
+
+  use_phrases:
+    weight: 4
+
+    terms:
+      - ideal para oficina
+      - ideal para oficinas
+      - excelente para negocio
+      - excelente para negocios
+      - apto para oficina
+      - apto para oficinas
+      - apto para negocio
+      - apto para negocios
+      - apto para comercio
+      - ideal para comercio
+      - ideal para comercial
+
+
+patterns:
+
+  bedroom_count:
+    description: "3 hab, 4 hab, 5 hab"
+    regex: "\\d+\\s*hab"
+
+  zero_bedrooms:
+    description: "habitaciones: 0"
+    regex: "\\b(habitaciones?|hab(?:s)?|bedrooms?)\\s*(?:=|:)?\\s*0\\b"
+
+  price_per_m2:
+    description: "$50 por m2"
+    regex: "\\$\\s*\\d+(?:[.,]\\d+)?\\s*(?:x|por)\\s*m(?:2|²)"
+
+  land_price_patterns:
+    vara_units:
+      - "v(?:rs)?\\s*[²2]"
+      - "vara(?:s)?(?:\\s+cuadrada(?:s)?)?"

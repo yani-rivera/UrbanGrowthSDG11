@@ -1,0 +1,120 @@
+{
+
+
+  "orchestrator": {
+    "version": "SDG11_ORCHESTRATOR_V3"
+  },
+
+  "logging": {
+    "columns": [
+      "run_id",
+      "run_date",
+      "step",
+      "agency",
+      "agency_folder",
+      "mnemonic",
+      "year",
+      "month",
+      "input_file",
+      "input_path",
+      "config_file",
+      "output_file_expected",
+      "status",
+      "return_code",
+      "error_message",
+      "metrics_json"
+    ]
+  },
+
+  "aggregation_tasks": [
+    {
+      "name": "neighborhood",
+      "script": "tools/Aggregate_Neighborhood_Summary.py",
+      "output": "neighborhood_{year}monthly.csv",
+      "needs_year": false
+    },
+    {
+      "name": "bedrooms",
+      "script": "tools/Aggregate_Neighborhood_Summary_ByYear_Bedrooms.py",
+      "output": "neighborhood_monthly_bedrooms_price.csv",
+      "needs_year": true
+    },
+    {
+      "name": "area",
+      "script": "tools/Aggregate_Neighborhood_Summary_ByYear_Area.py",
+      "output": "neighborhood_{year}_monthly_area.csv",
+      "needs_year": true
+    },
+    {
+      "name": "area_beds",
+      "script": "tools/Aggregate_Neighborhood_Summary_ByYear_AreaBeds_Flexible.py",
+      "output": "neighborhood_{year}_monthly_area_beds.csv",
+      "needs_year": true
+    }
+  ],
+
+  "paths": {
+    "agency_config_dir": "config/agencies",
+    "report_dir": "reports",
+    "log_dir": "logs"
+  },
+
+  "configs": {
+    "price_semantics": "config/price_semantic_config.json",
+    "property_semantics": "config/property_semantic_config.json",
+    "currency_rules": "config/currency_config.json",
+    "transaction_rules": "config/transaction_rules.json",
+
+    "mnemonics_file": "config/agency_mnemonics.csv"
+  },
+  "catalogs":
+    { "catalog_neighborhood" :"Catalog/standard_neighborhood_catalog.csv"},
+
+  "scripts": {
+    "merge": "tools/merge_output_csvs.py",
+    "deduplicate": "tools/MergeDeduplicate.py",
+    "word_filter": "tools/word_filter.py",
+    "add_uid": "tools/AddUid.py",
+    "clean_neighborhoods": "tools/clean_neighborhoods.py",
+    "stdprice": "tools/StdPrice.py",
+    "transaction_validate": "L1clean/ValidateTransaction.py",
+    "aggregate": "tools/Aggregate_Neighborhood_Summary.py"
+  },
+
+  "pipeline": {
+    "default_steps": [
+      "parse",
+      "merge",
+      "deduplicate",
+      "filter",
+      "uid",
+      "clean",
+      "stdprice",
+      "transaction_validate",
+      "aggregate"
+    ]
+  },
+
+  "reporting": {
+    "enabled": true,
+    "save_step_reports": true,
+    "save_execution_summary": true
+  },
+
+
+
+
+ "report_metrics": 
+{
+  "step": "transaction_validate",
+  "status": "SUCCESS",
+
+  "report_metrics": {
+    "OK_DECLARED": 1116,
+    "CORRECTED_PRICE_BOUNDARY": 37,
+    "REMOVED_PRICE_OUT_OF_RANGE": 12,
+    "REMOVED_INVALID_PRICE": 7
+  }
+}
+
+}

@@ -1,0 +1,25 @@
+﻿
+============================================================
+STEP: MERGE
+============================================================
+[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/2026/*.csv -> 1 hit(s)
+[DEBUG] glob: /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/output/*/*.csv -> 0 hit(s)
+[DEBUG] total candidate CSVs: 1
+[DEBUG] KEEP: casamagica_20260415.csv  token=20260415
+✅ Merged 1 file(s) for [ALL] @ [2026] → 46 rows into /Users/yani/Documents/GitHub/UrbanGrowthSDG11/real_estate_parser/consolidated/2026/merged_2026.csv
+   Dedupe key: ['agency', 'ingestion_id', 'Listing ID']
+
+============================================================
+STEP: DEDUPLICATE
+============================================================
+{'stdout': '[OK] Deduplication completed\n  Canonical records : 46\n  Duplicate records : 0\n[OUT] consolidated/2026/merged_2026_c.csv\n[OUT] consolidated/2026/merged_2026_duplicates.csv'}
+
+============================================================
+STEP: WORD_FILTER
+============================================================
+{'stdout': '=== Word Cleaner Summary ===\nInput file     : consolidated/2026/merged_2026_c.csv\nOutput file    : consolidated/2026/merged_2026_flt.csv\nColumn cleaned : neighborhood\nWords file     : config/remove_words.txt\nRows total     : 46\nRows modified  : 0\n[OK] Done.'}
+
+============================================================
+STEP: UID
+============================================================
+{'stdout': "[done] 46 rows → consolidated/2026/merged_2026_uid.csv  (added 'Listing_uid' as first column)"}
