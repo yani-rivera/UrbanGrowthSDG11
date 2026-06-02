@@ -1,10 +1,20 @@
 # SDG-11 Housing Data Reconstruction Framework
 
+## Software
+[![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226605.svg)](https://doi.org/10.5281/zenodo.18226605)
+
+## Data
+[![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18226143.svg)](https://doi.org/10.5281/zenodo.18778210)
+
 A reproducible, configuration-driven framework for reconstructing historical and contemporary real-estate datasets from heterogeneous sources, including newspaper advertisements, OCR archives, web listings, and agency publications.
 
 The framework was developed as part of the SDG-11 (Sustainable Cities and Communities) research program focused on housing affordability, urban development, neighborhood dynamics, and long-term housing-market monitoring in data-scarce environments.
 
 ---
+
+## Framework Overview
+
+![SDG-11 Framework](OrchestratorV3.png)
 
 # Why This Project Exists
 

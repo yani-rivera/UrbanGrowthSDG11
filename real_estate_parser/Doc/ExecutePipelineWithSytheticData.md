@@ -16,7 +16,7 @@ To ensure full reproducibility while respecting data access constraints:
   * Inspect intermediate outputs
   * Understand expected input/output schemas
 
-> ⚠️ Note: Original data sources are not redistributed. The synthetic data preserves schema and behavior, enabling users to apply the pipeline to their own datasets.
+> ⚠️ Note:  The synthetic data preserves schema and behavior, enabling users to apply the pipeline to their own datasets.
 
 ---
 
@@ -201,6 +201,15 @@ python tools/Aggregate_Neighborhood_Summary_ByYear_Bedrooms.py \
 ```
 
 ---
+##  ORCHESTRATOR
+```bash
+python scripts/SDG11_ORCHESTRATOR_V3.py \
+  --all-agencies \
+  --year 2010 \
+  --steps parse merge deduplicate word_filter uid clean_neighborhoods ptype_fix \
+filter_records gis_match unmatched_check price_standardize transaction_validate \
+area_standardize aggregate
+
 
 ##  Outputs
 
