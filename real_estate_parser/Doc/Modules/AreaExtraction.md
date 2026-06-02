@@ -11,6 +11,7 @@ Unlike simple pattern matching approaches, the module preserves the original rep
 * Manzana Area (`MZ`)
 * Generic Area Measurements
 * Uses area_units_hn_v1.yaml
+  
 This design supports traceability, reproducibility, and later quality-control review.
 
 ---
